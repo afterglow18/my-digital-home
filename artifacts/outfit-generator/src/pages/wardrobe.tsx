@@ -60,11 +60,14 @@ const LM = {
   doorL: 0.110,
   doorR: 0.890,
 
-  // Per-row: y-centre of the "+ ADD" pill, carousel top & bottom
+  // Per-row: y-centre of the "+ ADD" pill, then the RECTANGULAR placeholder box bounds.
+  // boxY  = fraction where the dotted box starts (BELOW the image's baked-in hanger graphic).
+  // boxBot = fraction where the dotted box ends.
+  // ClosetRow is placed at [boxY, boxBot]; no HTML hanger is rendered — image hangers show above.
   rows: [
-    { btnCY: 0.278, carY: 0.305, carBot: 0.447 }, // TOPS
-    { btnCY: 0.480, carY: 0.506, carBot: 0.645 }, // BOTTOMS
-    { btnCY: 0.685, carY: 0.712, carBot: 0.840 }, // SHOES
+    { btnCY: 0.278, boxY: 0.304, boxBot: 0.445 }, // TOPS
+    { btnCY: 0.480, boxY: 0.513, boxBot: 0.651 }, // BOTTOMS
+    { btnCY: 0.685, boxY: 0.724, boxBot: 0.851 }, // SHOES
   ],
 
   // SAVE OUTFIT bar
@@ -283,12 +286,10 @@ export default function WardrobePage() {
             const lm    = LM.rows[rowIdx];
             const items = rowData[key];
 
-            // Hanger height derived from carousel zone height
-            const carH = pH(ir, lm.carBot - lm.carY);
-            const hH   = Math.min(18, Math.max(8, Math.round(carH * 0.145)));
-
-            // Carousel container — aligned to the image's inner door edges
-            const carTop   = pY(ir, lm.carY);
+            // Carousel container — placed at the rectangular placeholder box bounds.
+            // The image's baked-in hanger graphics sit above carTop and show through.
+            const carTop   = pY(ir, lm.boxY);
+            const carH     = pH(ir, lm.boxBot - lm.boxY);
             const carLeft  = pX(ir, LM.doorL);
             // CSS `right` = distance from the container's right edge to doorR_x
             const carRight = ir.left + pW(ir, 1 - LM.doorR);
@@ -337,7 +338,6 @@ export default function WardrobePage() {
                     <ClosetRow
                       ref={rowRefs[key]}
                       items={items}
-                      hangerH={hH}
                       onCenteredItem={centredHandlers[key]}
                       onItemTap={handleItemTap}
                     />

@@ -1,12 +1,14 @@
 /**
  * ClosetRow — fixed 3-slot carousel for the wardrobe closet view.
  *
- * • Fills its container exactly (position it over the image's 3 placeholder boxes).
+ * Container must be positioned EXACTLY over the dotted placeholder boxes in the
+ * background image (rectangular area below the baked-in hanger graphics).
+ * The component renders no hanger — image hangers are visible above the container.
+ *
  * • Divides width into 3 equal slots: left | center | right.
- * • Center item: scale 1.0, opacity 1.  Side items: scale ~0.82, opacity ~0.62.
+ * • All items identical size; selected item gets a blush-pink border + glow.
  * • Swipe gesture translates the strip; release snaps to the nearest item.
- * • Empty slots render nothing → image's placeholder cards show through.
- * • No background (container transparent).
+ * • Empty slots are transparent → image's placeholder cards show through.
  *
  * Handle (forwardRef): scrollToIndex(i, smooth?)
  */
@@ -31,42 +33,13 @@ export interface ClosetRowHandle {
 
 interface ClosetRowProps {
   items: ClothingItem[];
-  /** Pixel height of the hanger graphic drawn above each card photo */
-  hangerH: number;
   onCenteredItem: (item: ClothingItem | null) => void;
   onItemTap?: (item: ClothingItem) => void;
 }
 
-// ── Hanger SVG ────────────────────────────────────────────────────────────────
-function HangerSVG({
-  width,
-  height,
-  dim = false,
-}: {
-  width: number;
-  height: number;
-  dim?: boolean;
-}) {
-  const hw = width;
-  const h  = height;
-  const s  = dim ? "rgba(176,136,40,0.30)" : "#C49B2A";
-  return (
-    <svg width={hw} height={h} viewBox={`0 0 ${hw} ${h}`} fill="none" style={{ display: "block" }}>
-      <path
-        d={`M${hw/2} ${h*0.12} Q${hw/2} ${h*0.04} ${hw/2+3} ${h*0.04} Q${hw/2+7} ${h*0.04} ${hw/2+7} ${h*0.26} Q${hw/2+7} ${h*0.46} ${hw/2} ${h*0.46}`}
-        stroke={s} strokeWidth="1.8" strokeLinecap="round" fill="none"
-      />
-      <line x1={hw/2} y1={h*0.46} x2={hw/2} y2={h*0.76} stroke={s} strokeWidth="1.8" strokeLinecap="round" />
-      <path d={`M${hw/2} ${h*0.76} Q${hw*0.22} ${h*0.84} 4 ${h}`} stroke={s} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      <path d={`M${hw/2} ${h*0.76} Q${hw*0.78} ${h*0.84} ${hw-4} ${h}`} stroke={s} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      <line x1={4} y1={h} x2={hw-4} y2={h} stroke={s} strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 export const ClosetRow = forwardRef<ClosetRowHandle, ClosetRowProps>(
-  ({ items, hangerH, onCenteredItem, onItemTap }, ref) => {
+  ({ items, onCenteredItem, onItemTap }, ref) => {
 
     // ── Container measurement ─────────────────────────────────────────────────
     const containerRef = useRef<HTMLDivElement>(null);
@@ -200,9 +173,8 @@ export const ClosetRow = forwardRef<ClosetRowHandle, ClosetRowProps>(
 
     const lo    = Math.max(0, centredIdx - 2);
     const hi    = Math.min(items.length - 1, centredIdx + 2);
-    // Card fills ~88% of each slot so it lines up with the image placeholder boxes
+    // Card fills ~88% of each slot width; height = full container (no hanger offset)
     const cardW = slotW > 0 ? Math.round(slotW * 0.88) : 0;
-    const cardH = Math.max(0, containerH - hangerH);
     const padX  = (slotW - cardW) / 2;
 
     // Blush-pink selection indicator colours
@@ -259,15 +231,11 @@ export const ClosetRow = forwardRef<ClosetRowHandle, ClosetRowProps>(
                   : `${item.name ?? "Item"} — tap to select`}
                 aria-pressed={isCenter}
                 style={{
-                  // All items identical size — no scale transform
                   position: "absolute",
                   top: 0,
                   left: i * slotW + padX,
                   width: cardW,
                   height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
                   cursor: isCenter ? "pointer" : "ew-resize",
                   background: "transparent",
                   border: "none",
@@ -275,45 +243,25 @@ export const ClosetRow = forwardRef<ClosetRowHandle, ClosetRowProps>(
                   WebkitTapHighlightColor: "transparent",
                 }}
               >
-                {/* Hanger — gold for selected, dimmed for others */}
+                {/* Photo card — fills the full container height (= rectangular dotted box).
+                    Blush-pink border + glow on selected; always-on transition so the
+                    highlight glides smoothly to the newly-centred card on every swipe. */}
                 <div
                   style={{
-                    flexShrink: 0,
-                    height: hangerH,
                     width: "100%",
-                    display: "flex",
-                    alignItems: "flex-end",
-                    justifyContent: "center",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <HangerSVG
-                    width={Math.round(cardW * 0.62)}
-                    height={hangerH}
-                    dim={!isCenter}
-                  />
-                </div>
-
-                {/* Photo card — blush-pink border + glow on selected item.
-                    border and box-shadow always transition so the highlight
-                    glides smoothly to the newly selected card on every swipe. */}
-                <div
-                  style={{
-                    flex: 1,
-                    width: "100%",
+                    height: "100%",
                     overflow: "hidden",
-                    borderRadius: "0 0 10px 10px",
+                    // All four corners rounded to match the placeholder box shape
+                    borderRadius: "10px",
                     background: "rgba(255, 251, 244, 0.97)",
-                    // 4–5 px blush-pink border on selected; near-invisible on others
                     border: isCenter
                       ? `4.5px solid ${PINK_BORDER}`
                       : "1.5px solid rgba(196,155,42,0.14)",
-                    borderTop: "none",     // hanger covers the top edge
-                    // Soft outer glow on selected
                     boxShadow: isCenter
                       ? PINK_GLOW
                       : "0 2px 8px rgba(0,0,0,0.06)",
-                    // Always-on transition — border/shadow move to the new card instantly
+                    // box-sizing: border-box (React default) keeps outer size identical
+                    // regardless of border width — no layout shift between selected/unselected
                     transition: "border-color 0.24s ease, border-width 0.24s ease, box-shadow 0.24s ease",
                     position: "relative",
                     pointerEvents: "none",

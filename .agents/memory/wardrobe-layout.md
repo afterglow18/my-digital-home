@@ -26,32 +26,36 @@ Container background `#F0C030` — side letterbox blends with yellow door colour
 
 The PNG already has all visual UI baked in. HTML provides:
 - **Transparent tap zones** over every baked-in button
-- **ClosetRow** (no background) rendered over the placeholder card area **only when items exist**
+- **ClosetRow** (no background) rendered over the **rectangular dotted box area only**
 - **Empty slots**: image's dashed placeholder cards show through (ClosetRow is transparent)
+- **Image hangers**: baked-in gold hanger graphics sit ABOVE the ClosetRow container and are always visible — ClosetRow renders NO HTML hanger
 
 ## ClosetRow component
 
-`src/components/ClosetRow.tsx` — fixed 3-slot carousel, NOT a scrollable strip.
+`src/components/ClosetRow.tsx` — fixed 3-slot carousel, no hanger rendering.
 
 Behaviour:
-- Divides its container into 3 equal slots (left / center / right)
-- Container is positioned exactly at `doorL`→`doorR` inner closet bounds with `overflow:hidden`
-- Center item: scale 1.0, opacity 1.0. Side items: scale ~0.82, opacity ~0.62
-- Swipe gesture (pointer events) translates the strip; snaps to nearest item on release
-- Tap on side item re-centers it; tap on center item opens item details
+- Divides its container into 3 equal slots (left / center / right), `overflow:hidden`
+- Card fills the FULL container height (= the rectangular dotted box, below the image's hanger)
+- `borderRadius: "10px"` all corners — matches the placeholder box shape
+- Selected item: 4.5px blush-pink border + outer glow; unselected: 1.5px warm-gold hairline
+- Border/shadow always transition (0.24s ease) so the highlight glides to the new card on swipe
 - `hasDragged` ref prevents synthetic click triggering after a drag
-- Tracks last-notified item **ID** (not just index) to keep parent `centred` map accurate
-- Item cards are `<button>` elements for keyboard/screen-reader accessibility
+- Tracks last-notified item **ID** (not index) for accurate parent `centred` map
+- No `hangerH` prop — hanger concept was removed entirely
 
 ## Landmark fractions (853×1844 PNG, all 0→1)
 
 ```
-doorL:   0.110   // inner left edge
-doorR:   0.890   // inner right edge
+doorL:   0.110   // inner left edge of closet
+doorR:   0.890   // inner right edge of closet
 
-rows[0]: { btnCY: 0.278, carY: 0.305, carBot: 0.447 }  // TOPS
-rows[1]: { btnCY: 0.480, carY: 0.506, carBot: 0.645 }  // BOTTOMS
-rows[2]: { btnCY: 0.685, carY: 0.712, carBot: 0.840 }  // SHOES
+rows[0] TOPS:    { btnCY: 0.278, boxY: 0.304, boxBot: 0.445 }
+rows[1] BOTTOMS: { btnCY: 0.480, boxY: 0.513, boxBot: 0.651 }
+rows[2] SHOES:   { btnCY: 0.685, boxY: 0.724, boxBot: 0.851 }
+
+// boxY  = top of rectangular dotted box (BELOW the image's baked-in hanger graphic)
+// boxBot = bottom of dotted box
 
 barY:     0.863
 barBot:   0.928
@@ -61,16 +65,18 @@ saveBtnR: 0.772
 manneCX:  0.860
 ```
 
-## Carousel container positioning (wardrobe.tsx)
+## ClosetRow container positioning (wardrobe.tsx)
 
 ```
-left:   pX(ir, LM.doorL)                        // = ir.left + ir.width * doorL
-right:  ir.left + pW(ir, 1 - LM.doorR)          // distance from right edge
-top:    pY(ir, lm.carY)
-height: pH(ir, lm.carBot - lm.carY)
-overflow: hidden                                 // clips items to 3-slot bounds
-// NO background — transparent, image placeholder cards show through
+top:    pY(ir, lm.boxY)                          // = ir.top + ir.height * boxY
+height: pH(ir, lm.boxBot - lm.boxY)
+left:   pX(ir, LM.doorL)
+right:  ir.left + pW(ir, 1 - LM.doorR)
+overflow: hidden
+// NO background — transparent, image placeholder cards show through empty slots
+// Image's gold hanger graphics are ABOVE this container (boxY is below the hanger)
 ```
 
-**Why contain over cover:** user requires full closet visible without scrolling.
-**Why ClosetRow over SwipeRow:** SwipeRow overflows the closet bounds; ClosetRow is pinned to the 3-slot box.
+**Why boxY not carY:** Original `carY` landed inside the hanger graphic area; adding a hangerH offset inside ClosetRow compounded the misalignment. The fix was to measure `boxY` = exact bottom of the hanger graphic, position ClosetRow there, and remove hangerH entirely.
+
+**Why ClosetRow over SwipeRow:** SwipeRow overflows the closet bounds; ClosetRow is pinned to the 3-slot box with overflow:hidden.
