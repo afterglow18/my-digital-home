@@ -53,14 +53,20 @@ Behaviour:
 doorL:   0.110   // inner left edge of closet
 doorR:   0.890   // inner right edge of closet
 
-rows[0] TOPS:    { btnCY: 0.278, boxY: 0.332, boxBot: 0.471 }
-rows[1] BOTTOMS: { btnCY: 0.480, boxY: 0.536, boxBot: 0.670 }
-rows[2] SHOES:   { btnCY: 0.685, boxY: 0.737, boxBot: 0.857 }
+rows[0] TOPS:    { btnCY: 0.278, boxY: 0.358, boxBot: 0.471 }
+rows[1] BOTTOMS: { btnCY: 0.480, boxY: 0.560, boxBot: 0.670 }
+rows[2] SHOES:   { btnCY: 0.685, boxY: 0.757, boxBot: 0.857 }
 
-// boxY  = fraction where the ClosetRow card container starts — set BELOW each
-//         row's hanger-arm bottom so the hanger is fully visible above cards.
-//         Hanger bottoms (scanned): TOPS f=0.323, BOTTOMS f=0.529, SHOES f=0.730.
-//         Each boxY adds ~0.008 clearance above the hanger bottom.
+// boxY  = fraction where the card container starts — BELOW the true hanger base.
+//         CRITICAL: must be measured at each row's SLOT 2 CENTER (x=427 for all rows)
+//         NOT at off-center sample positions — the center hanger is 30-40px taller
+//         than hangers at slot boundaries, as the hanger's bottom bar/cross-piece
+//         only appears at the center x.
+//         Slot-center hanger bases (scanned x=200,427,648):
+//           TOPS    y=634 → f=0.344  (s2 center last dark pixel)
+//           BOTTOMS y≈1008 → f=0.547
+//           SHOES   y=1372 → f=0.744
+//         Each boxY adds ~0.012-0.014 clearance above hanger base.
 // boxBot = fraction where cream interior ends (unchanged from image scan).
 
 barY:     0.863
