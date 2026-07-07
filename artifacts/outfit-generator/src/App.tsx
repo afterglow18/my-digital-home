@@ -6,6 +6,7 @@ import WardrobePage from './pages/wardrobe';
 import GeneratePage from './pages/generate';
 import SavedPage from './pages/saved';
 import WelcomePage from './pages/welcome';
+import { setGlobalTier } from '@/hooks/useEntitlements';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +65,40 @@ function App() {
       el.removeAttribute("aria-hidden");
     }
   }, [entered]);
+
+  // ── Stripe success callback ──────────────────────────────────────────────────
+  // When Stripe redirects back with ?unlock=success&session_id=..., verify the
+  // payment server-side before granting access.  The URL params are cleaned up
+  // immediately so refreshing doesn't re-trigger the verification.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const unlock = params.get("unlock");
+    const sessionId = params.get("session_id");
+
+    if (unlock !== "success" || !sessionId) return;
+
+    // Clean the URL immediately — don't wait for server response.
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("unlock");
+    cleanUrl.searchParams.delete("session_id");
+    window.history.replaceState({}, "", cleanUrl.toString());
+
+    // Skip past the welcome screen so the user lands in the wardrobe.
+    sessionStorage.setItem("closet-entered", "1");
+    setEntered(true);
+
+    // Verify with the server and grant tier upgrade.
+    fetch(`/api/stripe/verify?session_id=${encodeURIComponent(sessionId)}`)
+      .then((r) => r.json())
+      .then(({ verified, product }: { verified: boolean; product: string | null }) => {
+        if (verified && product === "unlock") {
+          setGlobalTier("unlock");
+        }
+      })
+      .catch(() => {
+        // Silently ignore — user can contact support if payment isn't reflected.
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -7,27 +7,18 @@
  * even across components that each call the hook independently.
  *
  * Tier is persisted locally so it survives page refreshes without a network
- * round-trip; a real payment provider should also verify server-side before
- * gating any sensitive data.
+ * round-trip.  Payment is verified server-side via the Stripe verify endpoint
+ * before the tier is upgraded — localStorage alone is not trusted for access.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * PAYMENT PROVIDER SEAM
+ * STRIPE CHECKOUT FLOW
  *
- * Replace the `runCheckout` stub below to wire in your payment provider.
- * The rest of the app (paywalls, limit checks, UI) requires no changes.
- *
- * Whop example:
- *   import { whop } from "@whop-apps/sdk";
- *   const result = await whop.checkout({ planId: WHOP_PLAN_IDS[product] });
- *   if (result.status === "paid") { setGlobalTier(product); return "success"; }
- *   return "cancelled";
- *
- * Stripe example:
- *   window.location.href = STRIPE_CHECKOUT_URLS[product];
- *   // On return from Stripe's success_url, verify server-side and call
- *   // setGlobalTier("unlock") or setGlobalTier("premium").
- *
- * After integrating, remove the "not yet configured" comment and the stub.
+ * 1. purchase("unlock") is called from a paywall component.
+ * 2. runCheckout posts to POST /api/stripe/checkout and receives a session URL.
+ * 3. The page navigates to Stripe-hosted checkout.
+ * 4. On success Stripe redirects back to /?unlock=success&session_id=<id>.
+ * 5. App.tsx detects those params, calls GET /api/stripe/verify?session_id=<id>,
+ *    and if verified calls setGlobalTier("unlock").
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import { useCallback, useSyncExternalStore } from "react";
@@ -78,18 +69,39 @@ export function setGlobalTier(t: Tier): void {
 export type PurchaseResult = "success" | "cancelled" | "unavailable";
 
 /**
- * Payment provider stub.
+ * Initiates a Stripe Checkout session for the given product.
  *
- * Returns "unavailable" until a real provider is wired in.
- * Replace this function body with your checkout integration.
+ * Redirects the page to Stripe's hosted checkout.  The function technically
+ * returns "cancelled" but the browser will navigate away before that value
+ * is used — App.tsx handles the return trip via the success_url params.
  */
-async function runCheckout(
-  product: PurchaseProduct,
-): Promise<PurchaseResult> {
-  // TODO: replace with Whop / Stripe / RevenueCat checkout.
-  // On success, call setGlobalTier(product) then return "success".
-  void product;
-  return "unavailable";
+async function runCheckout(product: PurchaseProduct): Promise<PurchaseResult> {
+  if (product !== "unlock") return "unavailable";
+
+  try {
+    // BASE_URL includes trailing slash, e.g. "/outfit-generator/".
+    // We send only the relative path — the server constructs the full URL
+    // from a trusted origin to prevent open-redirect abuse.
+    const returnPath = (import.meta.env.BASE_URL as string) ?? "/";
+
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product, returnPath }),
+    });
+
+    if (!res.ok) return "unavailable";
+
+    const data = await res.json() as { url?: string };
+    if (!data.url) return "unavailable";
+
+    // Navigate to Stripe-hosted checkout.
+    window.location.href = data.url;
+    // Page navigates; this return is never reached during a normal flow.
+    return "cancelled";
+  } catch {
+    return "unavailable";
+  }
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
