@@ -152,7 +152,7 @@ export default function AuthPage({ onAuthenticated }: { onAuthenticated: () => v
   }, [resetToken, newPassword, confirmPassword]);
 
   const titles: Record<Mode, string> = {
-    signin: "Welcome Back ✨",
+    signin: "Welcome ✨",
     signup: "Create your closet ✨",
     forgot: "Reset password 🔑",
     "forgot-sent": "Check your email 📬",
