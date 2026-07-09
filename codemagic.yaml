@@ -2,15 +2,13 @@
 # Codemagic CI/CD — My Digital Closet iOS build
 # ─────────────────────────────────────────────────────────────────────────────
 #
-# REQUIRED — add these in Codemagic → your app → Environment variables
-# Create a group called "signing" with these exact variable names:
-#
+# REQUIRED — Codemagic → your app → Environment variables
+# Group "signing":
 #   APP_STORE_CONNECT_KEY_IDENTIFIER   67K2T48W7Y
 #   APP_STORE_CONNECT_ISSUER_ID        66d4ce13-148d-4d6b-bab8-f1d0d8441a1e
-#   APP_STORE_CONNECT_PRIVATE_KEY      Full contents of AuthKey_67K2T48W7Y.p8
-#                                      (include BEGIN/END PRIVATE KEY lines)
+#   APP_STORE_CONNECT_PRIVATE_KEY      Full .p8 file contents (mark Secure)
 #
-# Also required — group "build_env":
+# Group "build_env":
 #   VITE_API_BASE_URL                  Your deployed API URL
 
 workflows:
@@ -18,6 +16,9 @@ workflows:
     name: iOS App Store Release
     max_build_duration: 60
     instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: My Digital Closet App
 
     environment:
       ios_signing:
@@ -32,19 +33,16 @@ workflows:
         XCODE_SCHEME: App
 
     scripts:
-      # 1 — Install pnpm + all workspace dependencies
       - name: Install pnpm and dependencies
         script: |
           npm install -g pnpm
           pnpm install --frozen-lockfile
 
-      # 2 — Build the Vite web bundle for Capacitor
       - name: Build web assets
         script: |
           cd artifacts/outfit-generator
           VITE_API_BASE_URL=$VITE_API_BASE_URL pnpm vite build --config vite.capacitor.config.ts
 
-      # 3 — Add the iOS platform if it does not already exist, then sync
       - name: Capacitor add iOS and sync
         script: |
           cd artifacts/outfit-generator
@@ -53,19 +51,16 @@ workflows:
           fi
           npx cap sync ios
 
-      # 4 — Install CocoaPods dependencies
       - name: Pod install
         script: |
           cd artifacts/outfit-generator/ios/App
           pod install
 
-      # 5 — Set build number from Codemagic's incremental counter
       - name: Set build number
         script: |
           cd artifacts/outfit-generator/ios/App
           agvtool new-version -all $BUILD_NUMBER
 
-      # 6 — Build & archive
       - name: Xcode archive
         script: |
           xcodebuild \
@@ -77,7 +72,6 @@ workflows:
             archive \
             | xcpretty
 
-      # 7 — Export the signed .ipa
       - name: Export IPA
         script: |
           xcodebuild \
@@ -93,5 +87,6 @@ workflows:
 
     publishing:
       app_store_connect:
+        auth: integration
         submit_to_testflight: true
         submit_to_app_store: false
