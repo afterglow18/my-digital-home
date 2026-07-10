@@ -15,7 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeSheet } from "@/components/paywall/UpgradeSheet";
 import { FREE_OUTFIT_LIMIT } from "@/lib/entitlements";
-import { QuickAddSheet } from "@/components/clothing/QuickAddSheet";
+import { WardrobePickerSheet } from "@/components/clothing/WardrobePickerSheet";
 import { ItemDetailsSheet } from "@/components/clothing/ItemDetailsSheet";
 
 const SLOT_ORDER = ["tops", "bottoms", "shoes", "dresses", "outerwear", "accessories"] as const;
@@ -74,7 +74,7 @@ export default function SavedPage() {
   const queryClient = useQueryClient();
   const { tier } = useEntitlements();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [addAccessoryToId, setAddAccessoryToId] = useState<number | null>(null);
+  const [replacingSlot, setReplacingSlot] = useState<{ outfitId: number; category: SlotKey } | null>(null);
   const [detailsItem, setDetailsItem] = useState<ClothingItem | null>(null);
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -146,15 +146,11 @@ export default function SavedPage() {
     );
   };
 
-  const handleAccessoryCreated = (item: ClothingItem) => {
-    if (addAccessoryToId == null) return;
+  const handlePickedItem = (item: ClothingItem) => {
+    if (replacingSlot == null) return;
     addItemToOutfit.mutate(
-      { id: addAccessoryToId, itemId: item.id },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
-        },
-      }
+      { id: replacingSlot.outfitId, itemId: item.id },
+      { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() }) }
     );
   };
 
@@ -346,9 +342,13 @@ export default function SavedPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="h-32 border-2 border-dashed border-black/20 rounded flex items-center justify-center">
-                          <span className="text-[9px] font-bold uppercase text-black/20">—</span>
-                        </div>
+                        <button
+                          onClick={() => setReplacingSlot({ outfitId: outfit.id, category: byCategory["dresses"] ? "dresses" : "tops" })}
+                          className="h-32 w-full border-2 border-dashed border-black/25 rounded flex flex-col items-center justify-center gap-1 hover:border-black/50 hover:bg-black/5 transition-colors"
+                        >
+                          <Plus className="w-4 h-4 text-black/30" />
+                          <span className="text-[9px] font-bold uppercase text-black/25">{byCategory["dresses"] ? "Add Dress" : "Add Top"}</span>
+                        </button>
                       )}
                     </div>
 
@@ -377,9 +377,13 @@ export default function SavedPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="h-32 border-2 border-dashed border-black/20 rounded flex items-center justify-center">
-                          <span className="text-[9px] font-bold uppercase text-black/20">—</span>
-                        </div>
+                        <button
+                          onClick={() => setReplacingSlot({ outfitId: outfit.id, category: byCategory["dresses"] ? "outerwear" : "bottoms" })}
+                          className="h-32 w-full border-2 border-dashed border-black/25 rounded flex flex-col items-center justify-center gap-1 hover:border-black/50 hover:bg-black/5 transition-colors"
+                        >
+                          <Plus className="w-4 h-4 text-black/30" />
+                          <span className="text-[9px] font-bold uppercase text-black/25">{byCategory["dresses"] ? "Add Jacket" : "Add Bottom"}</span>
+                        </button>
                       )}
                     </div>
 
@@ -397,9 +401,13 @@ export default function SavedPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="h-32 border-2 border-dashed border-black/20 rounded flex items-center justify-center">
-                          <span className="text-[9px] font-bold uppercase text-black/20">—</span>
-                        </div>
+                        <button
+                          onClick={() => setReplacingSlot({ outfitId: outfit.id, category: "shoes" })}
+                          className="h-32 w-full border-2 border-dashed border-black/25 rounded flex flex-col items-center justify-center gap-1 hover:border-black/50 hover:bg-black/5 transition-colors"
+                        >
+                          <Plus className="w-4 h-4 text-black/30" />
+                          <span className="text-[9px] font-bold uppercase text-black/25">Add Shoes</span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -467,7 +475,7 @@ export default function SavedPage() {
                           {Array.from({ length: emptySlots }).map((_, i) => (
                             <button
                               key={`empty-${i}`}
-                              onClick={() => setAddAccessoryToId(outfit.id)}
+                              onClick={() => setReplacingSlot({ outfitId: outfit.id, category: "accessories" })}
                               className="flex flex-col items-center gap-0.5"
                             >
                               <div
@@ -477,7 +485,7 @@ export default function SavedPage() {
                                 <Plus className="w-3.5 h-3.5 text-black/25" />
                               </div>
                               {i === 0 ? (
-                                <span className="text-[8px] font-bold uppercase text-black/25 whitespace-nowrap">+ ACCESSORIES</span>
+                                <span className="text-[8px] font-bold uppercase text-black/25 whitespace-nowrap">+ ACC</span>
                               ) : (
                                 <span className="text-[8px]">&nbsp;</span>
                               )}
@@ -518,19 +526,18 @@ export default function SavedPage() {
         )}
       </AnimatePresence>
 
-      {/* Add Accessory sheet */}
+      {/* Wardrobe replacement picker */}
       <AnimatePresence>
-        {addAccessoryToId !== null && (
-          <QuickAddSheet
-            key={addAccessoryToId}
+        {replacingSlot !== null && (
+          <WardrobePickerSheet
+            key={`${replacingSlot.outfitId}-${replacingSlot.category}`}
             open
-            onOpenChange={(open) => { if (!open) setAddAccessoryToId(null); }}
-            category="accessories"
-            existingCount={
-              outfits?.find((o) => o.id === addAccessoryToId)
-                ?.items?.filter((i) => i.category === "accessories").length ?? 0
+            onOpenChange={(open) => { if (!open) setReplacingSlot(null); }}
+            category={replacingSlot.category}
+            existingItemIds={
+              outfits?.find((o) => o.id === replacingSlot.outfitId)?.items?.map((i) => i.id) ?? []
             }
-            onCreated={handleAccessoryCreated}
+            onPick={handlePickedItem}
           />
         )}
       </AnimatePresence>
