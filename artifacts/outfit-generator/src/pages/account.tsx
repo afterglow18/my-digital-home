@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import { Eye, EyeOff, Check, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Check, Loader2, TriangleAlert } from "lucide-react";
 
 type Section = "email" | "password";
 
@@ -107,7 +107,7 @@ function Card({
 }
 
 export default function AccountPage() {
-  const { state } = useAuthContext();
+  const { state, logout } = useAuthContext();
   const currentEmail = state.status === "authenticated" ? state.user?.email ?? "" : "";
 
   // Email form
@@ -124,6 +124,12 @@ export default function AccountPage() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState<string | null>(null);
   const [pwPending, setPwPending] = useState(false);
+
+  // Delete account
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
 
   const token = state.status === "authenticated" ? state.token : null;
 
@@ -249,6 +255,103 @@ export default function AccountPage() {
             autoComplete="new-password"
           />
         </Card>
+
+        {/* Delete Account */}
+        <div className="bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="px-4 py-3 border-b-2 border-black bg-red-50 flex items-center gap-2">
+            <span className="text-lg leading-none">🗑️</span>
+            <h2 className="font-display font-bold text-base uppercase tracking-tight text-red-700">Delete Account</h2>
+          </div>
+          <div className="p-4 flex flex-col gap-3">
+            {!showDeleteConfirm ? (
+              <>
+                <p className="text-sm text-black/60 leading-snug">
+                  Permanently deletes your account and everything in your closet — clothes, outfits, all of it. This cannot be undone.
+                </p>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3
+                             border-4 border-red-600 rounded-xl bg-white text-red-600
+                             font-display font-bold text-sm uppercase tracking-tight
+                             shadow-[3px_3px_0px_0px_rgba(220,38,38,1)]
+                             active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all
+                             hover:bg-red-50"
+                >
+                  <TriangleAlert className="w-4 h-4" />
+                  Delete My Account
+                </button>
+              </>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setDeleteError(null);
+                  if (!deletePassword) { setDeleteError("Enter your password to confirm"); return; }
+                  setDeletePending(true);
+                  try {
+                    const res = await fetch("/api/auth/me", {
+                      method: "DELETE",
+                      headers: {
+                        "Content-Type": "application/json",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                      },
+                      body: JSON.stringify({ password: deletePassword }),
+                    });
+                    if (!res.ok) {
+                      const d = await res.json();
+                      throw new Error(d.error ?? "Failed to delete account");
+                    }
+                    logout();
+                  } catch (err) {
+                    setDeleteError(err instanceof Error ? err.message : "Failed to delete account");
+                    setDeletePending(false);
+                  }
+                }}
+                className="flex flex-col gap-3"
+              >
+                <p className="text-sm font-semibold text-red-700 flex items-center gap-1.5">
+                  <TriangleAlert className="w-4 h-4 shrink-0" />
+                  This will delete everything permanently.
+                </p>
+                <Field
+                  label="Enter your password to confirm"
+                  type="password"
+                  value={deletePassword}
+                  onChange={setDeletePassword}
+                  placeholder="Your current password"
+                  autoComplete="current-password"
+                />
+                {deleteError && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {deleteError}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowDeleteConfirm(false); setDeletePassword(""); setDeleteError(null); }}
+                    className="flex-1 py-3 border-4 border-black rounded-xl bg-white font-display font-bold text-sm uppercase tracking-tight shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={deletePending}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3
+                               border-4 border-red-600 rounded-xl bg-red-600 text-white
+                               font-display font-bold text-sm uppercase tracking-tight
+                               shadow-[3px_3px_0px_0px_rgba(220,38,38,1)]
+                               active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+                               disabled:opacity-50 transition-all"
+                  >
+                    {deletePending && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Yes, Delete
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

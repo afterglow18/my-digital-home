@@ -138,6 +138,28 @@ router.patch("/auth/me", requireAuth, async (req, res): Promise<void> => {
   res.json({ user: updated });
 });
 
+// DELETE /api/auth/me — permanently delete account and all data
+router.delete("/auth/me", requireAuth, async (req, res): Promise<void> => {
+  const userId = (req as AuthRequest).userId;
+  const { password } = req.body as { password?: string };
+
+  if (!password) {
+    res.status(400).json({ error: "Password is required to delete your account" });
+    return;
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) { res.status(401).json({ error: "Incorrect password" }); return; }
+
+  // Cascade deletes clothing_items, saved_outfits, outfit_items automatically
+  await db.delete(usersTable).where(eq(usersTable.id, userId));
+
+  res.status(204).send();
+});
+
 // GET /api/auth/me
 router.get("/auth/me", requireAuth, async (req, res): Promise<void> => {
   const userId = (req as AuthRequest).userId;
