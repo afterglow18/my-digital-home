@@ -297,6 +297,14 @@ export const DeleteOutfitParams = zod.object({
 export const DeleteOutfitResponse = zod.void()
 
 /**
+ * @summary Remove an item from an outfit
+ */
+export const RemoveOutfitItemParams = zod.object({
+  "id": zod.coerce.number(),
+  "itemId": zod.coerce.number()
+})
+
+/**
  * @summary Add an item to an existing outfit
  */
 export const AddOutfitItemParams = zod.object({

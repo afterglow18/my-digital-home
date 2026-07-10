@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import {
   ClothingItem,
+  ClothingItemUpdateCategory,
   useUpdateClothingItem,
   useDeleteClothingItem,
   getListClothingQueryKey,
@@ -20,8 +21,9 @@ import { getImageUrl } from "@/lib/utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const SEASON_OPTIONS   = ["", "Spring", "Summer", "Fall", "Winter", "All Season"];
-const OCCASION_OPTIONS = ["", "Casual", "Work", "Formal", "Sport", "Special Event"];
+const SEASON_OPTIONS    = ["", "Spring", "Summer", "Fall", "Winter", "All Season"];
+const OCCASION_OPTIONS  = ["", "Casual", "Work", "Formal", "Sport", "Special Event"];
+const CATEGORY_OPTIONS  = ["tops", "bottoms", "shoes", "dresses", "outerwear", "accessories"];
 
 function Field({
   label,
@@ -109,6 +111,7 @@ interface FormState {
   purchaseDate: string;
   notes: string;
   isFavorite: boolean;
+  category: string;
 }
 
 function toForm(item: ClothingItem): FormState {
@@ -123,6 +126,7 @@ function toForm(item: ClothingItem): FormState {
     purchaseDate:  item.purchaseDate  ?? "",
     notes:         item.notes         ?? "",
     isFavorite:    item.isFavorite    ?? false,
+    category:      item.category      ?? "",
   };
 }
 
@@ -137,7 +141,8 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
     form.purchasePrice !== (item.purchasePrice ?? "") ||
     form.purchaseDate  !== (item.purchaseDate  ?? "") ||
     form.notes         !== (item.notes         ?? "") ||
-    form.isFavorite    !== (item.isFavorite    ?? false)
+    form.isFavorite    !== (item.isFavorite    ?? false) ||
+    form.category      !== (item.category      ?? "")
   );
 }
 
@@ -179,6 +184,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
           purchaseDate:  form.purchaseDate.trim(),
           notes:         form.notes.trim(),
           isFavorite:    form.isFavorite,
+          category:      (form.category || item.category) as ClothingItemUpdateCategory,
         },
       },
       {
@@ -326,15 +332,15 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
           />
         </div>
 
-        {/* Category + Times Worn — read-only */}
-        <div className="grid grid-cols-2 gap-3 opacity-50 pointer-events-none">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Category</span>
-            <div className="border-2 border-black/20 rounded-lg px-3 py-2 text-sm font-medium bg-white/50 capitalize">
-              {item.category}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1">
+        {/* Category (editable) + Times Worn (read-only) */}
+        <div className="grid grid-cols-2 gap-3">
+          <SelectField
+            label="Category"
+            value={form.category}
+            onChange={patch("category") as (v: string) => void}
+            options={CATEGORY_OPTIONS}
+          />
+          <div className="flex flex-col gap-1 opacity-50 pointer-events-none">
             <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Times Worn</span>
             <div className="border-2 border-black/20 rounded-lg px-3 py-2 text-sm font-medium bg-white/50">
               {item.timesWorn ?? 0}

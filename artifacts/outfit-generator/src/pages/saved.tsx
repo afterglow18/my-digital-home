@@ -4,10 +4,11 @@ import {
   useDeleteOutfit,
   useRenameOutfit,
   useAddItemToOutfit,
+  useRemoveItemFromOutfit,
   getListOutfitsQueryKey,
   ClothingItem,
 } from "@workspace/api-client-react";
-import { Trash2, Bookmark, Plus, Pencil, Check } from "lucide-react";
+import { Trash2, Bookmark, Plus, Pencil, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImageUrl } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -68,6 +69,7 @@ export default function SavedPage() {
   const { data: outfits, isLoading } = useListOutfits();
   const deleteOutfit = useDeleteOutfit();
   const renameOutfit = useRenameOutfit();
+  const removeItemFromOutfit = useRemoveItemFromOutfit();
   const addItemToOutfit = useAddItemToOutfit();
   const queryClient = useQueryClient();
   const { tier } = useEntitlements();
@@ -110,6 +112,13 @@ export default function SavedPage() {
           queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
         },
       }
+    );
+  };
+
+  const handleRemoveItem = (outfitId: number, itemId: number) => {
+    removeItemFromOutfit.mutate(
+      { id: outfitId, itemId },
+      { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() }) }
     );
   };
 
@@ -266,7 +275,13 @@ export default function SavedPage() {
                     <div className="flex flex-col gap-1">
                       {heroItem ? (
                         <>
-                          <ItemPhoto item={heroItem} size="lg" onClick={() => setDetailsItem(heroItem)} />
+                          <div className="relative">
+                            <ItemPhoto item={heroItem} size="lg" onClick={() => setDetailsItem(heroItem)} />
+                            <button onClick={() => handleRemoveItem(outfit.id, heroItem.id)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-red-50">
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                           <span className="text-[9px] font-bold uppercase text-center text-muted-foreground">
                             {byCategory["dresses"] ? "Dress" : "Top"}
                           </span>
@@ -282,12 +297,24 @@ export default function SavedPage() {
                     <div className="flex flex-col gap-1">
                       {bottomItem && !byCategory["dresses"] ? (
                         <>
-                          <ItemPhoto item={bottomItem} size="lg" onClick={() => setDetailsItem(bottomItem)} />
+                          <div className="relative">
+                            <ItemPhoto item={bottomItem} size="lg" onClick={() => setDetailsItem(bottomItem)} />
+                            <button onClick={() => handleRemoveItem(outfit.id, bottomItem.id)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-red-50">
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                           <span className="text-[9px] font-bold uppercase text-center text-muted-foreground">Bottom</span>
                         </>
                       ) : byCategory["dresses"] && outerwearItem ? (
                         <>
-                          <ItemPhoto item={outerwearItem} size="lg" onClick={() => setDetailsItem(outerwearItem)} />
+                          <div className="relative">
+                            <ItemPhoto item={outerwearItem} size="lg" onClick={() => setDetailsItem(outerwearItem)} />
+                            <button onClick={() => handleRemoveItem(outfit.id, outerwearItem.id)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-red-50">
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                           <span className="text-[9px] font-bold uppercase text-center text-muted-foreground">Jacket</span>
                         </>
                       ) : (
@@ -301,7 +328,13 @@ export default function SavedPage() {
                     <div className="flex flex-col gap-1">
                       {shoesItem ? (
                         <>
-                          <ItemPhoto item={shoesItem} size="lg" onClick={() => setDetailsItem(shoesItem)} />
+                          <div className="relative">
+                            <ItemPhoto item={shoesItem} size="lg" onClick={() => setDetailsItem(shoesItem)} />
+                            <button onClick={() => handleRemoveItem(outfit.id, shoesItem.id)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-red-50">
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                           <span className="text-[9px] font-bold uppercase text-center text-muted-foreground">Shoes</span>
                         </>
                       ) : (
@@ -325,8 +358,36 @@ export default function SavedPage() {
                         {otherExtras.length > 0 && (
                           <div className="flex gap-2 overflow-x-auto no-scrollbar mb-2">
                             {otherExtras.map((item) => (
-                              <button key={item.id} onClick={() => setDetailsItem(item)} className="flex-none flex flex-col items-center gap-0.5 relative">
-                                <div className="w-14 h-14 border-2 border-black overflow-hidden" style={{ background: "#FDECEF" }}>
+                              <div key={item.id} className="flex-none flex flex-col items-center gap-0.5 relative">
+                                <button onClick={() => setDetailsItem(item)}>
+                                  <div className="w-14 h-14 border-2 border-black overflow-hidden" style={{ background: "#FDECEF" }}>
+                                    {item.imageObjectPath ? (
+                                      <img src={getImageUrl(item.imageObjectPath)!} alt={item.name} className="w-full h-full object-contain" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-[8px] font-bold uppercase text-black/30">—</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </button>
+                                <button onClick={() => handleRemoveItem(outfit.id, item.id)}
+                                  className="absolute top-0 right-0 w-4 h-4 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10">
+                                  <X className="w-2 h-2" />
+                                </button>
+                                {item.isFavorite && <span className="absolute top-0 left-0 text-[9px] leading-none">❤️</span>}
+                                <span className="text-[8px] font-bold uppercase text-muted-foreground">
+                                  {SLOT_LABELS[item.category as SlotKey] ?? item.category}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {/* 5-slot accessory row */}
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {accItems.map((item) => (
+                            <div key={item.id} className="flex flex-col items-center gap-0.5 relative">
+                              <button onClick={() => setDetailsItem(item)} className="w-full">
+                                <div className="w-full aspect-square border-2 border-black overflow-hidden" style={{ background: "#FDECEF" }}>
                                   {item.imageObjectPath ? (
                                     <img src={getImageUrl(item.imageObjectPath)!} alt={item.name} className="w-full h-full object-contain" />
                                   ) : (
@@ -335,30 +396,14 @@ export default function SavedPage() {
                                     </div>
                                   )}
                                 </div>
-                                {item.isFavorite && <span className="absolute top-0 right-0 text-[9px] leading-none">❤️</span>}
-                                <span className="text-[8px] font-bold uppercase text-muted-foreground">
-                                  {SLOT_LABELS[item.category as SlotKey] ?? item.category}
-                                </span>
                               </button>
-                            ))}
-                          </div>
-                        )}
-                        {/* 5-slot accessory row */}
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {accItems.map((item) => (
-                            <button key={item.id} onClick={() => setDetailsItem(item)} className="flex flex-col items-center gap-0.5 relative">
-                              <div className="w-full aspect-square border-2 border-black overflow-hidden" style={{ background: "#FDECEF" }}>
-                                {item.imageObjectPath ? (
-                                  <img src={getImageUrl(item.imageObjectPath)!} alt={item.name} className="w-full h-full object-contain" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-[8px] font-bold uppercase text-black/30">—</span>
-                                  </div>
-                                )}
-                              </div>
+                              <button onClick={() => handleRemoveItem(outfit.id, item.id)}
+                                className="absolute top-0 right-0 w-4 h-4 bg-white border border-black rounded-full flex items-center justify-center shadow-sm z-10">
+                                <X className="w-2 h-2" />
+                              </button>
                               <span className="text-[8px] font-bold uppercase text-muted-foreground truncate w-full text-center">Acc</span>
-                              {item.isFavorite && <span className="absolute top-0 right-0 text-[9px] leading-none">⭐</span>}
-                            </button>
+                              {item.isFavorite && <span className="absolute top-0 left-0 text-[9px] leading-none">⭐</span>}
+                            </div>
                           ))}
                           {Array.from({ length: emptySlots }).map((_, i) => (
                             <button

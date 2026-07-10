@@ -226,6 +226,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /outfits/{id}/items/{itemId}:
+    delete:
+      operationId: removeItemFromOutfit
+      tags: [Outfits]
+      summary: Remove an item from an outfit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated outfit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedOutfit"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /outfits/{id}:
     patch:
       operationId: renameOutfit

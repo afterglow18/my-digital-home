@@ -8,6 +8,7 @@ import {
   RenameOutfitBody,
   AddOutfitItemParams,
   AddOutfitItemBody,
+  RemoveOutfitItemParams,
 } from "@workspace/api-zod";
 import { requireAuth, type AuthRequest } from "../middleware/requireAuth.js";
 
@@ -134,6 +135,30 @@ router.patch("/outfits/:id/items", requireAuth, async (req, res): Promise<void> 
 
   const allItems = await db.select().from(outfitItemsTable).where(eq(outfitItemsTable.outfitId, params.data.id));
   const itemIds = allItems.map((r) => r.clothingItemId);
+  const items = itemIds.length > 0
+    ? await db.select().from(clothingItemsTable).where(inArray(clothingItemsTable.id, itemIds))
+    : [];
+
+  res.json({ ...outfit, itemIds, items });
+});
+
+router.delete("/outfits/:id/items/:itemId", requireAuth, async (req, res): Promise<void> => {
+  const userId = (req as AuthRequest).userId;
+  const params = RemoveOutfitItemParams.safeParse(req.params);
+  if (!params.success) { res.status(400).json({ error: params.error.message }); return; }
+
+  const [outfit] = await db
+    .select()
+    .from(savedOutfitsTable)
+    .where(and(eq(savedOutfitsTable.id, params.data.id), eq(savedOutfitsTable.userId, userId)));
+  if (!outfit) { res.status(404).json({ error: "Outfit not found" }); return; }
+
+  await db
+    .delete(outfitItemsTable)
+    .where(and(eq(outfitItemsTable.outfitId, params.data.id), eq(outfitItemsTable.clothingItemId, params.data.itemId)));
+
+  const remaining = await db.select().from(outfitItemsTable).where(eq(outfitItemsTable.outfitId, params.data.id));
+  const itemIds = remaining.map((r) => r.clothingItemId);
   const items = itemIds.length > 0
     ? await db.select().from(clothingItemsTable).where(inArray(clothingItemsTable.id, itemIds))
     : [];
