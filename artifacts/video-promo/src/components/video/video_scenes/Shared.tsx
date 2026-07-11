@@ -47,7 +47,7 @@ export const WardrobeDoorsLayer = ({ isOpen }: { isOpen: boolean }) => (
 export const SceneContainer = ({ children, className = "", style = {} }: { children: React.ReactNode, className?: string, style?: any }) => (
   <motion.div
     className={`absolute inset-0 w-full h-full overflow-hidden flex flex-col items-center justify-center ${className}`}
-    style={{ perspective: '1500px', ...style }}
+    style={style}
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}

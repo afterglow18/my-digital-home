@@ -50,7 +50,8 @@ export const Scene0 = () => {
           {/* Top */}
           <motion.img
             src={`${import.meta.env.BASE_URL}images/top.jpeg`}
-            className="absolute top-[5%] left-[20%] w-[50cqw] object-contain mix-blend-darken"
+            className="absolute top-[5%] left-[20%] w-[50cqw] object-contain rounded-xl"
+            style={{ filter: 'drop-shadow(4px 6px 12px rgba(0,0,0,0.25))' }}
             initial={{ scale: 0, y: -100, rotate: -15 }}
             animate={phase >= 0 ? { scale: 1, y: 0, rotate: -5 } : { scale: 0, y: -100, rotate: -15 }}
             transition={springBouncy}
@@ -59,7 +60,8 @@ export const Scene0 = () => {
           {/* Skirt */}
           <motion.img
             src={`${import.meta.env.BASE_URL}images/skirt.jpeg`}
-            className="absolute top-[35%] left-[25%] w-[45cqw] object-contain mix-blend-darken"
+            className="absolute top-[35%] left-[25%] w-[45cqw] object-contain rounded-xl"
+            style={{ filter: 'drop-shadow(4px 6px 12px rgba(0,0,0,0.25))' }}
             initial={{ scale: 0, y: -100, rotate: 20 }}
             animate={phase >= 1 ? { scale: 1, y: 0, rotate: 5 } : { scale: 0, y: -100, rotate: 20 }}
             transition={springBouncy}
@@ -68,7 +70,8 @@ export const Scene0 = () => {
           {/* Shoes */}
           <motion.img
             src={`${import.meta.env.BASE_URL}images/shoes.jpeg`}
-            className="absolute bottom-[5%] left-[20%] w-[40cqw] object-contain mix-blend-darken z-10"
+            className="absolute bottom-[5%] left-[20%] w-[40cqw] object-contain rounded-xl z-10"
+            style={{ filter: 'drop-shadow(4px 6px 12px rgba(0,0,0,0.25))' }}
             initial={{ scale: 0, x: -100, rotate: -20 }}
             animate={phase >= 2 ? { scale: 1, x: 0, rotate: -10 } : { scale: 0, x: -100, rotate: -20 }}
             transition={springBouncy}
@@ -77,7 +80,8 @@ export const Scene0 = () => {
           {/* Bag */}
           <motion.img
             src={`${import.meta.env.BASE_URL}images/bag.jpeg`}
-            className="absolute top-[40%] right-[0%] w-[35cqw] object-contain mix-blend-darken z-20"
+            className="absolute top-[40%] right-[0%] w-[35cqw] object-contain rounded-xl z-20"
+            style={{ filter: 'drop-shadow(4px 6px 12px rgba(0,0,0,0.25))' }}
             initial={{ scale: 0, x: 100, rotate: 30 }}
             animate={phase >= 3 ? { scale: 1, x: 0, rotate: 15 } : { scale: 0, x: 100, rotate: 30 }}
             transition={springBouncy}
@@ -86,7 +90,8 @@ export const Scene0 = () => {
           {/* Earrings */}
           <motion.img
             src={`${import.meta.env.BASE_URL}images/earrings.jpeg`}
-            className="absolute top-[10%] right-[10%] w-[25cqw] object-contain mix-blend-darken z-30"
+            className="absolute top-[10%] right-[10%] w-[25cqw] object-contain rounded-xl z-30"
+            style={{ filter: 'drop-shadow(4px 6px 12px rgba(0,0,0,0.25))' }}
             initial={{ scale: 0, y: -50, rotate: 45 }}
             animate={phase >= 4 ? { scale: 1, y: 0, rotate: 10 } : { scale: 0, y: -50, rotate: 45 }}
             transition={springBouncy}
