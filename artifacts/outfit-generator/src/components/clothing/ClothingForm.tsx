@@ -44,14 +44,22 @@ export function ClothingForm({ initialData, onSubmit, isSubmitting, submitLabel 
   const uploadFile = useCallback(async (file: File) => {
     setIsUploading(true);
     try {
-      const res = await fetch("/api/storage/uploads/direct", {
-        method: "POST",
-        headers: { "Content-Type": file.type || "image/png" },
-        body: file,
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const canvas = document.createElement("canvas");
+          const scale = Math.min(1, 800 / img.naturalWidth);
+          canvas.width  = Math.round(img.naturalWidth  * scale);
+          canvas.height = Math.round(img.naturalHeight * scale);
+          canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        img.onerror = reject;
+        img.src = url;
       });
-      if (!res.ok) throw new Error("Upload failed");
-      const { objectPath } = await res.json() as { objectPath: string };
-      form.setValue("imageObjectPath", objectPath);
+      form.setValue("imageObjectPath", dataUrl);
     } catch (err) {
       console.error("Upload error:", err);
     } finally {

@@ -44,18 +44,25 @@ type Phase =
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-async function uploadBlob(blob: Blob, filename: string): Promise<string> {
-  const res = await fetch("/api/storage/uploads/direct", {
-    method:  "POST",
-    headers: {
-      "Content-Type":          "image/png",
-      "X-Upload-Filename":     filename,
-    },
-    body: blob,
+/** Convert a Blob to a JPEG data URL (compressed, ready for DB storage). */
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      // Cap at 800px wide to keep data URLs small
+      const scale = Math.min(1, 800 / img.naturalWidth);
+      canvas.width  = Math.round(img.naturalWidth  * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+      resolve(dataUrl);
+    };
+    img.onerror = reject;
+    img.src = url;
   });
-  if (!res.ok) throw new Error("Upload failed");
-  const { objectPath } = (await res.json()) as { objectPath: string };
-  return objectPath;
 }
 
 /** Convert a Blob to a base64 string (without the data-URL prefix). */
@@ -185,11 +192,10 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
       console.warn("Clothing validation error (failing open):", err);
     }
 
-    // 3. Upload & save
+    // 3. Convert to data URL & save
     setPhase("uploading");
     try {
-      const filename = `${category}-${Date.now()}.png`;
-      const path     = await uploadBlob(png, filename);
+      const path = await blobToDataUrl(png);
 
       const label    = CATEGORY_LABELS[category];
       const n        = existingCount + 1;

@@ -7,5 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getImageUrl(path: string | null | undefined) {
   if (!path) return null;
+  // Data URLs are stored directly — return as-is
+  if (path.startsWith("data:")) return path;
   return `/api/storage${path}`;
 }
