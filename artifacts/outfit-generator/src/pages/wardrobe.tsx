@@ -1,22 +1,20 @@
 /**
- * WardrobePage — closet-bg.png (941×1672 PNG)
+ * WardrobePage — vanity-bg.png (1024×1536 PNG)
  *
- * Sizing: object-fit CONTAIN inside min(calc(100dvh − 90px), calc(100vw × H/W)).
- *   Image ratio 0.5629 — taller than iPhone portrait ratio (≈0.517) → fills width.
- *   min() clamps container to image aspect ratio so image fills exactly — no letterbox.
- *   Container background #F0C030 (door yellow) blends with yellow doors on sides.
+ * Layout: 4 shelf sections inside a Hollywood-mirror frame.
+ * Items sit ON TOP of each shelf surface (bottom-anchored within each section).
+ * Baked-in pink "ADD X" pills show through the background when shelves are empty;
+ * a React-rendered transparent tap zone handles the click.
+ * When items are present, the carousel fills the section and covers the pill.
  *
- * Layout (z-index):
- *   0   background <img>
- *   10  ClosetRow carousels — positioned below the rod
- *   12  Transparent "+ ADD" tap zones (visual comes from baked-in background pills)
- *   14  Transparent SAVE OUTFIT / shuffle / mannequin tap zones (visual from rug background)
- *   20  Hanger overlays — thin crop re-rendered at z=20 to keep rod bottom above photos
- *   30+ Modals
+ * Sections (y-fractions of image height):
+ *   Section 1 (TOPS):        0.19 → 0.39
+ *   Section 2 (BOTTOMS):     0.39 → 0.55
+ *   Section 3 (SHOES):       0.55 → 0.71
+ *   Section 4 (ACCESSORIES): 0.71 → 0.85
  *
- * Hanger overlay technique:
- *   New background has no visible hanging hanger-arm graphics.
- *   A thin overlay (rod-center → rod-bottom, ~5 px) covers the rod bottom edge above photos.
+ * No rod-overlay technique needed — shelf surfaces are already below items.
+ * Save outfit: floating pill button at the top of the mirror.
  */
 
 import React, {
@@ -29,7 +27,7 @@ import {
   useSaveOutfit, useListOutfits, getListOutfitsQueryKey,
   ClothingItem,
 } from "@workspace/api-client-react";
-import { X } from "lucide-react";
+import { X, Heart, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ClosetRow, ClosetRowHandle } from "@/components/ClosetRow";
 import { QuickAddSheet } from "@/components/clothing/QuickAddSheet";
@@ -40,82 +38,43 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { FREE_ITEM_LIMIT } from "@/lib/entitlements";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type RowKey   = "tops" | "bottoms" | "shoes";
+type RowKey   = "tops" | "bottoms" | "shoes" | "accessories";
 type Category = "tops" | "bottoms" | "shoes" | "accessories" | "outerwear" | "dresses";
 
-const ROWS: { key: RowKey; addLabel: string; btnLabel: string }[] = [
-  { key: "tops",    addLabel: "Add Top",    btnLabel: "+ ADD TOPS"    },
-  { key: "bottoms", addLabel: "Add Bottom", btnLabel: "+ ADD BOTTOMS" },
-  { key: "shoes",   addLabel: "Add Shoes",  btnLabel: "+ ADD SHOES"   },
+const ROWS: { key: RowKey; btnLabel: string }[] = [
+  { key: "tops",        btnLabel: "+ ADD TOPS"        },
+  { key: "bottoms",     btnLabel: "+ ADD BOTTOMS"     },
+  { key: "shoes",       btnLabel: "+ ADD SHOES"       },
+  { key: "accessories", btnLabel: "+ ADD ACCESSORIES" },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
-const IMG_W = 941;
-const IMG_H = 1672;
+const IMG_W = 1024;
+const IMG_H = 1536;
 const NAV_H = 90;
 
-// ── Landmark fractions (measured from the 941×1672 PNG) ──────────────────────
-// All x-values are fractions of image WIDTH; y-values of image HEIGHT.
-//
-// Rod positions sampled at x=150 (left interior, clear of the centre pill):
-//   TOPS    rod dark pixels  y=515–528 → centre y≈520  (520/1672=0.311)
-//   BOTTOMS rod dark pixels  y=828–840 → centre y≈833  (833/1672=0.498)
-//   SHOES   rod dark pixels  y=1148–1160 → centre y≈1153 (1153/1672=0.690)
-//
-// Door edges sampled at y=600:
-//   doorL: yellow→pink transition at x≈87 (87/941=0.092)
-//   doorR: pink→yellow transition at x≈848 (848/941=0.901)
-//
-// Hanger overlay: new background has NO hanging hanger-arm graphics.
-//   Each overlay covers only rod-centre → rod-bottom (~8 px) to keep the
-//   rod edge crisp above photos.  Zero impact on the clothing photo area.
-//
-// Save bar: three baked-in circles on the rug (transparent tap zones).
-//   Rug/bar starts at y≈1480 (0.885).  Button centres measured from crop.
+// ── Landmark fractions (measured from the 1024×1536 vanity PNG) ──────────────
+// doorL/doorR: inner mirror area edges (inside the bulb frame)
+// rows[i]: sectionTop = y where section starts, shelfY = shelf surface y
+// btnCY: y-centre of the baked-in pink ADD pill in the background
 const LM = {
-  // Inner closet edges (just inside the yellow doors)
-  doorL: 0.092,   // x≈87  (87/941)
-  doorR: 0.901,   // x≈848 (848/941)
+  doorL: 0.185,  // x≈190/1024 — left inner edge of white shelf area
+  doorR: 0.815,  // x≈835/1024 — right inner edge
 
-  // Per-row landmarks  (btnCY = rod centre, boxY = just below rod bottom)
   rows: [
-    {
-      btnCY:     0.311, // TOPS rod centre   y≈520  (520/1672)
-      boxY:      0.319, // just below rod    y≈533  (533/1672)
-      boxBot:    0.495, // just before BOTTOMS rod  y≈828
-      hangerTop: 0.311, // thin rod-bottom overlay — rod centre…
-      hangerBot: 0.319, // …to rod bottom (no hanger arms in new bg)
-    },
-    {
-      btnCY:     0.498, // BOTTOMS rod centre y≈833  (833/1672)
-      boxY:      0.506, // just below rod     y≈846  (846/1672)
-      boxBot:    0.685, // just before SHOES rod     y≈1145
-      hangerTop: 0.498,
-      hangerBot: 0.506,
-    },
-    {
-      btnCY:     0.690, // SHOES rod centre   y≈1153 (1153/1672)
-      boxY:      0.697, // just below rod     y≈1165 (1165/1672)
-      boxBot:    0.849, // just before floor/rug      y≈1420
-      hangerTop: 0.697, // SHOES: no overlay (isShoes guard in JSX)
-      hangerBot: 0.697,
-    },
+    { sectionTop: 0.185, shelfY: 0.395, btnCY: 0.305 },  // TOPS
+    { sectionTop: 0.395, shelfY: 0.555, btnCY: 0.478 },  // BOTTOMS
+    { sectionTop: 0.555, shelfY: 0.715, btnCY: 0.635 },  // SHOES
+    { sectionTop: 0.715, shelfY: 0.855, btnCY: 0.785 },  // ACCESSORIES
   ],
 
-  // SAVE OUTFIT bar — three baked-in circles on the rug
-  // Visual from background image; HTML = transparent tap zones only.
-  barY:     0.885, // rug/bar top   y≈1480 (1480/1672)
-  barBot:   0.993, // bar bottom    y≈1660 (1660/1672)
-  hangerCX: 0.175, // left  hanger icon centre x≈165 (165/941)
-  saveBtnL: 0.350, // centre button left  edge  x≈329 (329/941)
-  saveBtnR: 0.650, // centre button right edge  x≈612 (612/941)
-  manneCX:  0.824, // right dress-form centre   x≈775 (775/941)
+  // Floating save area — just above the baked-in bottom shelf items
+  saveAreaY: 0.86,
 } as const;
 
 // ── useImageRect ─────────────────────────────────────────────────────────────
 interface ImgRect {
   top: number; left: number; width: number; height: number;
-  /** Full height of the positioning container (not just the rendered image). */
   containerH: number;
 }
 
@@ -130,10 +89,8 @@ function useImageRect(containerRef: RefObject<HTMLDivElement>): ImgRect {
       const cR = cW / cH;
       let rW: number, rH: number, rL: number, rT: number;
       if (cR > iR) {
-        // Container wider than image: fill height, center horizontally
         rH = cH; rW = cH * iR; rT = 0; rL = (cW - rW) / 2;
       } else {
-        // Container taller than image: fill width, anchor top
         rW = cW; rH = cW / iR; rL = 0; rT = 0;
       }
       setRect({ top: rT, left: rL, width: rW, height: rH, containerH: cH });
@@ -151,17 +108,16 @@ const pW = (ir: ImgRect, f: number) => ir.width  * f;
 const pX = (ir: ImgRect, f: number) => ir.left   + ir.width  * f;
 const pY = (ir: ImgRect, f: number) => ir.top    + ir.height * f;
 
-const GOLD = "#C49B2A";
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function WardrobePage() {
   const containerRef = useRef<HTMLDivElement>(null!);
   const ir = useImageRect(containerRef);
 
   const rowRefs: Record<RowKey, RefObject<ClosetRowHandle | null>> = {
-    tops:    useRef<ClosetRowHandle | null>(null),
-    bottoms: useRef<ClosetRowHandle | null>(null),
-    shoes:   useRef<ClosetRowHandle | null>(null),
+    tops:        useRef<ClosetRowHandle | null>(null),
+    bottoms:     useRef<ClosetRowHandle | null>(null),
+    shoes:       useRef<ClosetRowHandle | null>(null),
+    accessories: useRef<ClosetRowHandle | null>(null),
   };
 
   const [centred,       setCentred]       = useState<Partial<Record<RowKey, ClothingItem>>>({});
@@ -179,44 +135,42 @@ export default function WardrobePage() {
   const { data: dresses     = [] } = useListClothing({ category: "dresses"     }, { query: { queryKey: getListClothingQueryKey({ category: "dresses"     }) } });
   const { data: outfits = [] } = useListOutfits();
 
-  const rowData: Record<RowKey, ClothingItem[]> = { tops, bottoms, shoes };
+  const rowData: Record<RowKey, ClothingItem[]> = { tops, bottoms, shoes, accessories };
   const totalItems = tops.length + bottoms.length + shoes.length + accessories.length + outerwear.length + dresses.length;
 
   const saveOutfit  = useSaveOutfit();
   const queryClient = useQueryClient();
-  const { tier, caps, canAddItem, canSaveOutfit } = useEntitlements();
+  const { tier, canAddItem, canSaveOutfit } = useEntitlements();
 
   useEffect(() => {
     setCentred(prev => {
       const next = { ...prev };
       let changed = false;
-      (["tops", "bottoms", "shoes"] as RowKey[]).forEach(key => {
+      (["tops", "bottoms", "shoes", "accessories"] as RowKey[]).forEach(key => {
         if (rowData[key].length === 0 && next[key] !== undefined) {
           delete next[key]; changed = true;
         }
       });
       return changed ? next : prev;
     });
-  }, [tops.length, bottoms.length, shoes.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tops.length, bottoms.length, shoes.length, accessories.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const setCentredTops    = useCallback((item: ClothingItem | null) =>
-    setCentred(p => ({ ...p, tops:    item ?? undefined })), []);
-  const setCentredBottoms = useCallback((item: ClothingItem | null) =>
-    setCentred(p => ({ ...p, bottoms: item ?? undefined })), []);
-  const setCentredShoes   = useCallback((item: ClothingItem | null) =>
-    setCentred(p => ({ ...p, shoes:   item ?? undefined })), []);
-  const centredHandlers: Record<RowKey, (item: ClothingItem | null) => void> = {
-    tops: setCentredTops, bottoms: setCentredBottoms, shoes: setCentredShoes,
+  const setCentredHandlers: Record<RowKey, (item: ClothingItem | null) => void> = {
+    tops:        useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, tops:        item ?? undefined })), []),
+    bottoms:     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, bottoms:     item ?? undefined })), []),
+    shoes:       useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, shoes:       item ?? undefined })), []),
+    accessories: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, accessories: item ?? undefined })), []),
   };
 
-  const handleAddClick   = useCallback((cat: Category) => {
+  const handleAddClick = useCallback((cat: Category) => {
     if (canAddItem(totalItems)) setAddCategory(cat); else setUpgradeReason("items");
   }, [canAddItem, totalItems]);
-  const handleAddTops    = useCallback(() => handleAddClick("tops"),    [handleAddClick]);
-  const handleAddBottoms = useCallback(() => handleAddClick("bottoms"), [handleAddClick]);
-  const handleAddShoes   = useCallback(() => handleAddClick("shoes"),   [handleAddClick]);
+
   const addHandlers: Record<RowKey, () => void> = {
-    tops: handleAddTops, bottoms: handleAddBottoms, shoes: handleAddShoes,
+    tops:        useCallback(() => handleAddClick("tops"),        [handleAddClick]),
+    bottoms:     useCallback(() => handleAddClick("bottoms"),     [handleAddClick]),
+    shoes:       useCallback(() => handleAddClick("shoes"),       [handleAddClick]),
+    accessories: useCallback(() => handleAddClick("accessories"), [handleAddClick]),
   };
 
   const handleItemTap = useCallback((item: ClothingItem) => setDetailsItem(item), []);
@@ -224,10 +178,6 @@ export default function WardrobePage() {
   const handleSaveClick = useCallback(() => {
     if (canSaveOutfit(outfits.length)) setIsSaveOpen(true); else setUpgradeReason("outfits");
   }, [canSaveOutfit, outfits.length]);
-
-  const handleMannequinClick = useCallback(() => {
-    setUpgradeReason("mannequin");
-  }, []);
 
   const [, navigate] = useLocation();
 
@@ -253,25 +203,31 @@ export default function WardrobePage() {
   const itemsLeft = isFree ? Math.max(0, FREE_ITEM_LIMIT - totalItems) : null;
   const ready     = ir.width > 0;
 
+  // ── Section layout helpers ────────────────────────────────────────────────
+  // Each section: items fill from sectionTop to shelfY.
+  // Compute a uniform maxPhotoH from the tightest section.
+  const sectionHeights = ready
+    ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))
+    : LM.rows.map(() => 0);
+  const minSectionH  = ready ? Math.min(...sectionHeights) : 0;
+  const maxPhotoH    = Math.max(0, minSectionH - 4);
+
   return (
     <div
       ref={containerRef}
       style={{
         position: "relative",
         width: "100%",
-        // Clamp to image aspect ratio so it fills the container exactly — no
-        // letterbox gap below — because the save-bar is baked into the rug at the
-        // bottom of the image.  min() prevents overflow on very short screens.
         height: `min(calc(100dvh - ${NAV_H}px), calc(100vw * ${(IMG_H / IMG_W).toFixed(6)}))`,
         overflow: "hidden",
-        // Door-yellow background blends with yellow doors visible at sides/bottom
-        background: "#F0C030",
+        // Dusty rose background matches the outer wall colour in the vanity image
+        background: "#e8b8b0",
       }}
     >
-      {/* ── Background image — object-fit:contain, never cropped ── */}
+      {/* ── Background image ── */}
       <img
-        src="/closet-bg.png"
-        alt="My Digital Closet"
+        src="/vanity-bg.png"
+        alt="My Digital Vanity"
         style={{
           position: "absolute",
           top:    ready ? ir.top    : 0,
@@ -287,7 +243,7 @@ export default function WardrobePage() {
 
       {ready && (
         <>
-          {/* ── Item-limit counter badge (free users only) ── */}
+          {/* ── Item-count badge (free tier) ── */}
           {itemsLeft !== null && (
             <button
               onClick={() => setUpgradeReason("items")}
@@ -295,17 +251,17 @@ export default function WardrobePage() {
               aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
               style={{
                 position: "absolute",
-                top: pY(ir, 0.230), left: "50%", transform: "translateX(-50%)",
-                zIndex: 12,
+                top: pY(ir, 0.105), left: "50%", transform: "translateX(-50%)",
+                zIndex: 25,
                 padding: "3px 14px", borderRadius: 20, border: "none",
                 background: totalItems >= FREE_ITEM_LIMIT
                   ? "rgba(200,40,40,0.14)"
-                  : "rgba(0,0,0,0.10)",
+                  : "rgba(255,255,255,0.55)",
                 boxShadow: totalItems >= FREE_ITEM_LIMIT
                   ? "0 0 0 2px rgba(200,40,40,0.40)"
-                  : "0 0 0 1.5px rgba(0,0,0,0.18)",
-                color: totalItems >= FREE_ITEM_LIMIT ? "#aa0000" : "#5a3a00",
-                fontWeight: 700, fontSize: 11,
+                  : "0 0 0 1.5px rgba(180,100,110,0.28)",
+                color: totalItems >= FREE_ITEM_LIMIT ? "#aa0000" : "#7a3a40",
+                fontWeight: 700, fontSize: 10,
                 letterSpacing: "0.08em", textTransform: "uppercase",
                 whiteSpace: "nowrap", cursor: "pointer",
               }}
@@ -314,111 +270,33 @@ export default function WardrobePage() {
             </button>
           )}
 
-          {/* ── Three clothing rows ── */}
-          {(() => {
-            // Pre-compute tap zones for ALL rows so each row's photo area can
-            // be capped at the NEXT row's overlay top — preventing the z=20
-            // overlay from hiding the bottom of photos in the row above it.
-            const tapH       = Math.max(36, pH(ir, 0.055));
-            const rowTapTops = LM.rows.map(lm => pY(ir, lm.btnCY) - tapH / 2);
-            const rowTapBots = rowTapTops.map(t => t + tapH);
-            const GAP_PX     = 2;
-
-            // Compute carTop/carH for every row first so we can derive a
-            // uniform maxPhotoH — the smallest available height across all rows.
-            const rowLayouts = LM.rows.map((lm, i) => {
-              const nextOverlayTop = i < LM.rows.length - 1
-                ? rowTapTops[i + 1]
-                : pY(ir, LM.barY);
-              // Shoes (i===2): anchor photos to the rod bottom so the gap
-              // matches tops/bottoms visually.  The z=20 overlay still covers
-              // tapTop → carTop, so the ADD button stays crisp above the photos.
-              const carTop = i === 2
-                ? pY(ir, lm.boxY) + GAP_PX
-                : Math.max(pY(ir, lm.boxY), rowTapBots[i] + GAP_PX);
-              const carH   = Math.max(0, nextOverlayTop - carTop);
-              return { carTop, carH };
-            });
-
-            // All cards same height: constrained by the tightest row (tops/bottoms)
-            const minCarH    = Math.min(...rowLayouts.map(r => r.carH));
-            const maxPhotoH  = Math.max(0, minCarH - 2);
-
-            return ROWS.map(({ key, btnLabel }, rowIdx) => {
+          {/* ── 4 shelf rows ── */}
+          {ROWS.map(({ key, btnLabel }, rowIdx) => {
             const lm      = LM.rows[rowIdx];
             const items   = rowData[key];
-            const isShoes = rowIdx === 2;
-            const { carTop, carH } = rowLayouts[rowIdx];
 
-            // ── Layout constants ──────────────────────────────────────────────
-            const carLeft  = pX(ir, LM.doorL);
-            const carRight = ir.left + pW(ir, 1 - LM.doorR);
+            const secTop  = pY(ir, lm.sectionTop);
+            const secH    = pH(ir, lm.shelfY - lm.sectionTop);
+            const carLeft = pX(ir, LM.doorL);
+            const carW    = pW(ir, LM.doorR - LM.doorL);
 
-            // "+ ADD" tap zone — centred on the gold rod / pill
-            const tapTop = rowTapTops[rowIdx];
-            const tapBot = rowTapBots[rowIdx]; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-            // Rod + button overlay — re-draws the background image from the
-            // button top down to the first photo pixel, so the pill always
-            // appears on top of any photo edge that might reach up.
-            // bgPosY uses the absolute pixel offset so the crop aligns with
-            // the main <img> (ir.top = 0 always in portrait).
-            const overlayTop  = tapTop;
-            const overlayH    = carTop - tapTop;   // covers button → first photo
-            const bgPosX      = -pW(ir, LM.doorL); // interior left edge offset
-            const bgPosY      = -overlayTop;        // aligns bg-image with main img
+            // ADD button: centered in the section at btnCY
+            const btnCY   = pY(ir, lm.btnCY);
+            const btnH    = Math.max(32, pH(ir, 0.045));
 
             return (
               <React.Fragment key={key}>
-                {/* Rod + button overlay — z=20 ensures background pill shows
-                    above photos.  Covers from button top to first photo row. */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    top:    overlayTop,
-                    left:   carLeft,
-                    right:  carRight,
-                    height: Math.max(0, overlayH),
-                    zIndex: 20,
-                    pointerEvents: "none",
-                    backgroundImage: "url('/closet-bg.png')",
-                    backgroundSize:     `${ir.width}px ${ir.height}px`,
-                    backgroundPosition: `${bgPosX}px ${bgPosY}px`,
-                    backgroundRepeat:   "no-repeat",
-                  }}
-                />
 
-                {/* "+ ADD" tap zone — z=22 keeps it above the overlay so it
-                    remains fully clickable.  Transparent: visual from background. */}
-                <button
-                  onClick={addHandlers[key]}
-                  aria-label={btnLabel}
-                  data-testid={`add-btn-${key}`}
-                  style={{
-                    position: "absolute",
-                    top:    tapTop,
-                    left:   pX(ir, LM.doorL),
-                    width:  pW(ir, LM.doorR - LM.doorL),
-                    height: tapH,
-                    zIndex: 22,
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    borderRadius: 20,
-                  }}
-                />
-
-                {/* ClosetRow — clothing photos, guaranteed to start below button */}
+                {/* ── Item carousel — fills the entire shelf section ── */}
                 {items.length > 0 && (
                   <div
                     data-testid={`row-${key}`}
                     style={{
                       position: "absolute",
-                      top:    carTop,
+                      top:    secTop,
                       left:   carLeft,
-                      right:  carRight,
-                      height: carH,
+                      width:  carW,
+                      height: secH,
                       zIndex: 10,
                       overflow: "hidden",
                     }}
@@ -426,56 +304,73 @@ export default function WardrobePage() {
                     <ClosetRow
                       ref={rowRefs[key]}
                       items={items}
-                      onCenteredItem={centredHandlers[key]}
+                      onCenteredItem={setCentredHandlers[key]}
                       onItemTap={handleItemTap}
                       maxPhotoH={maxPhotoH}
                     />
                   </div>
                 )}
+
+                {/* ── ADD button — shown when section is empty ─────────────
+                    Transparent tap zone when items present (covered by carousel),
+                    pink pill when empty (matches baked-in image pill below).     */}
+                {items.length === 0 ? (
+                  <button
+                    onClick={addHandlers[key]}
+                    aria-label={btnLabel}
+                    data-testid={`add-btn-${key}`}
+                    style={{
+                      position: "absolute",
+                      top:    btnCY - btnH / 2,
+                      left:   carLeft,
+                      width:  carW,
+                      height: btnH,
+                      zIndex: 22,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  />
+                ) : (
+                  /* Transparent tap zone over entire section when items exist */
+                  <button
+                    onClick={addHandlers[key]}
+                    aria-label={btnLabel}
+                    data-testid={`add-btn-${key}`}
+                    style={{
+                      position: "absolute",
+                      top:    secTop,
+                      left:   carLeft,
+                      width:  carW,
+                      height: secH,
+                      zIndex: 5, // below carousel (z=10) so carousel handles taps first
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  />
+                )}
+
               </React.Fragment>
             );
-          });
-          })()}
+          })}
 
-          {/* ── SAVE OUTFIT bar — transparent tap zones over baked-in rug circles ──
-              Visual (hanger icon, "SAVE OUTFIT ♡", dress-form icon) comes from the
-              background image.  These HTML elements are invisible tap targets only. */}
-
-          {/* Hanger icon — left circle → Favorites */}
-          <button
-            onClick={() => navigate("/favorites")}
-            data-testid="button-favorites"
-            aria-label="View favorites"
-            title="Favorites"
-            style={{
-              position: "absolute",
-              top:    pY(ir, LM.barY),
-              left:   pX(ir, LM.hangerCX) - 38,
-              width:  76,
-              height: pH(ir, LM.barBot - LM.barY),
-              zIndex: 14,
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-            }}
-          />
-
-          {/* Save Outfit — centre circle */}
+          {/* ── Floating SAVE OUTFIT button ───────────────────────────────── */}
           <AnimatePresence mode="wait">
             {isSaveOpen ? (
               <motion.div
-                key="input"
-                initial={{ opacity: 0, y: 6 }}
+                key="save-input"
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6 }}
+                exit={{ opacity: 0, y: -8 }}
                 style={{
                   position: "absolute",
-                  bottom: `calc(100% - ${pY(ir, LM.barY)}px + 8px)`,
-                  left:   16,
-                  right:  16,
+                  top:   pY(ir, 0.10),
+                  left:  pX(ir, LM.doorL),
+                  width: pW(ir, LM.doorR - LM.doorL),
                   display: "flex",
                   gap: 6,
-                  zIndex: 20,
+                  zIndex: 30,
                 }}
               >
                 <input
@@ -487,10 +382,10 @@ export default function WardrobePage() {
                   onKeyDown={e => e.key === "Enter" && handleSave()}
                   data-testid="input-outfit-name"
                   style={{
-                    flex: 1, height: 38, borderRadius: 20, padding: "0 14px",
+                    flex: 1, height: 36, borderRadius: 20, padding: "0 14px",
                     fontSize: 13, fontWeight: 600, color: "#3a2400",
-                    background: "rgba(255,252,245,0.98)",
-                    border: "1.5px solid rgba(196,155,42,0.50)",
+                    background: "rgba(255,252,248,0.97)",
+                    border: "1.5px solid rgba(220,150,160,0.60)",
                     boxShadow: "0 3px 12px rgba(0,0,0,0.14)",
                     outline: "none",
                   }}
@@ -498,25 +393,25 @@ export default function WardrobePage() {
                 <button
                   onClick={() => { setIsSaveOpen(false); setSaveName(""); }}
                   style={{
-                    width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
-                    background: "rgba(255,250,240,0.97)",
-                    border: "1.5px solid rgba(196,155,42,0.36)",
+                    width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                    background: "rgba(255,248,248,0.97)",
+                    border: "1.5px solid rgba(220,150,160,0.40)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer",
                   }}
                 >
-                  <X style={{ width: 14, height: 14, color: GOLD }} />
+                  <X style={{ width: 14, height: 14, color: "#c06070" }} />
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!saveName.trim() || saveOutfit.isPending}
                   data-testid="button-save-outfit-confirm"
                   style={{
-                    padding: "0 16px", height: 38, borderRadius: 20, flexShrink: 0,
-                    background: "linear-gradient(to bottom,#f5d840,#c89018)",
-                    color: "#3a2400", fontWeight: 700, fontSize: 13, border: "none",
-                    boxShadow: "0 3px 10px rgba(200,168,24,0.32)",
-                    opacity: (!saveName.trim() || saveOutfit.isPending) ? 0.42 : 1,
+                    padding: "0 14px", height: 36, borderRadius: 20, flexShrink: 0,
+                    background: "linear-gradient(to bottom, #f7c6d8, #e08090)",
+                    color: "#fff", fontWeight: 700, fontSize: 12, border: "none",
+                    boxShadow: "0 3px 10px rgba(220,100,130,0.32)",
+                    opacity: (!saveName.trim() || saveOutfit.isPending) ? 0.45 : 1,
                     cursor: "pointer",
                   }}
                 >
@@ -524,48 +419,69 @@ export default function WardrobePage() {
                 </button>
               </motion.div>
             ) : (
-              <button
-                key="save-zone"
+              <motion.button
+                key="save-pill"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: canSave ? 1 : 0.55, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 onClick={handleSaveClick}
                 data-testid="button-save-outfit"
                 aria-label="Save Outfit"
                 style={{
                   position: "absolute",
-                  top:    pY(ir, LM.barY),
-                  left:   pX(ir, LM.saveBtnL),
-                  right:  ir.left + pW(ir, 1 - LM.saveBtnR),
-                  height: pH(ir, LM.barBot - LM.barY),
-                  zIndex: 14,
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
+                  top:       pY(ir, 0.10),
+                  left:      "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 25,
+                  height: 34,
+                  padding: "0 20px",
                   borderRadius: 20,
+                  border: "none",
+                  background: canSave
+                    ? "linear-gradient(to bottom, #f7c6d8, #e08090)"
+                    : "rgba(255,255,255,0.55)",
+                  color: canSave ? "#fff" : "#9a5060",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase" as const,
                   boxShadow: canSave
-                    ? "0 0 0 2.5px rgba(196,155,42,0.45)"
-                    : "none",
+                    ? "0 2px 10px rgba(220,100,130,0.35)"
+                    : "0 0 0 1.5px rgba(220,150,160,0.35)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap" as const,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
-              />
+              >
+                <Heart style={{ width: 13, height: 13 }} />
+                Save Outfit
+              </motion.button>
             )}
           </AnimatePresence>
 
-          {/* Mannequin / dress-form icon — right circle → always opens upgrade */}
+          {/* ── Favorites shortcut ── */}
           <button
-            onClick={handleMannequinClick}
-            data-testid="button-view-mannequin"
-            aria-label="Unlock mannequin view"
-            title="Unlock mannequin view"
+            onClick={() => navigate("/favorites")}
+            data-testid="button-favorites"
+            aria-label="View favorites"
             style={{
               position: "absolute",
-              top:    pY(ir, LM.barY),
-              left:   pX(ir, LM.manneCX) - 38,
-              width:  76,
-              height: pH(ir, LM.barBot - LM.barY),
-              zIndex: 14,
-              background: "transparent",
-              border: "none",
+              top:    pY(ir, 0.10),
+              right:  ir.left + pW(ir, 1 - LM.doorR) + 4,
+              width:  34,
+              height: 34,
+              borderRadius: "50%",
+              zIndex: 25,
+              background: "rgba(255,255,255,0.55)",
+              border: "1.5px solid rgba(220,150,160,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
             }}
-          />
+          >
+            <Bookmark style={{ width: 15, height: 15, color: "#9a5060" }} />
+          </button>
         </>
       )}
 
