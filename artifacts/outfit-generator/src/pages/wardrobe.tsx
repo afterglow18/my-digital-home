@@ -331,7 +331,7 @@ export default function WardrobePage() {
 
           {/* ── Saved shortcut — sits over the vanity chair bottom-left ── */}
           <button
-            onClick={() => navigate("/saved")}
+            onClick={() => navigate("/favorites")}
             data-testid="button-saved"
             aria-label="View saved looks"
             style={{
