@@ -268,8 +268,8 @@ export default function GeneratePage() {
           style={{
             position: "absolute",
             top:  pY(ir, 0.158),
-            left: pX(ir, 0.207),
-            width: pW(ir, 0.594),
+            left: pX(ir, 0.237),
+            width: pW(ir, 0.564),
             textAlign: "center",
             zIndex: 1,
             pointerEvents: "none",
@@ -282,7 +282,7 @@ export default function GeneratePage() {
             fontSize: Math.max(14, pW(ir, 0.055)),
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "#7a4a52",
+            color: "#4a1e28",
             opacity: 0.85,
           }}>
             Matchmaker
