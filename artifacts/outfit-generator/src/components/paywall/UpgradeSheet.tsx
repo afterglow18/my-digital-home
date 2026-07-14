@@ -1,11 +1,13 @@
 /**
  * UpgradeSheet — paywall shown when the user hits a free-tier limit.
+ * Design: 3-plan selector (Monthly / Yearly / Lifetime) matching brand pricing.
  * Purchase is stubbed until RevenueCat is integrated.
  */
 import React, { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Check } from "lucide-react";
 import { useEntitlements, type PurchaseResult } from "@/hooks/useEntitlements";
+import type { PurchaseProduct } from "@/types/local";
 
 export type UpgradeReason = "items" | "outfits" | "mannequin";
 
@@ -15,33 +17,64 @@ interface Props {
 }
 
 const FEATURES = [
-  { emoji: "♾️",  text: "Unlimited beauty products"  },
-  { emoji: "💄",  text: "Unlimited saved looks"       },
-  { emoji: "☁️",  text: "Save your entire vanity"     },
-  { emoji: "💳",  text: "One-time purchase"            },
-  { emoji: "🚫",  text: "No monthly subscription"     },
+  "Unlimited beauty products",
+  "Unlimited saved looks",
+  "Save your entire vanity",
+  "One-time payment options",
+  "Choose monthly, yearly or lifetime!",
 ] as const;
 
-const SUBTITLES: Record<UpgradeReason, string> = {
-  items:     "You've reached your 20-item limit. Unlock your entire digital vanity with a one-time purchase of $4.99.",
-  outfits:   "You've hit the free look limit.",
-  mannequin: "A premium feature — unlock it once.",
+type Plan = {
+  id: PurchaseProduct;
+  label:   string;
+  price:   string;
+  per:     string;
+  badge?:  string;
+  perks:   string[];
 };
+
+const PLANS: Plan[] = [
+  {
+    id:    "monthly",
+    label: "MONTHLY",
+    price: "$1.99",
+    per:   "/month",
+    perks: ["Cancel anytime", "Billed monthly"],
+  },
+  {
+    id:    "yearly",
+    label: "YEARLY",
+    price: "$19.99",
+    per:   "/year",
+    perks: ["Save 17%", "Billed yearly"],
+  },
+  {
+    id:    "lifetime",
+    label: "LIFETIME",
+    price: "$9.99",
+    per:   "one-time",
+    badge: "BEST ★ VALUE",
+    perks: ["Pay once", "Yours forever"],
+  },
+];
 
 export function UpgradeSheet({ reason, onClose }: Props) {
   const { purchase } = useEntitlements();
-  const [status, setStatus] = useState<"idle" | "pending">("idle");
+  const [selected, setSelected] = useState<PurchaseProduct>("lifetime");
+  const [status, setStatus]     = useState<"idle" | "pending">("idle");
+
+  const selectedPlan = PLANS.find(p => p.id === selected)!;
 
   const handlePurchase = useCallback(async () => {
     if (status === "pending") return;
     setStatus("pending");
-    const result: PurchaseResult = await purchase("unlock");
+    const result: PurchaseResult = await purchase(selected);
     if (result === "success") {
       onClose();
     } else {
       setStatus("idle");
     }
-  }, [status, purchase, onClose]);
+  }, [status, purchase, selected, onClose]);
 
   return (
     <motion.div
@@ -49,80 +82,133 @@ export function UpgradeSheet({ reason, onClose }: Props) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 240 }}
-      className="fixed inset-0 z-[80] flex flex-col max-w-md mx-auto"
-      style={{ background: "#F8F4ED" }}
+      className="fixed inset-0 z-[80] flex flex-col max-w-md mx-auto overflow-y-auto"
+      style={{ background: "#F5F0E8" }}
     >
-      {/* Close button */}
-      <div className="flex justify-end px-4 pt-4 pb-2 flex-shrink-0">
+      {/* Hanger hero + close */}
+      <div
+        className="relative flex items-center justify-center flex-shrink-0"
+        style={{
+          height: 100,
+          background: "repeating-linear-gradient(45deg, #F5C842 0px, #F5C842 20px, #E8B800 20px, #E8B800 40px)",
+        }}
+      >
+        <span className="text-5xl leading-none" style={{ color: "rgba(255,255,255,0.9)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}>🪝</span>
         <button
           onClick={onClose}
-          className="w-9 h-9 rounded-full border-2 border-black flex items-center justify-center
-                     bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                     active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center
+                     shadow-sm border border-black/10
+                     active:scale-95 transition-transform"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 text-black/70" />
         </button>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 flex flex-col px-5 pb-4 gap-4 min-h-0">
-        <div className="flex flex-col gap-0.5">
-          <h1 className="font-display font-bold text-4xl uppercase tracking-tight leading-none">
-            Unlock Your<br />Unlimited<br />Digital Vanity
-          </h1>
-          <p className="text-sm font-bold text-black/55 mt-2">
-            {SUBTITLES[reason]}
-          </p>
-        </div>
-
-        <div
-          className="rounded-3xl overflow-hidden border-4 border-black flex flex-col flex-1 min-h-0"
-          style={{ background: "#0a0a0a", boxShadow: "6px 6px 0px 0px rgba(0,0,0,0.35)" }}
+      {/* Title */}
+      <div className="px-5 pt-5 pb-3 flex-shrink-0">
+        <h1
+          className="font-display font-black uppercase leading-none tracking-tight"
+          style={{ fontSize: 44, letterSpacing: "-0.02em" }}
         >
-          <div className="px-5 pt-5 pb-3 border-b border-white/10 flex-shrink-0">
-            <p className="font-display font-bold text-base uppercase tracking-tight text-white">
-              Upgrade once to unlock:
-            </p>
-          </div>
-
-          <ul className="px-5 py-0 flex flex-col flex-1 justify-evenly">
-            {FEATURES.map(({ emoji, text }) => (
-              <li key={text} className="flex items-center gap-4 py-1">
-                <span className="text-xl leading-none w-7 flex-shrink-0 text-center">{emoji}</span>
-                <span className="text-white font-semibold text-sm leading-snug">{text}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="px-5 pb-5 pt-2 border-t border-white/10 flex-shrink-0">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display font-bold text-5xl leading-none" style={{ color: "#D9A7B3" }}>
-                $4.99
-              </span>
-              <span className="text-white/50 font-semibold text-sm leading-tight">one&#8209;time</span>
-            </div>
-          </div>
-        </div>
+          UNLOCK<br />YOUR<br />UNLIMITED<br />DIGITAL<br />VANITY
+        </h1>
+        <p className="text-sm font-medium text-black/50 mt-2">
+          A premium feature — unlock it once.
+        </p>
       </div>
 
-      {/* CTA footer */}
+      {/* Features card */}
+      <div className="mx-5 mb-5 rounded-2xl overflow-hidden flex-shrink-0" style={{ background: "#111" }}>
+        <p
+          className="px-4 pt-4 pb-2 font-bold text-xs uppercase tracking-widest"
+          style={{ color: "#F5C842" }}
+        >
+          Upgrade to premium &amp; get:
+        </p>
+        <ul className="px-4 pb-4 flex flex-col gap-2.5">
+          {FEATURES.map(f => (
+            <li key={f} className="flex items-center gap-3">
+              <span
+                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: "#F5C842" }}
+              >
+                <Check className="w-3 h-3 text-black" strokeWidth={3} />
+              </span>
+              <span className="text-white text-sm font-medium leading-snug">{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Plan picker */}
+      <p className="text-center text-[10px] font-bold uppercase tracking-widest text-black/40 mb-3 flex-shrink-0">
+        Choose your plan
+      </p>
+      <div className="px-5 flex gap-2 mb-5 flex-shrink-0">
+        {PLANS.map(plan => {
+          const isSelected = selected === plan.id;
+          return (
+            <button
+              key={plan.id}
+              onClick={() => setSelected(plan.id)}
+              className="flex-1 flex flex-col items-start p-3 rounded-xl text-left transition-all"
+              style={{
+                border: isSelected ? "2px solid #F5C842" : "2px solid #D4C9B0",
+                background: isSelected ? "#FFFBE8" : "white",
+                boxShadow: isSelected ? "3px 3px 0 #F5C842" : "none",
+                position: "relative",
+              }}
+            >
+              {plan.badge && (
+                <span
+                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full"
+                  style={{ background: "#F5C842", color: "#000", border: "1px solid rgba(0,0,0,0.1)" }}
+                >
+                  {plan.badge}
+                </span>
+              )}
+              <span className="text-[9px] font-black uppercase tracking-widest text-black/50 mb-0.5">
+                {plan.label}
+              </span>
+              <span className="font-black text-xl leading-none" style={{ fontFamily: "var(--font-display)" }}>
+                {plan.price}
+              </span>
+              <span className="text-[10px] text-black/40 font-medium">{plan.per}</span>
+              <div className="mt-2 flex flex-col gap-0.5">
+                {plan.perks.map(perk => (
+                  <span key={perk} className="flex items-center gap-1 text-[9px] font-semibold text-black/60">
+                    <Check className="w-2.5 h-2.5 flex-shrink-0 text-black/40" strokeWidth={3} />
+                    {perk}
+                  </span>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* CTA */}
       <div
-        className="px-5 pt-3 flex flex-col gap-3 flex-shrink-0"
+        className="px-5 flex flex-col gap-3 flex-shrink-0"
         style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}
       >
         <button
           onClick={handlePurchase}
           disabled={status === "pending"}
-          className="w-full py-4 rounded-2xl font-display font-bold text-xl uppercase
-                     tracking-tight border-4 border-black text-black
-                     active:translate-x-1 active:translate-y-1 transition-all
+          className="w-full py-4 rounded-xl font-black text-lg uppercase tracking-tight
+                     transition-all active:translate-y-0.5 active:shadow-none
                      disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: "#F4D6DD",
-            boxShadow: status === "pending" ? "none" : "5px 5px 0px 0px rgba(0,0,0,1)",
+            background: status === "pending" ? "#D4B800" : "#F5C842",
+            color: "#000",
+            border: "3px solid #000",
+            boxShadow: status === "pending" ? "none" : "4px 4px 0 #000",
+            letterSpacing: "-0.01em",
           }}
         >
-          {status === "pending" ? "Opening checkout…" : "Unlock Forever – $4.99"}
+          {status === "pending"
+            ? "Opening checkout…"
+            : `UNLOCK FOREVER – ${selectedPlan.price} ›`}
         </button>
         <button
           onClick={onClose}

@@ -68,13 +68,20 @@ export function useEntitlements() {
   /**
    * Purchase stub — RevenueCat integration not yet connected.
    * Returns "unavailable" so the paywall closes without crashing.
+   *
+   * Product mapping:
+   *   'monthly'  → RevenueCat monthly subscription → tier 'unlock'
+   *   'yearly'   → RevenueCat yearly subscription  → tier 'unlock'
+   *   'lifetime' → RevenueCat one-time purchase    → tier 'unlock'
+   *   'premium'  → RevenueCat one-time purchase    → tier 'premium'
+   *
    * Replace this body with the actual RevenueCat purchase call
    * after connecting the integration.
    */
   const purchase = useCallback(
     async (_product: PurchaseProduct): Promise<PurchaseResult> => {
       // TODO: replace with RevenueCat purchase once integrated
-      console.warn('[useEntitlements] RevenueCat not yet configured');
+      console.warn('[useEntitlements] RevenueCat not yet configured — product:', _product);
       return 'unavailable';
     },
     [],

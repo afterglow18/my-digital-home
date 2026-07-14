@@ -81,9 +81,19 @@ export const TIER_CAPS: Record<Tier, TierCapabilities> = {
   premium: { maxItems: null,             maxOutfits: null,              mannequin: true  },
 };
 
-export type PurchaseProduct = 'unlock' | 'premium';
+export type PurchaseProduct = 'monthly' | 'yearly' | 'lifetime' | 'premium';
 
 export const PRODUCT_PRICES: Record<PurchaseProduct, string> = {
-  unlock:  '$4.99',
-  premium: '$9.99',
+  monthly:  '$1.99',
+  yearly:   '$19.99',
+  lifetime: '$9.99',
+  premium:  '$9.99',
+};
+
+/** Which tier a purchase unlocks */
+export const PRODUCT_TIER: Record<PurchaseProduct, Tier> = {
+  monthly:  'unlock',
+  yearly:   'unlock',
+  lifetime: 'unlock',
+  premium:  'premium',
 };

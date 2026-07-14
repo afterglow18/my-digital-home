@@ -102,7 +102,7 @@ export function PremiumSheet({ onClose }: Props) {
         </button>
 
         <button
-          onClick={() => handlePurchase("unlock")}
+          onClick={() => handlePurchase("lifetime")}
           disabled={!!pending}
           className="w-full py-3 rounded-xl flex items-center justify-center gap-1.5
                      font-display font-bold text-sm uppercase tracking-tight border-4 border-black
@@ -110,7 +110,7 @@ export function PremiumSheet({ onClose }: Props) {
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
                      disabled:opacity-60 disabled:cursor-not-allowed transition-all"
         >
-          {pending === "unlock" ? "Opening checkout…" : "Or get Unlock Forever – $4.99 (no mannequin)"}
+          {pending === "lifetime" ? "Opening checkout…" : "Or get Unlock Forever – $9.99 (no mannequin)"}
         </button>
 
         <button
