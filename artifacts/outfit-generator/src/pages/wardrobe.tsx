@@ -211,7 +211,7 @@ export default function WardrobePage() {
       {/* Pink tint overlay — shifts salmon tones toward icon pink */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
-        background: "rgba(245, 184, 200, 0.42)",
+        background: "rgba(245, 184, 200, 0.30)",
       }} />
 
       {ready && (
