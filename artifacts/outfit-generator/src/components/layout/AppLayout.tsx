@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shirt, Sparkles, Bookmark, HardDrive } from "lucide-react";
+import { Shirt, Sparkles, Bookmark, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetWardrobeStats } from "@/hooks/useLocalWardrobe";
 
@@ -18,7 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { href: "/",         label: "Vanity",   icon: Shirt,    badge: wardrobeCount },
     { href: "/generate", label: "Generate", icon: Sparkles },
     { href: "/saved",    label: "Saved",    icon: Bookmark },
-    { href: "/backup",   label: "Backup",   icon: HardDrive },
+    { href: "/backup",   label: "Account",  icon: UserCircle },
   ];
 
   return (
