@@ -212,7 +212,7 @@ export default function GeneratePage() {
         width: "100%",
         height: `min(calc(100dvh - ${NAV_H}px), calc(100vw * ${(IMG_H / IMG_W).toFixed(6)}))`,
         overflow: "hidden",
-        background: "#e8b8b0",
+        background: "#F5B8C8",
       }}
     >
       {/* Background image */}
@@ -231,6 +231,12 @@ export default function GeneratePage() {
           zIndex: 0,
         }}
       />
+      {/* Pink tint overlay — shifts salmon tones toward icon pink */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
+        background: "rgba(245, 184, 200, 0.22)",
+        mixBlendMode: "multiply",
+      }} />
 
       {/* "Matchmaker" subtitle */}
       {ready && (
