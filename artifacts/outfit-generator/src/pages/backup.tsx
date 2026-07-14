@@ -30,8 +30,8 @@ function Card({ children }: { children: React.ReactNode }) {
 
 // ── Gold button ────────────────────────────────────────────────────────────────
 
-const ROSE      = "#F4A7BA";   // dusty pink — Spin It button colour
-const ROSE_DARK = "#E8899F";   // dusty pink mid
+const ROSE      = "#F5B8C8";   // dusty pink — Spin It button colour
+const ROSE_DARK = "#DFA0B5";   // dusty pink mid
 
 function RoseButton({
   onClick,
@@ -51,8 +51,8 @@ function RoseButton({
                  text-black transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
                  disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
-        background: disabled ? '#E8899F' : 'linear-gradient(to bottom, #F4A7BA, #E8899F)',
-        border: '2.5px solid #E8899F',
+        background: disabled ? '#DFA0B5' : 'linear-gradient(to bottom, #F5B8C8, #DFA0B5)',
+        border: '2.5px solid #DFA0B5',
         boxShadow: disabled ? 'none' : '3px 3px 0 rgba(0,0,0,0.85)',
         letterSpacing: '0.07em',
       }}

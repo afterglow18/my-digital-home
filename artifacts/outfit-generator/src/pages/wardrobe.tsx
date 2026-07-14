@@ -339,8 +339,8 @@ export default function WardrobePage() {
               left:   pX(ir, 0.491)  - pW(ir, 0.0625),
               width:  pW(ir, 0.125), height: pW(ir, 0.125),
               borderRadius: "50%", zIndex: 26,
-              background: "linear-gradient(160deg, #F4A7BA 0%, #E8899F 100%)",
-              border: "2px solid #E8899F",
+              background: "linear-gradient(160deg, #F5B8C8 0%, #DFA0B5 100%)",
+              border: "2px solid #DFA0B5",
               boxShadow: "0 2px 8px rgba(180,100,120,0.25)",
               cursor: "pointer",
               display: "flex", flexDirection: "column",
@@ -418,8 +418,8 @@ export default function WardrobePage() {
                       disabled={!saveName.trim() || saveOutfit.isPending}
                       style={{
                         flex: 1, height: 40, borderRadius: 20,
-                        border: "2px solid #E8899F",
-                        background: "linear-gradient(to bottom, #F4A7BA, #E8899F)",
+                        border: "2px solid #DFA0B5",
+                        background: "linear-gradient(to bottom, #F5B8C8, #DFA0B5)",
                         color: "#4A3A3A", fontWeight: 800, fontSize: 13,
                         cursor: saveName.trim() ? "pointer" : "default",
                         opacity: saveName.trim() ? 1 : 0.45,

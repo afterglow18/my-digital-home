@@ -16,10 +16,10 @@ interface Props {
 }
 
 // ── Brand colours — Spin It button palette ───────────────────────────────────
-const ROSE       = "#F4A7BA";   // dusty pink light (Spin It button top)
-const ROSE_DARK  = "#E8899F";   // dusty pink mid (Spin It button bottom / border)
+const ROSE       = "#F5B8C8";   // dusty pink light (Spin It button top)
+const ROSE_DARK  = "#DFA0B5";   // dusty pink mid (Spin It button bottom / border)
 const ROSE_LIGHT = "#FDF0F3";   // very light tint for selected card bg
-const ROSE_MID   = "#E8899F";   // border / badge colour
+const ROSE_MID   = "#DFA0B5";   // border / badge colour
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES = [
@@ -97,7 +97,7 @@ export function UpgradeSheet({ onClose }: Props) {
         className="relative flex items-center justify-center flex-shrink-0"
         style={{
           height: 64,
-          backgroundColor: "#F4A7BA",
+          backgroundColor: "#F5B8C8",
           backgroundImage: [
             // horizontal black stripes with white hairline — matches app icon plaid
             "repeating-linear-gradient(0deg, transparent 0px, transparent 20px, rgba(20,8,12,0.72) 20px, rgba(20,8,12,0.72) 30px, rgba(255,255,255,0.50) 30px, rgba(255,255,255,0.50) 32px, rgba(20,8,12,0.72) 32px, rgba(20,8,12,0.72) 42px, transparent 42px, transparent 62px)",
@@ -229,8 +229,8 @@ export function UpgradeSheet({ onClose }: Props) {
                      text-black transition-all active:translate-y-0.5 active:shadow-none
                      disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: status === "pending" ? "#E8899F" : "linear-gradient(to bottom, #F4A7BA, #E8899F)",
-            border:     "2.5px solid #E8899F",
+            background: status === "pending" ? "#DFA0B5" : "linear-gradient(to bottom, #F5B8C8, #DFA0B5)",
+            border:     "2.5px solid #DFA0B5",
             boxShadow:  status === "pending" ? "none" : "3px 3px 0 rgba(0,0,0,0.85)",
             letterSpacing: "0.04em",
           }}
