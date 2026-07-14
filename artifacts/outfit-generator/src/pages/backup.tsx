@@ -30,7 +30,10 @@ function Card({ children }: { children: React.ReactNode }) {
 
 // ── Gold button ────────────────────────────────────────────────────────────────
 
-function GoldButton({
+const ROSE      = "#C0145A";
+const ROSE_DARK = "#8C0040";
+
+function RoseButton({
   onClick,
   disabled,
   children,
@@ -45,10 +48,10 @@ function GoldButton({
       disabled={disabled}
       className="w-full flex items-center justify-center gap-2.5 py-3.5
                  rounded-xl border-2 border-black font-black text-sm uppercase tracking-wide
-                 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+                 text-white transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
                  disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
-        background: disabled ? '#D4B800' : '#F5C842',
+        background: disabled ? ROSE_DARK : ROSE,
         boxShadow: disabled ? 'none' : '3px 3px 0 #000',
         letterSpacing: '0.07em',
       }}
@@ -160,9 +163,9 @@ export default function AccountPage() {
 
             {/* Upgrade button (hidden if already premium) */}
             {tier !== 'premium' && (
-              <GoldButton onClick={() => setShowUpgrade(true)}>
+              <RoseButton onClick={() => setShowUpgrade(true)}>
                 UPGRADE
-              </GoldButton>
+              </RoseButton>
             )}
 
             {/* Restore purchases */}
@@ -196,10 +199,10 @@ export default function AccountPage() {
             </p>
 
             {/* Export */}
-            <GoldButton onClick={handleExport} disabled={busy}>
+            <RoseButton onClick={handleExport} disabled={busy}>
               <Download className="w-4 h-4" />
               {backupStatus === 'exporting' ? 'Exporting…' : 'Export Backup'}
-            </GoldButton>
+            </RoseButton>
 
             {/* Warning */}
             <p className="text-xs font-bold leading-snug" style={{ color: '#C0392B' }}>
@@ -208,10 +211,10 @@ export default function AccountPage() {
             </p>
 
             {/* Import */}
-            <GoldButton onClick={() => fileInputRef.current?.click()} disabled={busy}>
+            <RoseButton onClick={() => fileInputRef.current?.click()} disabled={busy}>
               <Upload className="w-4 h-4" />
               {backupStatus === 'importing' ? 'Restoring…' : 'Import Backup'}
-            </GoldButton>
+            </RoseButton>
 
             {/* Import note */}
             <p className="text-xs text-black/40 text-center leading-snug">

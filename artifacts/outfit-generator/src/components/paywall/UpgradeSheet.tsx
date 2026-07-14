@@ -1,7 +1,6 @@
 /**
- * UpgradeSheet — paywall shown when the user hits a free-tier limit.
- * Design: 3-plan selector (Monthly / Yearly / Lifetime) matching brand pricing.
- * Purchase is stubbed until RevenueCat is integrated.
+ * UpgradeSheet — full-screen paywall, one page, no scroll.
+ * Pink/rose palette to match app brand.
  */
 import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -16,21 +15,27 @@ interface Props {
   onClose: () => void;
 }
 
+// ── Brand colours ────────────────────────────────────────────────────────────
+const ROSE       = "#C0145A";   // deep rose — primary accent
+const ROSE_DARK  = "#8C0040";   // shadow / stripe dark
+const ROSE_LIGHT = "#FDEEF5";   // selected card bg
+const ROSE_MID   = "#F2B8D4";   // selected card border / badge bg
+
+// ── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES = [
   "Unlimited beauty products",
   "Unlimited saved looks",
   "Save your entire vanity",
   "One-time payment options",
-  "Choose monthly, yearly or lifetime!",
 ] as const;
 
 type Plan = {
-  id: PurchaseProduct;
-  label:   string;
-  price:   string;
-  per:     string;
-  badge?:  string;
-  perks:   string[];
+  id:     PurchaseProduct;
+  label:  string;
+  price:  string;
+  per:    string;
+  badge?: string;
+  perks:  string[];
 };
 
 const PLANS: Plan[] = [
@@ -53,12 +58,13 @@ const PLANS: Plan[] = [
     label: "LIFETIME",
     price: "$9.99",
     per:   "one-time",
-    badge: "BEST ★ VALUE",
+    badge: "BEST VALUE",
     perks: ["Pay once", "Yours forever"],
   },
 ];
 
-export function UpgradeSheet({ reason, onClose }: Props) {
+// ── Component ─────────────────────────────────────────────────────────────────
+export function UpgradeSheet({ onClose }: Props) {
   const { purchase } = useEntitlements();
   const [selected, setSelected] = useState<PurchaseProduct>("lifetime");
   const [status, setStatus]     = useState<"idle" | "pending">("idle");
@@ -82,138 +88,156 @@ export function UpgradeSheet({ reason, onClose }: Props) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 240 }}
-      className="fixed inset-0 z-[80] flex flex-col max-w-md mx-auto overflow-y-auto"
-      style={{ background: "#F5F0E8" }}
+      className="fixed inset-0 z-[80] flex flex-col max-w-md mx-auto overflow-hidden"
+      style={{ background: "#FDF5F9" }}
     >
-      {/* Hanger hero + close */}
+
+      {/* ── Hero strip ─────────────────────────────────────────────────── */}
       <div
         className="relative flex items-center justify-center flex-shrink-0"
         style={{
-          height: 100,
-          background: "repeating-linear-gradient(45deg, #F5C842 0px, #F5C842 20px, #E8B800 20px, #E8B800 40px)",
+          height: 64,
+          background: `repeating-linear-gradient(45deg, ${ROSE} 0px, ${ROSE} 18px, ${ROSE_DARK} 18px, ${ROSE_DARK} 36px)`,
         }}
       >
-        <span className="text-5xl leading-none" style={{ color: "rgba(255,255,255,0.9)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}>🪝</span>
+        <span
+          className="text-4xl leading-none"
+          style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))" }}
+        >
+          💄
+        </span>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center
-                     shadow-sm border border-black/10
+          className="absolute top-2.5 right-3 w-8 h-8 rounded-full bg-white/90
+                     flex items-center justify-center border border-black/10
                      active:scale-95 transition-transform"
         >
-          <X className="w-4 h-4 text-black/70" />
+          <X className="w-4 h-4 text-black/60" />
         </button>
       </div>
 
-      {/* Title */}
-      <div className="px-5 pt-5 pb-3 flex-shrink-0">
+      {/* ── Title ──────────────────────────────────────────────────────── */}
+      <div className="px-5 pt-4 pb-3 flex-shrink-0">
         <h1
-          className="font-display font-black uppercase leading-none tracking-tight"
-          style={{ fontSize: 44, letterSpacing: "-0.02em" }}
+          className="font-black uppercase leading-none tracking-tight"
+          style={{ fontSize: 34, letterSpacing: "-0.02em" }}
         >
-          UNLOCK<br />YOUR<br />UNLIMITED<br />DIGITAL<br />VANITY
+          UNLOCK YOUR<br />
+          <span style={{ color: ROSE }}>DIGITAL VANITY</span>
         </h1>
-        <p className="text-sm font-medium text-black/50 mt-2">
+        <p className="text-xs font-semibold text-black/45 mt-1.5 tracking-wide">
           A premium feature — unlock it once.
         </p>
       </div>
 
-      {/* Features card */}
-      <div className="mx-5 mb-5 rounded-2xl overflow-hidden flex-shrink-0" style={{ background: "#111" }}>
+      {/* ── Features card ──────────────────────────────────────────────── */}
+      <div
+        className="mx-5 mb-4 rounded-2xl flex-shrink-0"
+        style={{ background: "#111" }}
+      >
         <p
-          className="px-4 pt-4 pb-2 font-bold text-xs uppercase tracking-widest"
-          style={{ color: "#F5C842" }}
+          className="px-4 pt-3 pb-1.5 font-bold text-[10px] uppercase tracking-widest"
+          style={{ color: ROSE_MID }}
         >
-          Upgrade to premium &amp; get:
+          Upgrade &amp; get:
         </p>
-        <ul className="px-4 pb-4 flex flex-col gap-2.5">
+        <ul className="px-4 pb-3 grid grid-cols-2 gap-x-3 gap-y-2">
           {FEATURES.map(f => (
-            <li key={f} className="flex items-center gap-3">
+            <li key={f} className="flex items-center gap-2">
               <span
-                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "#F5C842" }}
+                className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: ROSE }}
               >
-                <Check className="w-3 h-3 text-black" strokeWidth={3} />
+                <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
               </span>
-              <span className="text-white text-sm font-medium leading-snug">{f}</span>
+              <span className="text-white text-[11px] font-medium leading-tight">{f}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Plan picker */}
-      <p className="text-center text-[10px] font-bold uppercase tracking-widest text-black/40 mb-3 flex-shrink-0">
+      {/* ── Plan picker ────────────────────────────────────────────────── */}
+      <p className="text-center text-[10px] font-bold uppercase tracking-widest text-black/35 mb-2.5 flex-shrink-0">
         Choose your plan
       </p>
-      <div className="px-5 flex gap-2 mb-5 flex-shrink-0">
+      <div className="px-5 flex gap-2 mb-4 flex-shrink-0">
         {PLANS.map(plan => {
-          const isSelected = selected === plan.id;
+          const active = selected === plan.id;
           return (
             <button
               key={plan.id}
               onClick={() => setSelected(plan.id)}
               className="flex-1 flex flex-col items-start p-3 rounded-xl text-left transition-all"
               style={{
-                border: isSelected ? "2px solid #F5C842" : "2px solid #D4C9B0",
-                background: isSelected ? "#FFFBE8" : "white",
-                boxShadow: isSelected ? "3px 3px 0 #F5C842" : "none",
-                position: "relative",
+                position:  "relative",
+                background: active ? ROSE_LIGHT : "white",
+                border:     active ? `2px solid ${ROSE}` : "2px solid #E8D5DF",
+                boxShadow:  active ? `3px 3px 0 ${ROSE}` : "none",
               }}
             >
+              {/* Best value badge */}
               {plan.badge && (
                 <span
-                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full"
-                  style={{ background: "#F5C842", color: "#000", border: "1px solid rgba(0,0,0,0.1)" }}
+                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap
+                             text-[8px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full"
+                  style={{ background: ROSE, color: "#fff" }}
                 >
                   {plan.badge}
                 </span>
               )}
-              <span className="text-[9px] font-black uppercase tracking-widest text-black/50 mb-0.5">
+
+              <span className="text-[9px] font-black uppercase tracking-widest text-black/45 mb-0.5">
                 {plan.label}
               </span>
-              <span className="font-black text-xl leading-none" style={{ fontFamily: "var(--font-display)" }}>
+              <span className="font-black text-xl leading-none">
                 {plan.price}
               </span>
-              <span className="text-[10px] text-black/40 font-medium">{plan.per}</span>
-              <div className="mt-2 flex flex-col gap-0.5">
-                {plan.perks.map(perk => (
-                  <span key={perk} className="flex items-center gap-1 text-[9px] font-semibold text-black/60">
-                    <Check className="w-2.5 h-2.5 flex-shrink-0 text-black/40" strokeWidth={3} />
-                    {perk}
-                  </span>
-                ))}
-              </div>
+              <span className="text-[10px] text-black/35 font-medium mb-2">
+                {plan.per}
+              </span>
+
+              {plan.perks.map(perk => (
+                <span key={perk} className="flex items-center gap-1 text-[9px] font-semibold text-black/55">
+                  <Check
+                    className="w-2.5 h-2.5 flex-shrink-0"
+                    strokeWidth={3}
+                    style={{ color: active ? ROSE : "#aaa" }}
+                  />
+                  {perk}
+                </span>
+              ))}
             </button>
           );
         })}
       </div>
 
-      {/* CTA */}
+      {/* ── CTA ────────────────────────────────────────────────────────── */}
       <div
-        className="px-5 flex flex-col gap-3 flex-shrink-0"
-        style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}
+        className="px-5 flex flex-col gap-2.5 flex-shrink-0 mt-auto"
+        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
       >
         <button
           onClick={handlePurchase}
           disabled={status === "pending"}
-          className="w-full py-4 rounded-xl font-black text-lg uppercase tracking-tight
-                     transition-all active:translate-y-0.5 active:shadow-none
+          className="w-full py-4 rounded-xl font-black text-base uppercase tracking-wide
+                     text-white transition-all active:translate-y-0.5 active:shadow-none
                      disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: status === "pending" ? "#D4B800" : "#F5C842",
-            color: "#000",
-            border: "3px solid #000",
-            boxShadow: status === "pending" ? "none" : "4px 4px 0 #000",
-            letterSpacing: "-0.01em",
+            background: status === "pending" ? ROSE_DARK : ROSE,
+            border:     "3px solid #000",
+            boxShadow:  status === "pending" ? "none" : "4px 4px 0 #000",
+            letterSpacing: "0.04em",
           }}
         >
           {status === "pending"
             ? "Opening checkout…"
             : `UNLOCK FOREVER – ${selectedPlan.price} ›`}
         </button>
+
         <button
           onClick={onClose}
-          className="text-sm font-bold text-black/40 text-center underline underline-offset-2
-                     hover:text-black/60 transition-colors"
+          className="text-sm font-bold text-black/35 text-center
+                     underline underline-offset-2 hover:text-black/55 transition-colors"
         >
           Maybe Later
         </button>
