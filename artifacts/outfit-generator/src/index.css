@@ -80,10 +80,10 @@
   --popover-foreground: 0 0% 9%;
   --popover-border: 0 0% 9%;
   
-  --primary: 343 68% 85%; /* Icon pink #F5B8C8 */
+  --primary: 342 48% 80%; /* Wall-with-overlay pink #E8B4C0 */
   --primary-foreground: 0 13% 18%;
   
-  --secondary: 340 52% 75%; /* Icon pink deep #DFA0B5 */
+  --secondary: 340 38% 70%; /* Wall-with-overlay deep #D09AAC */
   --secondary-foreground: 0 0% 9%;
   
   --muted: 0 0% 90%;
