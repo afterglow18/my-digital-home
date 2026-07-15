@@ -67,8 +67,8 @@ function useImageRect(containerRef: RefObject<HTMLDivElement>): ImgRect {
       if (!c) return;
       const cW = c.clientWidth, cH = c.clientHeight;
       const iR = IMG_W / IMG_H;
-      // Fit by width; container fills full height so pink bg covers any gap below.
-      const rW = cW, rH = cW / iR, rL = 0, rT = 0;
+      // Cover: scale by height so the image always fills the full container height.
+      const rH = cH, rW = cH * iR, rT = 0, rL = (cW - rW) / 2;
       setRect({ top: rT, left: rL, width: rW, height: rH, containerH: cH, containerW: cW });
     };
     compute();
@@ -193,9 +193,9 @@ export default function WardrobePage() {
         alt="My Digital Vanity"
         style={{
           position: "absolute",
-          top:    ready ? ir.top    : 0,
-          left:   0,
-          width:  ready ? ir.containerW : "100%",
+          top:    ready ? ir.top  : 0,
+          left:   ready ? ir.left : 0,
+          width:  ready ? ir.width : "100%",
           height: ready ? ir.height : "auto",
           display: "block",
           pointerEvents: "none",
