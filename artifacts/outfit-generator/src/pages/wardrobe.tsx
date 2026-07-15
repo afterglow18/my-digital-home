@@ -67,9 +67,8 @@ function useImageRect(containerRef: RefObject<HTMLDivElement>): ImgRect {
       if (!c) return;
       const cW = c.clientWidth, cH = c.clientHeight;
       const iR = IMG_W / IMG_H;
-      // Cover: scale by height so the image always fills the full container height.
-      // The image may extend beyond the container width (clipped by overflow:hidden).
-      const rH = cH, rW = cH * iR, rT = 0, rL = (cW - rW) / 2;
+      // Fit by width; container fills full height so pink bg covers any gap below.
+      const rW = cW, rH = cW / iR, rL = 0, rT = 0;
       setRect({ top: rT, left: rL, width: rW, height: rH, containerH: cH, containerW: cW });
     };
     compute();
