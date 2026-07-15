@@ -328,8 +328,8 @@ export default function WardrobePage() {
             onClick={() => setUpgradeReason("items")}
             aria-label="Upgrade to premium"
             style={{
-              position: "absolute", top: pY(ir, 0.905), left: pX(ir, 0.755),
-              width: pW(ir, 0.110), height: pH(ir, 0.065),
+              position: "absolute", top: pY(ir, 0.906), left: pX(ir, 0.670),
+              width: pW(ir, 0.130), height: pH(ir, 0.080),
               zIndex: 25, background: "transparent", border: "none", cursor: "pointer",
             }}
           />
