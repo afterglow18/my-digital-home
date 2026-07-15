@@ -18,7 +18,8 @@ import {
 
 // ── Shared external store ─────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'mdc_tier';
+const STORAGE_KEY         = 'mdc_tier';
+const STORAGE_PRODUCT_KEY = 'mdc_active_product';
 
 function readStoredTier(): Tier {
   try {
@@ -28,6 +29,14 @@ function readStoredTier(): Tier {
     // private browsing
   }
   return 'free';
+}
+
+export function readStoredProduct(): PurchaseProduct | null {
+  try {
+    const v = localStorage.getItem(STORAGE_PRODUCT_KEY);
+    if (v === 'monthly' || v === 'yearly' || v === 'lifetime') return v as PurchaseProduct;
+  } catch {}
+  return null;
 }
 
 let _currentTier: Tier = readStoredTier();
@@ -43,8 +52,11 @@ function getTierSnapshot(): Tier {
 }
 
 /** Promote the tier globally and persist. Called after a successful purchase. */
-export function setGlobalTier(t: Tier): void {
-  try { localStorage.setItem(STORAGE_KEY, t); } catch {}
+export function setGlobalTier(t: Tier, product?: PurchaseProduct): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, t);
+    if (product) localStorage.setItem(STORAGE_PRODUCT_KEY, product);
+  } catch {}
   _currentTier = t;
   _subscribers.forEach((fn) => fn());
 }
@@ -84,7 +96,7 @@ export function useEntitlements() {
 
         if (ENTITLEMENT_ID in (customerInfo.entitlements?.active ?? {})) {
           const newTier: Tier = PRODUCT_TIER_MAP[product] ?? PRODUCT_TIER[product] ?? 'unlock';
-          setGlobalTier(newTier);
+          setGlobalTier(newTier, product);
           return 'success';
         }
 

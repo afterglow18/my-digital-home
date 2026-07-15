@@ -7,7 +7,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { Download, Upload, RefreshCw } from 'lucide-react';
 import { exportBackup, importBackup } from '@/lib/backup';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEntitlements } from '@/hooks/useEntitlements';
+import { useEntitlements, readStoredProduct } from '@/hooks/useEntitlements';
 import { AnimatePresence, motion } from 'framer-motion';
 import { UpgradeSheet } from '@/components/paywall/UpgradeSheet';
 
@@ -88,9 +88,12 @@ export default function AccountPage() {
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const queryClient    = useQueryClient();
 
+  const activeProduct = readStoredProduct();
   const tierLabel =
-    tier === 'unlock' ? 'Unlock Forever' :
-                        'Free';
+    tier !== 'unlock'         ? 'Free' :
+    activeProduct === 'monthly'  ? 'Monthly' :
+    activeProduct === 'yearly'   ? 'Annual' :
+                                   'Lifetime';
 
   const handleExport = async () => {
     setBackupStatus('exporting');
