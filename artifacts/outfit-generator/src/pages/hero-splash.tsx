@@ -10,7 +10,8 @@ interface Props {
   onContinue: () => void;
 }
 
-const HOLD_MS = 1000; // how long the image stays fully visible
+// 650 ms fade-in + 1000 ms fully visible before fade-out begins
+const HOLD_MS = 1650;
 
 export default function HeroSplash({ onContinue }: Props) {
   // Auto-advance after hold period — ref avoids resetting timer if parent re-renders
@@ -21,10 +22,10 @@ export default function HeroSplash({ onContinue }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.65 }}
       onClick={onContinue}
       style={{
         position: "fixed",
