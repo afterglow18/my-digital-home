@@ -28,6 +28,8 @@ const CATEGORY_LABELS: Record<Category, string> = {
 
 type Phase = "pick" | "uploading";
 
+interface UploadProgress { done: number; total: number; }
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 /** Compress a Blob to a JPEG data URL capped at 800 px wide. */
@@ -70,6 +72,7 @@ const PHOTO_TIPS = [
 export function QuickAddSheet({ open, onOpenChange, category, existingCount, onCreated }: Props) {
   const [phase,    setPhase]    = useState<Phase>("pick");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [progress, setProgress] = useState<UploadProgress | null>(null);
 
   const cameraInputRef  = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -83,24 +86,19 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const handleFile = useCallback(async (file: File) => {
-    setErrorMsg(null);
-    setPhase("uploading");
-
+  const handleFile = useCallback(async (file: File, countOffset = 0): Promise<boolean> => {
     let png: Blob;
     try {
       png = await encodeToPng(file);
     } catch (err) {
       console.error("PNG encoding failed:", err);
-      setErrorMsg("Could not read the photo. Please try again.");
-      setPhase("pick");
-      return;
+      return false;
     }
 
     try {
       const dataUrl = await blobToDataUrl(png);
       const label    = CATEGORY_LABELS[category];
-      const n        = existingCount + 1;
+      const n        = existingCount + countOffset + 1;
       const autoName = n === 1 ? label : `${label} ${n}`;
 
       await new Promise<void>((resolve, reject) => {
@@ -116,18 +114,39 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
           },
         );
       });
-
-      handleClose();
+      return true;
     } catch (err) {
       console.error("Save failed:", err);
-      setErrorMsg("Could not save the item. Please try again.");
-      setPhase("pick");
+      return false;
     }
-  }, [category, existingCount, createItem, queryClient, handleClose, onCreated]);
+  }, [category, existingCount, createItem, queryClient, onCreated]);
+
+  const handleFiles = useCallback(async (files: File[]) => {
+    if (files.length === 0) return;
+    setErrorMsg(null);
+    setPhase("uploading");
+    setProgress({ done: 0, total: files.length });
+
+    let saved = 0;
+    for (let i = 0; i < files.length; i++) {
+      const ok = await handleFile(files[i], i);
+      if (ok) saved++;
+      setProgress({ done: i + 1, total: files.length });
+    }
+
+    if (saved === 0) {
+      setErrorMsg("Could not save the photos. Please try again.");
+      setPhase("pick");
+      setProgress(null);
+    } else {
+      handleClose();
+      setProgress(null);
+    }
+  }, [handleFile, handleClose]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) handleFiles(files);
     e.target.value = "";
   };
 
@@ -246,7 +265,11 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
               </div>
               <div className="text-center">
                 <p className="font-display font-bold text-2xl uppercase tracking-tight">Saving…</p>
-                <p className="text-sm text-muted-foreground mt-1">Adding to your vanity.</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {progress && progress.total > 1
+                    ? `${progress.done} of ${progress.total} photos added.`
+                    : "Adding to your vanity."}
+                </p>
               </div>
             </motion.div>
           )}
@@ -267,6 +290,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
         ref={galleryInputRef}
         type="file"
         accept="image/*"
+        multiple
         className="hidden"
         onChange={handleInputChange}
       />
