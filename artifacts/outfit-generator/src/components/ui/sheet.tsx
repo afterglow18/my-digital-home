@@ -52,8 +52,7 @@ export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed lg:absolute bottom-0 left-0 right-0 max-h-[90vh] bg-white border-t-4 border-black rounded-t-3xl z-50 flex flex-col shadow-[0px_-8px_0px_0px_rgba(0,0,0,0.1)]"
           >
-            <div className="px-4 pb-4 flex justify-between items-center border-b-2 border-black bg-primary rounded-t-[1.3rem]"
-              style={{ paddingTop: "max(60px, env(safe-area-inset-top))" }}>
+            <div className="px-4 pt-4 pb-4 flex justify-between items-center border-b-2 border-black bg-primary rounded-t-[1.3rem]">
               <h2 className="font-display font-bold text-2xl uppercase">{title}</h2>
               <button
                 onClick={() => onOpenChange(false)}

@@ -96,7 +96,8 @@ export function UpgradeSheet({ onClose }: Props) {
       <div
         className="relative flex items-center justify-center flex-shrink-0"
         style={{
-          height: 64,
+          paddingTop: "env(safe-area-inset-top)",
+          minHeight: 64,
           backgroundColor: "#E8B0B8",
           backgroundImage: [
             // horizontal stripes — warm charcoal, softer opacity like app icon plaid
