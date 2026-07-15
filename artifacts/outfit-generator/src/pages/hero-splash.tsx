@@ -50,6 +50,48 @@ export default function HeroSplash({ onContinue }: Props) {
           pointerEvents: "none",
         }}
       />
+
+      {/* Same title text as the lights page */}
+      <div
+        style={{
+          position: "absolute",
+          top: "36%",
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          textAlign: "center",
+          pointerEvents: "none",
+          padding: "0 48px",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-display, serif)",
+            fontWeight: 900,
+            fontSize: "clamp(30px, 9vw, 44px)",
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            color: "#fff8ee",
+            textShadow: "0 0 28px rgba(255,210,100,0.55), 0 2px 10px rgba(0,0,0,0.7)",
+          }}
+        >
+          MY DIGITAL
+          <br />
+          VANITY
+        </div>
+        <div
+          style={{
+            marginTop: 10,
+            fontSize: 12,
+            fontWeight: 500,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "rgba(255,230,180,0.6)",
+          }}
+        >
+          your beauty collection
+        </div>
+      </div>
     </motion.div>
   );
 }
