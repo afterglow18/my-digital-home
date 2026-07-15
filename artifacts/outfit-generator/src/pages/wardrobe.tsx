@@ -67,13 +67,9 @@ function useImageRect(containerRef: RefObject<HTMLDivElement>): ImgRect {
       if (!c) return;
       const cW = c.clientWidth, cH = c.clientHeight;
       const iR = IMG_W / IMG_H;
-      const cR = cW / cH;
-      let rW: number, rH: number, rL: number, rT: number;
-      if (cR > iR) {
-        rH = cH; rW = cH * iR; rT = 0; rL = (cW - rW) / 2;
-      } else {
-        rW = cW; rH = cW / iR; rL = 0; rT = 0;
-      }
+      // Cover: scale by height so the image always fills the full container height.
+      // The image may extend beyond the container width (clipped by overflow:hidden).
+      const rH = cH, rW = cH * iR, rT = 0, rL = (cW - rW) / 2;
       setRect({ top: rT, left: rL, width: rW, height: rH, containerH: cH, containerW: cW });
     };
     compute();
@@ -187,7 +183,7 @@ export default function WardrobePage() {
       style={{
         position: "relative",
         width: "100%",
-        height: `min(calc(100dvh - ${NAV_H}px), calc(100vw * ${(IMG_H / IMG_W).toFixed(6)}))`,
+        height: `calc(100dvh - ${NAV_H}px)`,
         overflow: "hidden",
         background: "#E8B0B8",
       }}
