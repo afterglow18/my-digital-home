@@ -115,7 +115,8 @@ export function UpgradeSheet({ onClose }: Props) {
         </span>
         <button
           onClick={onClose}
-          className="absolute top-2.5 right-3 w-8 h-8 rounded-full bg-white/90
+          style={{ top: "calc(env(safe-area-inset-top) + 10px)" }}
+          className="absolute right-3 w-8 h-8 rounded-full bg-white/90
                      flex items-center justify-center border border-black/10
                      active:scale-95 transition-transform"
         >
