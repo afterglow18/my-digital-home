@@ -237,7 +237,11 @@ export function UpgradeSheet({ onClose }: Props) {
         >
           {status === "pending"
             ? "Opening checkout…"
-            : `UNLOCK FOREVER – ${selectedPlan.price} ›`}
+            : selected === "monthly"
+              ? `UNLOCK MONTHLY – ${selectedPlan.price} ›`
+              : selected === "yearly"
+                ? `UNLOCK YEARLY – ${selectedPlan.price} ›`
+                : `UNLOCK FOREVER – ${selectedPlan.price} ›`}
         </button>
 
         <button
