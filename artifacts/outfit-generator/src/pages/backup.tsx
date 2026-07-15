@@ -89,9 +89,8 @@ export default function AccountPage() {
   const queryClient    = useQueryClient();
 
   const tierLabel =
-    tier === 'premium' ? 'Pro Stylist' :
-    tier === 'unlock'  ? 'Unlock Forever' :
-                         'Free';
+    tier === 'unlock' ? 'Unlock Forever' :
+                        'Free';
 
   const handleExport = async () => {
     setBackupStatus('exporting');
