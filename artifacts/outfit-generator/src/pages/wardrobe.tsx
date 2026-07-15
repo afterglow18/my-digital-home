@@ -179,6 +179,7 @@ export default function WardrobePage() {
     : LM.rows.map(() => 0);
 
   return (
+    <>
     <div
       ref={containerRef}
       style={{
@@ -358,114 +359,119 @@ export default function WardrobePage() {
         </>
       )}
 
-      {/* Save modal */}
-      <AnimatePresence>
-        {isSaveOpen && (
+    </div>
+
+    {/* ── Modals — rendered OUTSIDE the overflow:hidden+transform container so
+        that position:fixed children aren't clipped by the iOS WKWebView
+        "transform creates a new containing block" behaviour. ── */}
+
+    {/* Save modal */}
+    <AnimatePresence>
+      {isSaveOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 60,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0 24px",
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ scale: 0.92, y: 12 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.92, y: 12 }}
             style={{
-              position: "absolute", inset: 0, zIndex: 60,
-              background: "rgba(0,0,0,0.45)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              padding: "0 24px",
+              background: "#fff", borderRadius: 20,
+              border: "2.5px solid #000",
+              boxShadow: "4px 4px 0 #000",
+              padding: "24px 20px 20px",
+              width: "100%", maxWidth: 340,
             }}
           >
-            <motion.div
-              initial={{ scale: 0.92, y: 12 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.92, y: 12 }}
-              style={{
-                background: "#fff", borderRadius: 20,
-                border: "2.5px solid #000",
-                boxShadow: "4px 4px 0 #000",
-                padding: "24px 20px 20px",
-                width: "100%", maxWidth: 340,
-              }}
-            >
-              {saveSuccess ? (
-                <div style={{ textAlign: "center", padding: "12px 0" }}>
-                  <div style={{ fontSize: 32, marginBottom: 8 }}>💕</div>
-                  <p style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>Look saved!</p>
-                </div>
-              ) : (
-                <>
-                  <p style={{ fontWeight: 800, fontSize: 15, fontFamily: "var(--font-display)", marginBottom: 12 }}>
-                    Name this look
-                  </p>
-                  <input
-                    autoFocus
-                    value={saveName}
-                    onChange={e => setSaveName(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && saveName.trim() && handleSave()}
-                    placeholder="e.g. Sunday Glow ✨"
+            {saveSuccess ? (
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>💕</div>
+                <p style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>Look saved!</p>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontWeight: 800, fontSize: 15, fontFamily: "var(--font-display)", marginBottom: 12 }}>
+                  Name this look
+                </p>
+                <input
+                  autoFocus
+                  value={saveName}
+                  onChange={e => setSaveName(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && saveName.trim() && handleSave()}
+                  placeholder="e.g. Sunday Glow ✨"
+                  style={{
+                    width: "100%", height: 42, borderRadius: 10,
+                    border: "2px solid #000", padding: "0 12px",
+                    fontSize: 14, fontFamily: "var(--font-display)",
+                    boxSizing: "border-box", marginBottom: 12, outline: "none",
+                  }}
+                />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => setIsSaveOpen(false)}
                     style={{
-                      width: "100%", height: 42, borderRadius: 10,
-                      border: "2px solid #000", padding: "0 12px",
-                      fontSize: 14, fontFamily: "var(--font-display)",
-                      boxSizing: "border-box", marginBottom: 12, outline: "none",
+                      flex: 1, height: 40, borderRadius: 20,
+                      border: "2px solid #000", background: "#fff",
+                      fontWeight: 700, fontSize: 13, cursor: "pointer",
+                      fontFamily: "var(--font-display)",
                     }}
-                  />
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      onClick={() => setIsSaveOpen(false)}
-                      style={{
-                        flex: 1, height: 40, borderRadius: 20,
-                        border: "2px solid #000", background: "#fff",
-                        fontWeight: 700, fontSize: 13, cursor: "pointer",
-                        fontFamily: "var(--font-display)",
-                      }}
-                    >Cancel</button>
-                    <button
-                      onClick={handleSave}
-                      disabled={!saveName.trim() || saveOutfit.isPending}
-                      style={{
-                        flex: 1, height: 40, borderRadius: 20,
-                        border: "2px solid #D0909A",
-                        background: "linear-gradient(to bottom, #E8B0B8, #D0909A)",
-                        color: "#4A3A3A", fontWeight: 800, fontSize: 13,
-                        cursor: saveName.trim() ? "pointer" : "default",
-                        opacity: saveName.trim() ? 1 : 0.45,
-                        fontFamily: "var(--font-display)",
-                      }}
-                    >
-                      {saveOutfit.isPending ? "…" : "Save ♡"}
-                    </button>
-                  </div>
-                </>
-              )}
-            </motion.div>
+                  >Cancel</button>
+                  <button
+                    onClick={handleSave}
+                    disabled={!saveName.trim() || saveOutfit.isPending}
+                    style={{
+                      flex: 1, height: 40, borderRadius: 20,
+                      border: "2px solid #D0909A",
+                      background: "linear-gradient(to bottom, #E8B0B8, #D0909A)",
+                      color: "#4A3A3A", fontWeight: 800, fontSize: 13,
+                      cursor: saveName.trim() ? "pointer" : "default",
+                      opacity: saveName.trim() ? 1 : 0.45,
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    {saveOutfit.isPending ? "…" : "Save ♡"}
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
-      {/* Modals */}
-      <AnimatePresence>
-        {upgradeReason && (
-          <UpgradeSheet reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {addCategory && (
-          <QuickAddSheet
-            key={addCategory}
-            open={!!addCategory}
-            onOpenChange={open => !open && setAddCategory(null)}
-            category={addCategory}
-            existingCount={rowData[addCategory as RowKey]?.length ?? 0}
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {detailsItem && (
-          <ItemDetailsSheet
-            key={detailsItem.id}
-            item={detailsItem}
-            onClose={() => setDetailsItem(null)}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+    <AnimatePresence>
+      {upgradeReason && (
+        <UpgradeSheet reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
+      )}
+    </AnimatePresence>
+    <AnimatePresence>
+      {addCategory && (
+        <QuickAddSheet
+          key={addCategory}
+          open={!!addCategory}
+          onOpenChange={open => !open && setAddCategory(null)}
+          category={addCategory}
+          existingCount={rowData[addCategory as RowKey]?.length ?? 0}
+        />
+      )}
+    </AnimatePresence>
+    <AnimatePresence>
+      {detailsItem && (
+        <ItemDetailsSheet
+          key={detailsItem.id}
+          item={detailsItem}
+          onClose={() => setDetailsItem(null)}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }
