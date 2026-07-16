@@ -17,11 +17,32 @@ workflows:
       - name: Install dependencies
         script: |
           npm install -g pnpm --force
-          # Remove Linux/Replit-only platform exclusions so macOS native binaries install correctly
-          sed -i '' '/"esbuild>@esbuild\/darwin/d' pnpm-workspace.yaml
-          sed -i '' '/"rollup>@rollup\/rollup-darwin/d' pnpm-workspace.yaml
-          sed -i '' '/"lightningcss>lightningcss-darwin/d' pnpm-workspace.yaml
-          sed -i '' '/"@tailwindcss\/oxide>@tailwindcss\/oxide-darwin/d' pnpm-workspace.yaml
+          # Replace workspace config with a CI-safe version:
+          # - No Linux/Replit-only platform exclusions (macOS needs darwin binaries)
+          # - No minimumReleaseAge (not needed in CI)
+          # - onlyBuiltDependencies explicitly listed so pnpm allows their build scripts
+          cat > pnpm-workspace.yaml << 'EOF'
+          packages:
+            - artifacts/*
+            - lib/*
+            - lib/integrations/*
+            - scripts
+
+          autoInstallPeers: false
+
+          onlyBuiltDependencies:
+            - '@google/genai'
+            - '@swc/core'
+            - esbuild
+            - msw
+            - protobufjs
+            - unrs-resolver
+
+          overrides:
+            "react": "19.1.0"
+            "react-dom": "19.1.0"
+            esbuild: "0.27.3"
+          EOF
           pnpm install --no-frozen-lockfile
 
       - name: Build web app
