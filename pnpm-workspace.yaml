@@ -76,6 +76,11 @@ onlyBuiltDependencies:
   - protobufjs
   - unrs-resolver
 
+allowBuilds:
+  "@google/genai": true
+  esbuild: true
+  protobufjs: true
+
 overrides:
   # Pin react versions workspace-wide (moved from package.json pnpm.overrides)
   "react": "19.1.0"
