@@ -42,7 +42,7 @@ const IMG_H = 1448;
 const NAV_H = 90;
 
 // Fraction of image height reserved at the top of every section for the heading.
-const LABEL_FRAC = 0.028;
+const LABEL_FRAC = 0.042;
 
 // Layout markers calibrated for jewelry-box-bg.png (1086×1448).
 // All four sections are ~16-18% tall so photos render at the same size.
