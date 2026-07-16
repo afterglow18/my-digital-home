@@ -187,7 +187,7 @@ export default function SavedPage() {
         >
           <p className="font-display font-bold text-sm uppercase tracking-tight">🔓 Lookbook is full</p>
           <p className="text-xs text-black/60 mt-1 mb-3 leading-snug">
-            You've saved {FREE_OUTFIT_LIMIT} looks — the free limit. Unlock Forever to save unlimited looks.
+            You've saved {FREE_OUTFIT_LIMIT} looks — the free limit. Unlock to save unlimited looks.
           </p>
           <button
             onClick={() => setShowUpgrade(true)}
@@ -196,7 +196,7 @@ export default function SavedPage() {
                        shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]
                        active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
           >
-            Unlock Forever – $4.99
+            Lifetime Unlock – $9.99
           </button>
         </motion.div>
       )}
