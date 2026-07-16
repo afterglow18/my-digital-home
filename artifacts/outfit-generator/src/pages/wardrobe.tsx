@@ -280,7 +280,7 @@ export default function WardrobePage() {
                     fontFamily: "var(--font-display)", textTransform: "uppercase",
                     textShadow: "0 1px 4px rgba(0,0,0,0.6)",
                   }}>
-                    {items.length > 0 ? key.toUpperCase() : btnLabel}
+                    {btnLabel}
                   </span>
                 </button>
 
