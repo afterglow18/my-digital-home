@@ -57,6 +57,11 @@ workflows:
           fi
           $CAP sync ios
 
+      - name: Set build number
+        script: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            artifacts/outfit-generator/ios/App/App/Info.plist
+
       - name: Set up code signing
         script: xcode-project use-profiles
 
