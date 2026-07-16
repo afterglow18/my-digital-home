@@ -15,7 +15,10 @@ workflows:
         APPLE_TEAM_ID: "2A78MFVCJS"
     scripts:
       - name: Install dependencies
-        script: pnpm install
+        script: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install
 
       - name: Build web app
         script: pnpm --filter @workspace/outfit-generator build
