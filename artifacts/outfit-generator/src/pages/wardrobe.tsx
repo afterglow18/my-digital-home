@@ -41,16 +41,20 @@ const IMG_W = 1086;
 const IMG_H = 1448;
 const NAV_H = 90;
 
-// Layout markers calibrated for jewelry-box-bg.png (1086×1448):
-// Row 1 → velvet ring-roll area; Rows 2-4 → the three open shelf bays.
+// Fraction of image height reserved at the top of every section for the heading.
+const LABEL_FRAC = 0.028;
+
+// Layout markers calibrated for jewelry-box-bg.png (1086×1448).
+// All four sections are ~16-18% tall so photos render at the same size.
+// Row 1 → LED + velvet roll; Rows 2-4 → the three open shelf bays.
 const LM = {
   doorL: 0.06,
   doorR: 0.94,
   rows: [
-    { sectionTop: 0.17, shelfY: 0.29, btnCY: 0.12 },
-    { sectionTop: 0.29, shelfY: 0.46, btnCY: 0.36 },
-    { sectionTop: 0.49, shelfY: 0.64, btnCY: 0.55 },
-    { sectionTop: 0.67, shelfY: 0.82, btnCY: 0.73 },
+    { sectionTop: 0.10, shelfY: 0.28 },
+    { sectionTop: 0.28, shelfY: 0.45 },
+    { sectionTop: 0.48, shelfY: 0.64 },
+    { sectionTop: 0.66, shelfY: 0.82 },
   ],
   saveAreaY: 0.85,
 } as const;
@@ -176,9 +180,12 @@ export default function WardrobePage() {
   const itemsLeft = isFree ? Math.max(0, FREE_ITEM_LIMIT - totalItems) : null;
   const ready     = ir.width > 0;
 
-  const sectionHeights = ready
-    ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))
-    : LM.rows.map(() => 0);
+  // Consistent photo height = smallest section minus the heading strip.
+  const labelH          = ready ? pH(ir, LABEL_FRAC) : 0;
+  const minSecH         = ready ? Math.min(...LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))) : 0;
+  const consistentPhotoH = Math.max(0, minSecH - labelH);
+  const carLeft         = ready ? pX(ir, LM.doorL) : 0;
+  const carW            = ready ? pW(ir, LM.doorR - LM.doorL) : 0;
 
   return (
     <>
@@ -226,7 +233,7 @@ export default function WardrobePage() {
               aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
               style={{
                 position: "absolute",
-                top: pY(ir, 0.165), left: "50%", transform: "translateX(-50%)",
+                top: pY(ir, 0.055), left: "50%", transform: "translateX(-50%)",
                 zIndex: 25,
                 padding: "3px 14px", borderRadius: 20, border: "none",
                 background: totalItems >= FREE_ITEM_LIMIT
@@ -245,46 +252,47 @@ export default function WardrobePage() {
             </button>
           )}
 
-          {/* 4 shelf rows */}
+          {/* 4 shelf rows — heading pinned to top of section, photos below at consistent height */}
           {ROWS.map(({ key, btnLabel }, rowIdx) => {
-            const lm      = LM.rows[rowIdx];
-            const items   = rowData[key];
-            const secTop  = pY(ir, lm.sectionTop);
-            const secH    = pH(ir, lm.shelfY - lm.sectionTop);
-            const carLeft = pX(ir, LM.doorL);
-            const carW    = pW(ir, LM.doorR - LM.doorL);
-            const btnCY   = pY(ir, lm.btnCY);
-            const btnH    = Math.max(32, pH(ir, 0.045));
-            const labelY  = pY(ir, lm.btnCY + (lm.sectionTop - lm.btnCY) * 0.08);
+            const lm    = LM.rows[rowIdx];
+            const items = rowData[key];
+            const secTop = pY(ir, lm.sectionTop);
+            const secH   = pH(ir, lm.shelfY - lm.sectionTop);
 
             return (
               <React.Fragment key={key}>
-                {/* Category label */}
+                {/* Heading — anchored to top of section, tappable to add */}
                 <button
                   onClick={addHandlers[key]}
                   aria-label={btnLabel}
+                  data-testid={`add-btn-${key}`}
                   style={{
-                    position: "absolute", top: labelY, left: carLeft, width: carW,
-                    transform: "translateY(-50%)", zIndex: 23,
-                    textAlign: "center", background: "none", border: "none", cursor: "pointer", padding: 0,
+                    position: "absolute", top: secTop, left: carLeft,
+                    width: carW, height: labelH,
+                    zIndex: 24, background: "none", border: "none", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}
                 >
                   <span style={{
-                    fontSize: Math.max(9, pH(ir, 0.013)), fontWeight: 800,
-                    letterSpacing: "0.12em", color: "rgba(120,60,70,0.75)",
+                    fontSize: Math.max(9, labelH * 0.55),
+                    fontWeight: 800, letterSpacing: "0.13em",
+                    color: "#f0d080",
                     fontFamily: "var(--font-display)", textTransform: "uppercase",
+                    textShadow: "0 1px 4px rgba(0,0,0,0.6)",
                   }}>
-                    {btnLabel}
+                    {items.length > 0 ? key.toUpperCase() : btnLabel}
                   </span>
                 </button>
 
-                {/* Item carousel */}
+                {/* Carousel — starts immediately below heading, same height every row */}
                 {items.length > 0 && (
                   <div
                     data-testid={`row-${key}`}
                     style={{
-                      position: "absolute", top: secTop, left: carLeft,
-                      width: carW, height: secH, zIndex: 10, overflow: "visible",
+                      position: "absolute",
+                      top: secTop + labelH, left: carLeft,
+                      width: carW, height: consistentPhotoH,
+                      zIndex: 10, overflow: "visible",
                     }}
                   >
                     <ClosetRow
@@ -292,23 +300,24 @@ export default function WardrobePage() {
                       items={items}
                       onCenteredItem={setCentredHandlers[key]}
                       onItemTap={handleItemTap}
-                      maxPhotoH={Math.max(0, sectionHeights[rowIdx] - 4)}
+                      maxPhotoH={consistentPhotoH}
                     />
                   </div>
                 )}
 
-                {/* ADD tap zone */}
-                <button
-                  onClick={addHandlers[key]}
-                  aria-label={btnLabel}
-                  data-testid={`add-btn-${key}`}
-                  style={{
-                    position: "absolute",
-                    top:    btnCY - btnH / 2,
-                    left:   carLeft, width: carW, height: btnH,
-                    zIndex: 22, background: "transparent", border: "none", cursor: "pointer",
-                  }}
-                />
+                {/* Empty-state tap zone — full section, only when no items */}
+                {items.length === 0 && (
+                  <button
+                    onClick={addHandlers[key]}
+                    aria-label={btnLabel}
+                    style={{
+                      position: "absolute",
+                      top: secTop + labelH, left: carLeft,
+                      width: carW, height: secH - labelH,
+                      zIndex: 22, background: "transparent", border: "none", cursor: "pointer",
+                    }}
+                  />
+                )}
               </React.Fragment>
             );
           })}

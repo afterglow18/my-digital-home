@@ -27,15 +27,19 @@ const PLUM_DARK  = "#220838";
 const GOLD       = "#d4af37";
 const GOLD_LIGHT = "#f0d080";
 
-// Layout markers calibrated for jewelry-box-bg.png (1086×1448)
+// Fraction of image height reserved at the top of every section for the heading.
+const LABEL_FRAC = 0.028;
+
+// Layout markers calibrated for jewelry-box-bg.png (1086×1448).
+// All four sections are ~16-18% tall so photos render at the same size.
 const LM = {
   doorL: 0.06,
   doorR: 0.94,
   rows: [
-    { sectionTop: 0.17, shelfY: 0.29, btnCY: 0.12 },
-    { sectionTop: 0.29, shelfY: 0.46, btnCY: 0.36 },
-    { sectionTop: 0.49, shelfY: 0.64, btnCY: 0.55 },
-    { sectionTop: 0.67, shelfY: 0.82, btnCY: 0.73 },
+    { sectionTop: 0.10, shelfY: 0.28 },
+    { sectionTop: 0.28, shelfY: 0.45 },
+    { sectionTop: 0.48, shelfY: 0.64 },
+    { sectionTop: 0.66, shelfY: 0.82 },
   ],
   barY:   0.85,
   barBot: 1.00,
@@ -207,9 +211,12 @@ export default function GeneratePage() {
 
   const canSave = Object.keys(centred).length > 0;
 
-  const sectionHeights = ready
-    ? LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))
-    : LM.rows.map(() => 0);
+  // Consistent photo height = smallest section minus the heading strip.
+  const labelH           = ready ? pH(ir, LABEL_FRAC) : 0;
+  const minSecH          = ready ? Math.min(...LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))) : 0;
+  const consistentPhotoH = Math.max(0, minSecH - labelH);
+  const carLeft          = ready ? pX(ir, LM.doorL) : 0;
+  const carW             = ready ? pW(ir, LM.doorR - LM.doorL) : 0;
 
   return (
     <div
@@ -246,77 +253,62 @@ export default function GeneratePage() {
         background: "rgba(30, 5, 50, 0.12)",
       }} />
 
-      {/* "Matchmaker" subtitle */}
-      {ready && (
-        <div
-          style={{
-            position: "absolute",
-            top:  pY(ir, 0.158), left: pX(ir, 0.237), width: pW(ir, 0.564),
-            textAlign: "center", zIndex: 1, pointerEvents: "none", userSelect: "none",
-          }}
-        >
-          <span style={{
-            fontFamily: "inherit", fontWeight: 700,
-            fontSize: Math.max(14, pW(ir, 0.055)),
-            letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "#4a1e28", opacity: 0.85,
-          }}>
-            Matchmaker
-          </span>
-        </div>
-      )}
-
       {ready && (() => {
-        const carLeft = pX(ir, LM.doorL);
-        const carW    = pW(ir, LM.doorR - LM.doorL);
-
         return (
           <>
-            {/* Shelf carousels */}
+            {/* Shelf carousels — heading at top of each section, photos below at consistent height */}
             {ROWS.map(({ key }, rowIdx) => {
               const lm    = LM.rows[rowIdx];
               const items = { rings, earrings, necklaces, bracelets }[key];
               const secTop = pY(ir, lm.sectionTop);
               const secH   = pH(ir, lm.shelfY - lm.sectionTop);
-              const label  = key.toUpperCase();
-              const labelY = pY(ir, lm.btnCY + (lm.sectionTop - lm.btnCY) * 0.08);
 
               return (
                 <React.Fragment key={key}>
+                  {/* Heading — anchored to top of section */}
                   <div style={{
-                    position: "absolute", top: labelY, left: carLeft, width: carW,
-                    transform: "translateY(-50%)", zIndex: 12, textAlign: "center", pointerEvents: "none",
+                    position: "absolute", top: secTop, left: carLeft,
+                    width: carW, height: labelH,
+                    zIndex: 12, display: "flex", alignItems: "center", justifyContent: "center",
+                    pointerEvents: "none",
                   }}>
                     <span style={{
-                      fontSize: Math.max(9, pH(ir, 0.013)), fontWeight: 800,
-                      letterSpacing: "0.12em", color: "rgba(120,60,70,0.75)",
+                      fontSize: Math.max(9, labelH * 0.55),
+                      fontWeight: 800, letterSpacing: "0.13em",
+                      color: "#f0d080",
                       fontFamily: "var(--font-display)", textTransform: "uppercase",
-                    }}>{label}</span>
+                      textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+                    }}>{key.toUpperCase()}</span>
                   </div>
 
+                  {/* Carousel or empty placeholder — same height every row */}
                   {items.length > 0 ? (
                     <div style={{
-                      position: "absolute", top: secTop, left: carLeft, width: carW, height: secH,
+                      position: "absolute",
+                      top: secTop + labelH, left: carLeft,
+                      width: carW, height: consistentPhotoH,
                       zIndex: 10, overflow: "visible",
                     }}>
                       <ClosetRow
                         ref={rowRefs[key]}
                         items={items}
                         onCenteredItem={setCentredHandlers[key]}
-                        maxPhotoH={Math.max(0, sectionHeights[rowIdx] - 4)}
+                        maxPhotoH={consistentPhotoH}
                         disableSwipe
                       />
                     </div>
                   ) : (
                     <div style={{
-                      position: "absolute", top: secTop, left: carLeft, width: carW, height: secH,
+                      position: "absolute",
+                      top: secTop + labelH, left: carLeft,
+                      width: carW, height: secH - labelH,
                       zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
                       <span style={{
                         fontSize: 10, fontWeight: 700,
                         letterSpacing: "0.09em", textTransform: "uppercase",
-                        color: "rgba(180,100,110,0.40)",
-                      }}>No items</span>
+                        color: "rgba(240,208,128,0.35)",
+                      }}>empty</span>
                     </div>
                   )}
                 </React.Fragment>
