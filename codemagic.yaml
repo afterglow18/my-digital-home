@@ -9,7 +9,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.mydigitaljewelrybox.app
       vars:
-        XCODE_WORKSPACE: "artifacts/outfit-generator/ios/App/App.xcworkspace"
+        XCODE_PROJECT: "artifacts/outfit-generator/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
         BUNDLE_ID: "com.mydigitaljewelrybox.app"
         APPLE_TEAM_ID: "2A78MFVCJS"
@@ -47,7 +47,7 @@ workflows:
       - name: Build web app
         script: pnpm --filter @workspace/outfit-generator build
 
-      - name: Add iOS platform and sync Capacitor
+      - name: Sync Capacitor
         script: |
           cd artifacts/outfit-generator
           CAP="./node_modules/.bin/cap"
@@ -55,15 +55,7 @@ workflows:
             npm install -g @capacitor/cli
             CAP="cap"
           fi
-          if [ ! -d "ios" ]; then
-            $CAP add ios
-          fi
           $CAP sync ios
-
-      - name: Install CocoaPods
-        script: |
-          cd artifacts/outfit-generator/ios/App
-          pod install
 
       - name: Set up code signing
         script: xcode-project use-profiles
@@ -71,7 +63,7 @@ workflows:
       - name: Build and archive
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
     artifacts:
