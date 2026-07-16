@@ -58,7 +58,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                           strokeWidth={isActive ? 2.5 : 2}
                         />
                       ) : (
-                        <span className="text-xl leading-none select-none">💍</span>
+                        <span className="text-xl leading-none select-none">💎</span>
                       )}
 
                       {/* Badge */}
