@@ -14,9 +14,6 @@ workflows:
         BUNDLE_ID: "com.mydigitaljewelrybox.app"
         APPLE_TEAM_ID: "2A78MFVCJS"
     scripts:
-      - name: Install pnpm
-        script: npm install -g pnpm
-
       - name: Install dependencies
         script: pnpm install
 
