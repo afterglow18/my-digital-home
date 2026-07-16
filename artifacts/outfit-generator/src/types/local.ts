@@ -3,7 +3,7 @@
  * All IDs are UUID strings (no server-side serial integers).
  */
 
-export type ClothingCategory = 'makeup' | 'skincare' | 'hair' | 'fragrances';
+export type ClothingCategory = 'rings' | 'earrings' | 'necklaces' | 'bracelets';
 /** Kept as alias so existing components that import ClothingItemUpdateCategory still work. */
 export type ClothingItemUpdateCategory = ClothingCategory;
 /** Kept as alias for useListClothing params. */

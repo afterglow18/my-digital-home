@@ -17,13 +17,13 @@ import { encodeToPng } from "@/lib/processImage";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type Category = "makeup" | "skincare" | "hair" | "fragrances";
+type Category = "rings" | "earrings" | "necklaces" | "bracelets";
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  makeup:     "Makeup",
-  skincare:   "Skincare",
-  hair:       "Haircare",
-  fragrances: "Fragrance",
+  rings:     "Rings",
+  earrings:  "Earrings",
+  necklaces: "Necklaces",
+  bracelets: "Bracelets",
 };
 
 type Phase = "pick" | "uploading";

@@ -6,11 +6,11 @@ import type { ClothingCategory } from "@/types/local";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
 
-const CATEGORIES: ClothingCategory[] = ["makeup", "skincare", "hair", "fragrances"];
+const CATEGORIES: ClothingCategory[] = ["rings", "earrings", "necklaces", "bracelets"];
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  category: z.enum(["makeup", "skincare", "hair", "fragrances"]),
+  category: z.enum(["rings", "earrings", "necklaces", "bracelets"]),
   color: z.string().optional(),
   brand: z.string().optional(),
   notes: z.string().optional(),
@@ -32,7 +32,7 @@ export function ClothingForm({ initialData, onSubmit, isSubmitting, submitLabel 
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
-      category: initialData?.category || "makeup",
+      category: initialData?.category || "rings",
       color: initialData?.color || "",
       brand: initialData?.brand || "",
       notes: initialData?.notes || "",

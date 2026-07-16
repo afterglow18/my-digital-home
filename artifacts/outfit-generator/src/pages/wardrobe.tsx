@@ -26,14 +26,14 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { FREE_ITEM_LIMIT } from "@/types/local";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type RowKey   = "makeup" | "skincare" | "hair" | "fragrances";
-type Category = "makeup" | "skincare" | "hair" | "fragrances";
+type RowKey   = "rings" | "earrings" | "necklaces" | "bracelets";
+type Category = "rings" | "earrings" | "necklaces" | "bracelets";
 
 const ROWS: { key: RowKey; btnLabel: string }[] = [
-  { key: "makeup",     btnLabel: "+ ADD MAKEUP"     },
-  { key: "skincare",   btnLabel: "+ ADD SKINCARE"   },
-  { key: "hair",       btnLabel: "+ ADD HAIRCARE"   },
-  { key: "fragrances", btnLabel: "+ ADD FRAGRANCES" },
+  { key: "rings",     btnLabel: "+ ADD RINGS"     },
+  { key: "earrings",  btnLabel: "+ ADD EARRINGS"  },
+  { key: "necklaces", btnLabel: "+ ADD NECKLACES" },
+  { key: "bracelets", btnLabel: "+ ADD BRACELETS" },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
@@ -93,10 +93,10 @@ export default function WardrobePage() {
   const ir = useImageRect(containerRef);
 
   const rowRefs: Record<RowKey, RefObject<ClosetRowHandle | null>> = {
-    makeup:     useRef<ClosetRowHandle | null>(null),
-    skincare:   useRef<ClosetRowHandle | null>(null),
-    hair:       useRef<ClosetRowHandle | null>(null),
-    fragrances: useRef<ClosetRowHandle | null>(null),
+    rings:     useRef<ClosetRowHandle | null>(null),
+    earrings:  useRef<ClosetRowHandle | null>(null),
+    necklaces: useRef<ClosetRowHandle | null>(null),
+    bracelets: useRef<ClosetRowHandle | null>(null),
   };
 
   const [centred,       setCentred]       = useState<Partial<Record<RowKey, ClothingItem>>>({});
@@ -109,14 +109,14 @@ export default function WardrobePage() {
 
   const saveOutfit = useSaveOutfit();
 
-  const { data: makeup     = [] } = useListClothing({ category: "makeup"     }, { query: { queryKey: getListClothingQueryKey({ category: "makeup"     }) } });
-  const { data: skincare   = [] } = useListClothing({ category: "skincare"   }, { query: { queryKey: getListClothingQueryKey({ category: "skincare"   }) } });
-  const { data: hair       = [] } = useListClothing({ category: "hair"       }, { query: { queryKey: getListClothingQueryKey({ category: "hair"       }) } });
-  const { data: fragrances = [] } = useListClothing({ category: "fragrances" }, { query: { queryKey: getListClothingQueryKey({ category: "fragrances" }) } });
+  const { data: rings     = [] } = useListClothing({ category: "rings"     }, { query: { queryKey: getListClothingQueryKey({ category: "rings"     }) } });
+  const { data: earrings  = [] } = useListClothing({ category: "earrings"  }, { query: { queryKey: getListClothingQueryKey({ category: "earrings"  }) } });
+  const { data: necklaces = [] } = useListClothing({ category: "necklaces" }, { query: { queryKey: getListClothingQueryKey({ category: "necklaces" }) } });
+  const { data: bracelets = [] } = useListClothing({ category: "bracelets" }, { query: { queryKey: getListClothingQueryKey({ category: "bracelets" }) } });
   const { data: outfits = [] } = useListOutfits();
 
-  const rowData: Record<RowKey, ClothingItem[]> = { makeup, skincare, hair, fragrances };
-  const totalItems = makeup.length + skincare.length + hair.length + fragrances.length;
+  const rowData: Record<RowKey, ClothingItem[]> = { rings, earrings, necklaces, bracelets };
+  const totalItems = rings.length + earrings.length + necklaces.length + bracelets.length;
 
   const queryClient = useQueryClient();
   const { tier, canAddItem } = useEntitlements();
@@ -125,20 +125,20 @@ export default function WardrobePage() {
     setCentred(prev => {
       const next = { ...prev };
       let changed = false;
-      (["makeup", "skincare", "hair", "fragrances"] as RowKey[]).forEach(key => {
+      (["rings", "earrings", "necklaces", "bracelets"] as RowKey[]).forEach(key => {
         if (rowData[key].length === 0 && next[key] !== undefined) {
           delete next[key]; changed = true;
         }
       });
       return changed ? next : prev;
     });
-  }, [makeup.length, skincare.length, hair.length, fragrances.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rings.length, earrings.length, necklaces.length, bracelets.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setCentredHandlers: Record<RowKey, (item: ClothingItem | null) => void> = {
-    makeup:     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, makeup:     item ?? undefined })), []),
-    skincare:   useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, skincare:   item ?? undefined })), []),
-    hair:       useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, hair:       item ?? undefined })), []),
-    fragrances: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, fragrances: item ?? undefined })), []),
+    rings:     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, rings:     item ?? undefined })), []),
+    earrings:  useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, earrings:  item ?? undefined })), []),
+    necklaces: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, necklaces: item ?? undefined })), []),
+    bracelets: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, bracelets: item ?? undefined })), []),
   };
 
   const handleAddClick = useCallback((cat: Category) => {
@@ -146,10 +146,10 @@ export default function WardrobePage() {
   }, [canAddItem, totalItems]);
 
   const addHandlers: Record<RowKey, () => void> = {
-    makeup:     useCallback(() => handleAddClick("makeup"),     [handleAddClick]),
-    skincare:   useCallback(() => handleAddClick("skincare"),   [handleAddClick]),
-    hair:       useCallback(() => handleAddClick("hair"),       [handleAddClick]),
-    fragrances: useCallback(() => handleAddClick("fragrances"), [handleAddClick]),
+    rings:     useCallback(() => handleAddClick("rings"),     [handleAddClick]),
+    earrings:  useCallback(() => handleAddClick("earrings"),  [handleAddClick]),
+    necklaces: useCallback(() => handleAddClick("necklaces"), [handleAddClick]),
+    bracelets: useCallback(() => handleAddClick("bracelets"), [handleAddClick]),
   };
 
   const handleItemTap = useCallback((item: ClothingItem) => setDetailsItem(item), []);

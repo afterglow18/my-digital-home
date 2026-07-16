@@ -71,14 +71,14 @@ const pW = (ir: ImgRect, f: number) => ir.width  * f;
 const pX = (ir: ImgRect, f: number) => ir.left   + ir.width  * f;
 const pY = (ir: ImgRect, f: number) => ir.top    + ir.height * f;
 
-type RowKey = "makeup" | "skincare" | "hair" | "fragrances";
+type RowKey = "rings" | "earrings" | "necklaces" | "bracelets";
 type Phase  = "idle" | "spinning" | "result";
 
 const ROWS: { key: RowKey }[] = [
-  { key: "makeup"     },
-  { key: "skincare"   },
-  { key: "hair"       },
-  { key: "fragrances" },
+  { key: "rings"     },
+  { key: "earrings"  },
+  { key: "necklaces" },
+  { key: "bracelets" },
 ];
 
 const MIN_SPIN_MS = 1600;
@@ -89,10 +89,10 @@ export default function GeneratePage() {
   const ready = ir.width > 0;
 
   const rowRefs: Record<RowKey, RefObject<ClosetRowHandle | null>> = {
-    makeup:     useRef<ClosetRowHandle | null>(null),
-    skincare:   useRef<ClosetRowHandle | null>(null),
-    hair:       useRef<ClosetRowHandle | null>(null),
-    fragrances: useRef<ClosetRowHandle | null>(null),
+    rings:     useRef<ClosetRowHandle | null>(null),
+    earrings:  useRef<ClosetRowHandle | null>(null),
+    necklaces: useRef<ClosetRowHandle | null>(null),
+    bracelets: useRef<ClosetRowHandle | null>(null),
   };
 
   const [phase,      setPhase]      = useState<Phase>("idle");
@@ -101,23 +101,23 @@ export default function GeneratePage() {
   const [saveName,   setSaveName]   = useState("");
 
   const rowDataRef = useRef<Record<RowKey, ClothingItem[]>>({
-    makeup: [], skincare: [], hair: [], fragrances: [],
+    rings: [], earrings: [], necklaces: [], bracelets: [],
   });
 
-  const { data: makeup     = [] } = useListClothing({ category: "makeup"     }, { query: { queryKey: getListClothingQueryKey({ category: "makeup"     }) } });
-  const { data: skincare   = [] } = useListClothing({ category: "skincare"   }, { query: { queryKey: getListClothingQueryKey({ category: "skincare"   }) } });
-  const { data: hair       = [] } = useListClothing({ category: "hair"       }, { query: { queryKey: getListClothingQueryKey({ category: "hair"       }) } });
-  const { data: fragrances = [] } = useListClothing({ category: "fragrances" }, { query: { queryKey: getListClothingQueryKey({ category: "fragrances" }) } });
+  const { data: rings     = [] } = useListClothing({ category: "rings"     }, { query: { queryKey: getListClothingQueryKey({ category: "rings"     }) } });
+  const { data: earrings  = [] } = useListClothing({ category: "earrings"  }, { query: { queryKey: getListClothingQueryKey({ category: "earrings"  }) } });
+  const { data: necklaces = [] } = useListClothing({ category: "necklaces" }, { query: { queryKey: getListClothingQueryKey({ category: "necklaces" }) } });
+  const { data: bracelets = [] } = useListClothing({ category: "bracelets" }, { query: { queryKey: getListClothingQueryKey({ category: "bracelets" }) } });
 
-  useEffect(() => { rowDataRef.current = { makeup, skincare, hair, fragrances }; }, [makeup, skincare, hair, fragrances]);
+  useEffect(() => { rowDataRef.current = { rings, earrings, necklaces, bracelets }; }, [rings, earrings, necklaces, bracelets]);
 
-  const hasItems = makeup.length > 0 || skincare.length > 0 || hair.length > 0 || fragrances.length > 0;
+  const hasItems = rings.length > 0 || earrings.length > 0 || necklaces.length > 0 || bracelets.length > 0;
 
   const setCentredHandlers: Record<RowKey, (item: ClothingItem | null) => void> = {
-    makeup:     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, makeup:     item ?? undefined })), []),
-    skincare:   useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, skincare:   item ?? undefined })), []),
-    hair:       useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, hair:       item ?? undefined })), []),
-    fragrances: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, fragrances: item ?? undefined })), []),
+    rings:     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, rings:     item ?? undefined })), []),
+    earrings:  useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, earrings:  item ?? undefined })), []),
+    necklaces: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, necklaces: item ?? undefined })), []),
+    bracelets: useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, bracelets: item ?? undefined })), []),
   };
 
   const saveOutfit  = useSaveOutfit();
@@ -134,7 +134,7 @@ export default function GeneratePage() {
     setSaveName("");
 
     const spinStart = Date.now();
-    const stop: Record<RowKey, boolean> = { makeup: false, skincare: false, hair: false, fragrances: false };
+    const stop: Record<RowKey, boolean> = { rings: false, earrings: false, necklaces: false, bracelets: false };
 
     ROWS.forEach(({ key }, ri) => {
       const INTERVAL = 65 + ri * 18;
@@ -275,10 +275,10 @@ export default function GeneratePage() {
             {/* Shelf carousels */}
             {ROWS.map(({ key }, rowIdx) => {
               const lm    = LM.rows[rowIdx];
-              const items = { makeup, skincare, hair, fragrances }[key];
+              const items = { rings, earrings, necklaces, bracelets }[key];
               const secTop = pY(ir, lm.sectionTop);
               const secH   = pH(ir, lm.shelfY - lm.sectionTop);
-              const label  = key === "fragrances" ? "FRAGRANCES" : key === "hair" ? "HAIRCARE" : key.toUpperCase();
+              const label  = key.toUpperCase();
               const labelY = pY(ir, lm.btnCY + (lm.sectionTop - lm.btnCY) * 0.08);
 
               return (
@@ -365,7 +365,7 @@ export default function GeneratePage() {
                   fontFamily: "var(--font-display)", margin: 0,
                 }}>Your vanity is empty</p>
                 <p style={{ fontSize: 11, color: "#9a5060", marginTop: 5, lineHeight: 1.5 }}>
-                  Add makeup, skincare, hair care or fragrances in the Vanity tab first.
+                  Add rings, earrings, necklaces or bracelets in the Jewelry Box tab first.
                 </p>
               </div>
             )}
