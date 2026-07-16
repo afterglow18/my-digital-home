@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 type Phase = "closed" | "opening" | "open" | "exiting";
 
 // Total timing (ms)
-const OPEN_DURATION_MS  = 1300;  // lid swing
+const OPEN_DURATION_MS  = 2200;  // lid swing (slow, physical feel)
 const HERO_FADE_IN_MS   = 500;   // hero image fades in after lid opens
 const HERO_SHOW_MS      = 500;   // hero visible at full opacity before exit
 const EXIT_DURATION_MS  = 700;   // whole-screen fade-out → jewelry page
@@ -82,7 +82,7 @@ export default function WelcomePage({ onEnter }: Props) {
           width: "min(92vw, 400px)",
           /* match image aspect ratio ~0.78 */
           height: "min(118vw, 512px)",
-          perspective: "900px",
+          perspective: "600px",
           perspectiveOrigin: "50% 0%",
         }}
       >
@@ -131,11 +131,11 @@ export default function WelcomePage({ onEnter }: Props) {
             WebkitBackfaceVisibility: "hidden",
           }}
           animate={{
-            rotateX: phase === "closed" ? 0 : -118,
+            rotateX: phase === "closed" ? 0 : -105,
           }}
           transition={{
             duration: OPEN_DURATION_MS / 1000,
-            ease: [0.22, 1, 0.36, 1], // spring-ish easeOut
+            ease: [0.4, 0.0, 0.2, 1], // slow start → accelerates → settles open
           }}
         >
           {/* Lid face — plum velvet with gold trim */}
