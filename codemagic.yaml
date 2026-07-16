@@ -17,7 +17,7 @@ workflows:
       - name: Install dependencies
         script: |
           npm install -g pnpm --force
-          pnpm install
+          pnpm install --no-frozen-lockfile
 
       - name: Build web app
         script: pnpm --filter @workspace/outfit-generator build
