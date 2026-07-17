@@ -232,10 +232,10 @@ export default function WelcomePage({ onEnter }: Props) {
 
             <defs>
               <linearGradient id="bagGrad" x1="0" y1="0" x2="0.2" y2="1">
-                <stop offset="0%"   stopColor="#8c1e2e" />
-                <stop offset="30%"  stopColor="#5C0F1E" />
-                <stop offset="70%"  stopColor="#3d0f18" />
-                <stop offset="100%" stopColor="#250a10" />
+                <stop offset="0%"   stopColor="#7e9062" />
+                <stop offset="30%"  stopColor="#6B7A52" />
+                <stop offset="70%"  stopColor="#4F5E3C" />
+                <stop offset="100%" stopColor="#3a4530" />
               </linearGradient>
               <pattern id="plaidH" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
                 <rect width="20" height="1.5" y="9" fill="white" />

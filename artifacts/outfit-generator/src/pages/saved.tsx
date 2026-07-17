@@ -194,8 +194,8 @@ export default function SavedPage() {
             className="w-full py-2.5 rounded-lg border-2 font-bold uppercase text-xs tracking-wide
                        text-white active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
             style={{
-              background: 'linear-gradient(to bottom, #7D1528, #5C0F1E)',
-              border: '2px solid #5C0F1E',
+              background: 'linear-gradient(to bottom, #6B7A52, #4F5E3C)',
+              border: '2px solid #4F5E3C',
               boxShadow: '3px 3px 0 rgba(0,0,0,0.85)',
             }}
           >

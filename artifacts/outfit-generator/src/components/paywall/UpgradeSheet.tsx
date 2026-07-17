@@ -1,6 +1,6 @@
 /**
  * UpgradeSheet — full-screen paywall, one page, no scroll.
- * Pink/rose palette to match app brand.
+ * Sage green palette to match app brand.
  */
 import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -16,9 +16,9 @@ interface Props {
 }
 
 // ── Brand colours — Spin It button palette ───────────────────────────────────
-const ROSE       = "#7D1528";   // icon burgundy (button top)
-const ROSE_DARK  = "#5C0F1E";   // icon burgundy dark (button bottom)
-const ROSE_LIGHT = "#fdf0f2";   // very light blush tint for selected card bg
+const ROSE       = "#6B7A52";   // sage green (button top)
+const ROSE_DARK  = "#4F5E3C";   // sage green dark (button bottom)
+const ROSE_LIGHT = "#f0f4eb";   // very light sage tint for selected card bg
 const ROSE_MID   = "#d4af37";   // gold border / badge colour
 
 // ── Data ─────────────────────────────────────────────────────────────────────
@@ -98,12 +98,12 @@ export function UpgradeSheet({ onClose }: Props) {
         style={{
           paddingTop: "env(safe-area-inset-top)",
           minHeight: 64,
-          backgroundColor: "#5C0F1E",
+          backgroundColor: "#4F5E3C",
           backgroundImage: [
             // horizontal stripes — matching app icon plaid pattern
-            "repeating-linear-gradient(0deg, transparent 0px, transparent 20px, rgba(40,0,12,0.38) 20px, rgba(40,0,12,0.38) 30px, rgba(255,255,255,0.45) 30px, rgba(255,255,255,0.45) 32px, rgba(40,0,12,0.38) 32px, rgba(40,0,12,0.38) 42px, transparent 42px, transparent 62px)",
+            "repeating-linear-gradient(0deg, transparent 0px, transparent 20px, rgba(0,20,0,0.25) 20px, rgba(0,20,0,0.25) 30px, rgba(255,255,255,0.35) 30px, rgba(255,255,255,0.35) 32px, rgba(0,20,0,0.25) 32px, rgba(0,20,0,0.25) 42px, transparent 42px, transparent 62px)",
             // vertical stripes
-            "repeating-linear-gradient(90deg, transparent 0px, transparent 20px, rgba(40,0,12,0.38) 20px, rgba(40,0,12,0.38) 30px, rgba(255,255,255,0.45) 30px, rgba(255,255,255,0.45) 32px, rgba(40,0,12,0.38) 32px, rgba(40,0,12,0.38) 42px, transparent 42px, transparent 62px)",
+            "repeating-linear-gradient(90deg, transparent 0px, transparent 20px, rgba(0,20,0,0.25) 20px, rgba(0,20,0,0.25) 30px, rgba(255,255,255,0.35) 30px, rgba(255,255,255,0.35) 32px, rgba(0,20,0,0.25) 32px, rgba(0,20,0,0.25) 42px, transparent 42px, transparent 62px)",
           ].join(", "),
         }}
       >

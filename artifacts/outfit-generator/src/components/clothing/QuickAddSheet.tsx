@@ -207,7 +207,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
                              shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]
                              active:translate-x-1 active:translate-y-1 active:shadow-none
                              transition-all"
-                  style={{ background: "linear-gradient(to bottom, #7D1528, #5C0F1E)" }}
+                  style={{ background: "linear-gradient(to bottom, #6B7A52, #4F5E3C)" }}
                 >
                   <span className="text-4xl leading-none">📷</span>
                   <span className="font-display font-bold text-base uppercase tracking-tight text-center leading-tight">
@@ -240,7 +240,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
                     <li key={tip} className="flex items-start gap-2 text-sm text-black/70 leading-snug">
                       <span className="mt-0.5 w-4 h-4 border-2 border-black rounded-sm
                                        flex items-center justify-center flex-shrink-0"
-                        style={{ background: "#5C0F1E" }}>
+                        style={{ background: "#4F5E3C" }}>
                         <Check className="w-2.5 h-2.5" strokeWidth={3} />
                       </span>
                       {tip}

@@ -22,8 +22,8 @@ import { useQueryClient } from "@tanstack/react-query";
 const IMG_W = 1086;
 const IMG_H = 1448;
 const NAV_H = 90;
-const PLUM       = "#7D1528";   // icon burgundy (light)
-const PLUM_DARK  = "#5C0F1E";   // icon burgundy (dark)
+const PLUM       = "#6B7A52";   // sage green (light)
+const PLUM_DARK  = "#4F5E3C";   // sage green (dark)
 const GOLD       = "#d4af37";
 const GOLD_LIGHT = "#f0d080";
 

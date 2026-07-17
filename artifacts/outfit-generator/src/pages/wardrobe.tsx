@@ -276,7 +276,7 @@ export default function WardrobePage() {
                 boxShadow: totalItems >= FREE_ITEM_LIMIT
                   ? "0 0 0 1.5px rgba(200,40,40,0.45)"
                   : "0 0 0 1.5px rgba(92,15,30,0.35)",
-                color: totalItems >= FREE_ITEM_LIMIT ? "#c02020" : "#5C0F1E",
+                color: totalItems >= FREE_ITEM_LIMIT ? "#c02020" : "#4F5E3C",
                 fontWeight: 700, fontSize: 9,
                 letterSpacing: "0.08em", textTransform: "uppercase",
                 whiteSpace: "nowrap", cursor: "pointer",
@@ -468,8 +468,8 @@ export default function WardrobePage() {
                     style={{
                       flex: 1, height: 40, borderRadius: 20,
                       border: "2px solid #d4af37",
-                      background: "linear-gradient(to bottom, #7D1528, #5C0F1E)",
-                      color: "#f0d080", fontWeight: 800, fontSize: 13,
+                      background: "linear-gradient(to bottom, #6B7A52, #4F5E3C)",
+                      color: "#ffffff", fontWeight: 800, fontSize: 13,
                       cursor: saveName.trim() ? "pointer" : "default",
                       opacity: saveName.trim() ? 1 : 0.45,
                       fontFamily: "var(--font-display)",
