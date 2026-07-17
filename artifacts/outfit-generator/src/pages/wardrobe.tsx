@@ -53,7 +53,7 @@ const LM = {
   rows: [
     { sectionTop: 0.10, shelfY: 0.27 },
     { sectionTop: 0.27, shelfY: 0.45 },
-    { sectionTop: 0.46, shelfY: 0.64 },
+    { sectionTop: 0.43, shelfY: 0.61 },
     { sectionTop: 0.65, shelfY: 0.83 },
   ],
   saveAreaY: 0.85,
