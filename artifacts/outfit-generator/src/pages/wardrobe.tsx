@@ -291,18 +291,19 @@ export default function WardrobePage() {
           {ROWS.map(({ key, heading, btnLabel }, rowIdx) => {
             const lm    = LM.rows[rowIdx];
             const items = rowData[key];
-            const secTop = pY(ir, lm.sectionTop);
-            const secH   = pH(ir, lm.shelfY - lm.sectionTop);
+            const secTop   = pY(ir, lm.sectionTop);
+            const shelfTop = pY(ir, lm.shelfY);
+            const secH     = pH(ir, lm.shelfY - lm.sectionTop);
 
             return (
               <React.Fragment key={key}>
-                {/* Heading — anchored to top of section, tappable to add */}
+                {/* Heading — anchored just above the shelf line, tappable to add */}
                 <button
                   onClick={addHandlers[key]}
                   aria-label={btnLabel}
                   data-testid={`add-btn-${key}`}
                   style={{
-                    position: "absolute", top: secTop, left: carLeft,
+                    position: "absolute", top: shelfTop - labelH, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 24, background: "none", border: "none", cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",

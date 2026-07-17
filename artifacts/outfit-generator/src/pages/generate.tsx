@@ -285,14 +285,15 @@ export default function GeneratePage() {
             {ROWS.map(({ key, heading }, rowIdx) => {
               const lm    = LM.rows[rowIdx];
               const items = { "furniture": furniture, "decor": decor, "organization": organization, "supplies": supplies }[key];
-              const secTop = pY(ir, lm.sectionTop);
-              const secH   = pH(ir, lm.shelfY - lm.sectionTop);
+              const secTop   = pY(ir, lm.sectionTop);
+              const shelfTop = pY(ir, lm.shelfY);
+              const secH     = pH(ir, lm.shelfY - lm.sectionTop);
 
               return (
                 <React.Fragment key={key}>
-                  {/* Heading — anchored to top of section */}
+                  {/* Heading — anchored just above the shelf line */}
                   <div style={{
-                    position: "absolute", top: secTop, left: carLeft,
+                    position: "absolute", top: shelfTop - labelH, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 12, display: "flex", alignItems: "center", justifyContent: "center",
                     pointerEvents: "none",
