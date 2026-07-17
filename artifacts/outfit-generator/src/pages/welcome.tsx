@@ -118,15 +118,14 @@ export default function WelcomePage({ onEnter }: Props) {
         {/* Branding */}
         <div style={{ marginTop: 26, textAlign: "center" }}>
           <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            fontWeight: 700,
-            fontSize: "clamp(18px, 5.5vw, 26px)",
-            letterSpacing: "0.08em",
+            fontFamily: "'Great Vibes', cursive",
+            fontWeight: 400,
+            fontSize: "clamp(38px, 11vw, 56px)",
             color: GOLD_LT,
-            textShadow: `0 0 28px rgba(212,175,55,0.5), 0 2px 8px rgba(0,0,0,0.9)`,
-            lineHeight: 1.25,
+            textShadow: `0 0 32px rgba(212,175,55,0.55), 0 2px 10px rgba(0,0,0,0.9)`,
+            lineHeight: 1.15,
           }}>
-            MY DIGITAL<br />HANDBAGS
+            My Digital<br />Handbags
           </div>
           <div style={{
             fontSize: 10, fontWeight: 500,
