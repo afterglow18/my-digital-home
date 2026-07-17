@@ -33,7 +33,7 @@ const ROWS: { key: RowKey; btnLabel: string }[] = [
   { key: "totes",              btnLabel: "+ ADD TOTES"              },
   { key: "shoulder-bags",      btnLabel: "+ ADD SHOULDER BAGS"      },
   { key: "crossbody-bags",     btnLabel: "+ ADD CROSSBODY BAGS"     },
-  { key: "clutches-wristlets", btnLabel: "+ ADD CLUTCHES & WRISTLETS" },
+  { key: "clutches-wristlets", btnLabel: "+ CLUTCHES" },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
