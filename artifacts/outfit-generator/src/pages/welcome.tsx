@@ -328,7 +328,7 @@ export default function WelcomePage({ onEnter }: Props) {
                   color: "rgba(247,242,236,0.55)", marginTop: 18,
                 }}
               >
-                unzip
+                tap to open
               </motion.div>
             )}
           </AnimatePresence>
