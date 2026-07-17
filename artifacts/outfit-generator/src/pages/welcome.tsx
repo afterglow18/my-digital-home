@@ -121,8 +121,8 @@ export default function WelcomePage({ onEnter }: Props) {
             fontFamily: "'Great Vibes', cursive",
             fontWeight: 400,
             fontSize: "clamp(38px, 11vw, 56px)",
-            color: GOLD_LT,
-            textShadow: `0 0 32px rgba(212,175,55,0.55), 0 2px 10px rgba(0,0,0,0.9)`,
+            color: "#f7f2ec",
+            textShadow: `0 0 32px rgba(255,245,235,0.35), 0 2px 10px rgba(0,0,0,0.9)`,
             lineHeight: 1.15,
           }}>
             My Digital<br />Handbags
@@ -130,7 +130,7 @@ export default function WelcomePage({ onEnter }: Props) {
           <div style={{
             fontSize: 10, fontWeight: 500,
             letterSpacing: "0.28em", textTransform: "uppercase",
-            color: "rgba(212,175,55,0.45)", marginTop: 7,
+            color: "rgba(247,242,236,0.5)", marginTop: 7,
           }}>
             your collection, curated
           </div>
@@ -146,7 +146,7 @@ export default function WelcomePage({ onEnter }: Props) {
                 style={{
                   fontSize: 10, letterSpacing: "0.22em",
                   textTransform: "uppercase",
-                  color: "rgba(212,175,55,0.5)", marginTop: 18,
+                  color: "rgba(247,242,236,0.55)", marginTop: 18,
                 }}
               >
                 tap to open
