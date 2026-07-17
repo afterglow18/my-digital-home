@@ -237,7 +237,7 @@ export default function WardrobePage() {
           <div
             style={{
               position: "absolute",
-              top: `calc(${ir.top + pH(ir, 0.005)}px + env(safe-area-inset-top))`,
+              top: `calc(${ir.top + pH(ir, -0.015)}px + env(safe-area-inset-top))`,
               left: 0, right: 0,
               display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
               zIndex: 25,
