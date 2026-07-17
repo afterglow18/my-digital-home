@@ -264,7 +264,7 @@ export default function WardrobePage() {
               aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
               style={{
                 position: "absolute",
-                top: pY(ir, 0.855),
+                top: pY(ir, 0.825),
                 left: 0, right: 0,
                 margin: "0 auto",
                 width: "fit-content",
