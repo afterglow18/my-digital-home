@@ -412,7 +412,9 @@ export default function GeneratePage() {
                     transition={{ type: "spring", stiffness: 360, damping: 26 }}
                     onClick={handleSpin} disabled={!hasItems}
                     style={{
-                      width: "100%", height: 52, borderRadius: 28,
+                      width: "auto", minWidth: 160, maxWidth: 240,
+                      paddingLeft: 32, paddingRight: 32,
+                      height: 52, borderRadius: 28,
                       border: "2.5px solid #d4af37",
                       background: hasItems ? `linear-gradient(to bottom, ${PLUM}, ${PLUM_DARK})` : "rgba(100,50,150,0.25)",
                       color: hasItems ? "#4A3A3A" : "#9a6070",
@@ -457,7 +459,7 @@ export default function GeneratePage() {
                     <button
                       onClick={handleRespin}
                       style={{
-                        flexGrow: 1, flexShrink: 1, flexBasis: "0%", minWidth: 0,
+                        flexGrow: 0, flexShrink: 0, width: 130,
                         height: 44, borderRadius: 24, border: `2.5px solid ${GOLD}`,
                         background: `linear-gradient(to bottom, ${PLUM}, ${PLUM_DARK})`,
                         color: "#4A3A3A", fontFamily: "var(--font-display)",
@@ -473,7 +475,7 @@ export default function GeneratePage() {
                     <button
                       onClick={() => setIsSaveOpen(true)} disabled={!canSave}
                       style={{
-                        flexGrow: 1, flexShrink: 1, flexBasis: "0%", minWidth: 0,
+                        flexGrow: 0, flexShrink: 0, width: 130,
                         height: 44, borderRadius: 24, border: `2.5px solid ${GOLD}`,
                         background: canSave ? "#fff" : "rgba(240,240,240,0.80)",
                         color: "#4A3A3A", fontFamily: "var(--font-display)",
