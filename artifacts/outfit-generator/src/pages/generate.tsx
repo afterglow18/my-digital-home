@@ -78,11 +78,11 @@ const pY = (ir: ImgRect, f: number) => ir.top    + ir.height * f;
 type RowKey = "furniture" | "decor" | "organization" | "supplies";
 type Phase  = "idle" | "spinning" | "result";
 
-const ROWS: { key: RowKey }[] = [
-  { key: "furniture"    },
-  { key: "decor"        },
-  { key: "organization" },
-  { key: "supplies"     },
+const ROWS: { key: RowKey; heading: string }[] = [
+  { key: "furniture",    heading: "FURNITURE"    },
+  { key: "decor",        heading: "DÉCOR"        },
+  { key: "organization", heading: "ORGANIZATION" },
+  { key: "supplies",     heading: "SUPPLIES"     },
 ];
 
 const MIN_SPIN_MS = 1600;
@@ -282,7 +282,7 @@ export default function GeneratePage() {
         return (
           <>
             {/* Shelf carousels — heading at top of each section, photos below at consistent height */}
-            {ROWS.map(({ key }, rowIdx) => {
+            {ROWS.map(({ key, heading }, rowIdx) => {
               const lm    = LM.rows[rowIdx];
               const items = { "furniture": furniture, "decor": decor, "organization": organization, "supplies": supplies }[key];
               const secTop = pY(ir, lm.sectionTop);
@@ -300,10 +300,10 @@ export default function GeneratePage() {
                     <span style={{
                       fontSize: Math.max(9, labelH * 0.55),
                       fontWeight: 300, letterSpacing: "0.22em",
-                      color: "#500d1a",
+                      color: "#3a4a2a",
                       fontFamily: "var(--font-display)", textTransform: "uppercase",
-                      textShadow: "0 1px 3px rgba(255,255,255,0.15)",
-                    }}>{key.toUpperCase()}</span>
+                      textShadow: "0 1px 3px rgba(255,255,255,0.25)",
+                    }}>{heading}</span>
                   </div>
 
                   {/* Carousel or empty placeholder — same height every row */}

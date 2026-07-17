@@ -29,11 +29,11 @@ import { FREE_ITEM_LIMIT } from "@/types/local";
 type RowKey   = "furniture" | "decor" | "organization" | "supplies";
 type Category = "furniture" | "decor" | "organization" | "supplies";
 
-const ROWS: { key: RowKey; btnLabel: string }[] = [
-  { key: "furniture",    btnLabel: "+ ADD FURNITURE"    },
-  { key: "decor",        btnLabel: "+ ADD DÉCOR"        },
-  { key: "organization", btnLabel: "+ ADD ORGANIZATION" },
-  { key: "supplies",     btnLabel: "+ ADD SUPPLIES"     },
+const ROWS: { key: RowKey; heading: string; btnLabel: string }[] = [
+  { key: "furniture",    heading: "FURNITURE",    btnLabel: "+ ADD FURNITURE"    },
+  { key: "decor",        heading: "DÉCOR",        btnLabel: "+ ADD DÉCOR"        },
+  { key: "organization", heading: "ORGANIZATION", btnLabel: "+ ADD ORGANIZATION" },
+  { key: "supplies",     heading: "SUPPLIES",     btnLabel: "+ ADD SUPPLIES"     },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
@@ -288,7 +288,7 @@ export default function WardrobePage() {
           )}
 
           {/* 4 shelf rows — heading pinned to top of section, photos below at consistent height */}
-          {ROWS.map(({ key, btnLabel }, rowIdx) => {
+          {ROWS.map(({ key, heading, btnLabel }, rowIdx) => {
             const lm    = LM.rows[rowIdx];
             const items = rowData[key];
             const secTop = pY(ir, lm.sectionTop);
@@ -311,11 +311,11 @@ export default function WardrobePage() {
                   <span style={{
                     fontSize: Math.max(9, labelH * 0.55),
                     fontWeight: 300, letterSpacing: "0.22em",
-                    color: "#500d1a",
+                    color: "#3a4a2a",
                     fontFamily: "var(--font-display)", textTransform: "uppercase",
-                    textShadow: "0 1px 3px rgba(255,255,255,0.15)",
+                    textShadow: "0 1px 3px rgba(255,255,255,0.25)",
                   }}>
-                    {btnLabel}
+                    {heading}
                   </span>
                 </button>
 
