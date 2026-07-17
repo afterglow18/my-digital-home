@@ -19,6 +19,11 @@ workflows:
         bundle_identifier: com.mydigitalhandbags.app
 
     scripts:
+      - name: Activate pnpm
+        script: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+
       - name: Install dependencies
         script: |
           pnpm install --frozen-lockfile
