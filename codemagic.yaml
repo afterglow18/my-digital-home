@@ -1,6 +1,6 @@
 workflows:
   ios-release:
-    name: iOS Release – My Digital Handbags
+    name: iOS Release – My Digital Home
     instance_type: mac_mini_m2
     max_build_duration: 60
 
@@ -11,14 +11,14 @@ workflows:
       xcode: latest
       node: "22"
       vars:
-        BUNDLE_ID: com.mydigitalhandbags.app
+        BUNDLE_ID: com.mydigitalhome.app
         XCODE_PROJECT: artifacts/outfit-generator/ios/App/App.xcodeproj
         XCODE_SCHEME: App
         COREPACK_ENABLE_STRICT: "0"
         COREPACK_DEFAULT_TO_LATEST: "0"
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.mydigitalhandbags.app
+        bundle_identifier: com.mydigitalhome.app
 
     scripts:
       - name: Install dependencies
