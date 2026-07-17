@@ -51,12 +51,12 @@ const LM = {
   doorL: 0.12,
   doorR: 0.88,
   rows: [
-    { sectionTop: 0.16, shelfY: 0.34 },
-    { sectionTop: 0.34, shelfY: 0.51 },
-    { sectionTop: 0.54, shelfY: 0.70 },
-    { sectionTop: 0.72, shelfY: 0.88 },
+    { sectionTop: 0.10, shelfY: 0.27 },
+    { sectionTop: 0.27, shelfY: 0.45 },
+    { sectionTop: 0.46, shelfY: 0.64 },
+    { sectionTop: 0.65, shelfY: 0.83 },
   ],
-  saveAreaY: 0.90,
+  saveAreaY: 0.85,
 } as const;
 
 // ── useImageRect ─────────────────────────────────────────────────────────────

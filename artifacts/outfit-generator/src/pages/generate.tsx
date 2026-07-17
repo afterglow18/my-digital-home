@@ -36,12 +36,12 @@ const LM = {
   doorL: 0.06,
   doorR: 0.94,
   rows: [
-    { sectionTop: 0.16, shelfY: 0.34 },
-    { sectionTop: 0.34, shelfY: 0.51 },
-    { sectionTop: 0.54, shelfY: 0.70 },
-    { sectionTop: 0.72, shelfY: 0.88 },
+    { sectionTop: 0.10, shelfY: 0.27 },
+    { sectionTop: 0.27, shelfY: 0.45 },
+    { sectionTop: 0.46, shelfY: 0.64 },
+    { sectionTop: 0.65, shelfY: 0.83 },
   ],
-  barY:   0.90,
+  barY:   0.85,
   barBot: 1.00,
 } as const;
 
