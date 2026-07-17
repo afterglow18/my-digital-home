@@ -75,14 +75,14 @@ const pW = (ir: ImgRect, f: number) => ir.width  * f;
 const pX = (ir: ImgRect, f: number) => ir.left   + ir.width  * f;
 const pY = (ir: ImgRect, f: number) => ir.top    + ir.height * f;
 
-type RowKey = "totes" | "shoulder-bags" | "crossbody-bags" | "clutches-wristlets";
+type RowKey = "furniture" | "decor" | "organization" | "supplies";
 type Phase  = "idle" | "spinning" | "result";
 
 const ROWS: { key: RowKey }[] = [
-  { key: "totes"              },
-  { key: "shoulder-bags"      },
-  { key: "crossbody-bags"     },
-  { key: "clutches-wristlets" },
+  { key: "furniture"    },
+  { key: "decor"        },
+  { key: "organization" },
+  { key: "supplies"     },
 ];
 
 const MIN_SPIN_MS = 1600;
@@ -93,10 +93,10 @@ export default function GeneratePage() {
   const ready = ir.width > 0;
 
   const rowRefs: Record<RowKey, RefObject<ClosetRowHandle | null>> = {
-    "totes":              useRef<ClosetRowHandle | null>(null),
-    "shoulder-bags":      useRef<ClosetRowHandle | null>(null),
-    "crossbody-bags":     useRef<ClosetRowHandle | null>(null),
-    "clutches-wristlets": useRef<ClosetRowHandle | null>(null),
+    "furniture":    useRef<ClosetRowHandle | null>(null),
+    "decor":        useRef<ClosetRowHandle | null>(null),
+    "organization": useRef<ClosetRowHandle | null>(null),
+    "supplies":     useRef<ClosetRowHandle | null>(null),
   };
 
   const [phase,      setPhase]      = useState<Phase>("idle");
@@ -105,23 +105,23 @@ export default function GeneratePage() {
   const [saveName,   setSaveName]   = useState("");
 
   const rowDataRef = useRef<Record<RowKey, ClothingItem[]>>({
-    "totes": [], "shoulder-bags": [], "crossbody-bags": [], "clutches-wristlets": [],
+    "furniture": [], "decor": [], "organization": [], "supplies": [],
   });
 
-  const { data: totes             = [] } = useListClothing({ category: "totes"              }, { query: { queryKey: getListClothingQueryKey({ category: "totes"              }) } });
-  const { data: shoulderBags      = [] } = useListClothing({ category: "shoulder-bags"      }, { query: { queryKey: getListClothingQueryKey({ category: "shoulder-bags"      }) } });
-  const { data: crossbodyBags     = [] } = useListClothing({ category: "crossbody-bags"     }, { query: { queryKey: getListClothingQueryKey({ category: "crossbody-bags"     }) } });
-  const { data: clutchesWristlets = [] } = useListClothing({ category: "clutches-wristlets" }, { query: { queryKey: getListClothingQueryKey({ category: "clutches-wristlets" }) } });
+  const { data: furniture    = [] } = useListClothing({ category: "furniture"    }, { query: { queryKey: getListClothingQueryKey({ category: "furniture"    }) } });
+  const { data: decor        = [] } = useListClothing({ category: "decor"        }, { query: { queryKey: getListClothingQueryKey({ category: "decor"        }) } });
+  const { data: organization = [] } = useListClothing({ category: "organization" }, { query: { queryKey: getListClothingQueryKey({ category: "organization" }) } });
+  const { data: supplies     = [] } = useListClothing({ category: "supplies"     }, { query: { queryKey: getListClothingQueryKey({ category: "supplies"     }) } });
 
-  useEffect(() => { rowDataRef.current = { "totes": totes, "shoulder-bags": shoulderBags, "crossbody-bags": crossbodyBags, "clutches-wristlets": clutchesWristlets }; }, [totes, shoulderBags, crossbodyBags, clutchesWristlets]);
+  useEffect(() => { rowDataRef.current = { "furniture": furniture, "decor": decor, "organization": organization, "supplies": supplies }; }, [furniture, decor, organization, supplies]);
 
-  const hasItems = totes.length > 0 || shoulderBags.length > 0 || crossbodyBags.length > 0 || clutchesWristlets.length > 0;
+  const hasItems = furniture.length > 0 || decor.length > 0 || organization.length > 0 || supplies.length > 0;
 
   const setCentredHandlers: Record<RowKey, (item: ClothingItem | null) => void> = {
-    "totes":              useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "totes":              item ?? undefined })), []),
-    "shoulder-bags":      useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "shoulder-bags":      item ?? undefined })), []),
-    "crossbody-bags":     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "crossbody-bags":     item ?? undefined })), []),
-    "clutches-wristlets": useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "clutches-wristlets": item ?? undefined })), []),
+    "furniture":    useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "furniture":    item ?? undefined })), []),
+    "decor":        useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "decor":        item ?? undefined })), []),
+    "organization": useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "organization": item ?? undefined })), []),
+    "supplies":     useCallback((item: ClothingItem | null) => setCentred(p => ({ ...p, "supplies":     item ?? undefined })), []),
   };
 
   const saveOutfit  = useSaveOutfit();
@@ -138,7 +138,7 @@ export default function GeneratePage() {
     setSaveName("");
 
     const spinStart = Date.now();
-    const stop: Record<RowKey, boolean> = { "totes": false, "shoulder-bags": false, "crossbody-bags": false, "clutches-wristlets": false };
+    const stop: Record<RowKey, boolean> = { "furniture": false, "decor": false, "organization": false, "supplies": false };
 
     ROWS.forEach(({ key }, ri) => {
       const INTERVAL = 65 + ri * 18;
@@ -284,7 +284,7 @@ export default function GeneratePage() {
             {/* Shelf carousels — heading at top of each section, photos below at consistent height */}
             {ROWS.map(({ key }, rowIdx) => {
               const lm    = LM.rows[rowIdx];
-              const items = { "totes": totes, "shoulder-bags": shoulderBags, "crossbody-bags": crossbodyBags, "clutches-wristlets": clutchesWristlets }[key];
+              const items = { "furniture": furniture, "decor": decor, "organization": organization, "supplies": supplies }[key];
               const secTop = pY(ir, lm.sectionTop);
               const secH   = pH(ir, lm.shelfY - lm.sectionTop);
 
@@ -382,7 +382,7 @@ export default function GeneratePage() {
                   fontFamily: "var(--font-display)", margin: 0,
                 }}>Your shelves are empty</p>
                 <p style={{ fontSize: 11, color: "#9a5060", marginTop: 5, lineHeight: 1.5 }}>
-                  Add totes, shoulder bags, crossbody bags or clutches in the Home tab first.
+                  Add furniture, décor, organization items or supplies in the Home tab first.
                 </p>
               </div>
             )}

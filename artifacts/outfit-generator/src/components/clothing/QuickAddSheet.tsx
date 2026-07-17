@@ -17,13 +17,13 @@ import { encodeToPng } from "@/lib/processImage";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type Category = "totes" | "shoulder-bags" | "crossbody-bags" | "clutches-wristlets";
+type Category = "furniture" | "decor" | "organization" | "supplies";
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  "totes":              "Totes",
-  "shoulder-bags":      "Shoulder Bags",
-  "crossbody-bags":     "Crossbody Bags",
-  "clutches-wristlets": "Clutches + Wristlets",
+  "furniture":    "Furniture",
+  "decor":        "Décor",
+  "organization": "Organization",
+  "supplies":     "Supplies",
 };
 
 type Phase = "pick" | "uploading";
@@ -270,7 +270,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
                 <p className="text-sm text-muted-foreground mt-1">
                   {progress && progress.total > 1
                     ? `${progress.done} of ${progress.total} photos added.`
-                    : "Adding to your vanity."}
+                    : "Adding to your home."}
                 </p>
               </div>
             </motion.div>

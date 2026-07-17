@@ -18,14 +18,14 @@ import { FREE_OUTFIT_LIMIT } from "@/types/local";
 import { WardrobePickerSheet } from "@/components/clothing/WardrobePickerSheet";
 import { ItemDetailsSheet } from "@/components/clothing/ItemDetailsSheet";
 
-const SLOT_ORDER = ["totes", "shoulder-bags", "crossbody-bags", "clutches-wristlets"] as const;
+const SLOT_ORDER = ["furniture", "decor", "organization", "supplies"] as const;
 type SlotKey = (typeof SLOT_ORDER)[number];
 
 const SLOT_LABELS: Record<SlotKey, string> = {
-  "totes":              "Totes",
-  "shoulder-bags":      "Shoulder Bags",
-  "crossbody-bags":     "Crossbody Bags",
-  "clutches-wristlets": "Clutches + Wristlets",
+  "furniture":    "Furniture",
+  "decor":        "Décor",
+  "organization": "Organization",
+  "supplies":     "Supplies",
 };
 
 function ItemPhoto({

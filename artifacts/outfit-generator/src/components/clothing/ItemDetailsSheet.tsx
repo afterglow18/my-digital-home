@@ -16,7 +16,7 @@ import { getImageUrl } from "@/lib/utils";
 
 const SEASON_OPTIONS   = ["", "Spring", "Summer", "Fall", "Winter", "All Season"];
 const OCCASION_OPTIONS = ["", "Casual", "Work", "Formal", "Sport", "Special Event"];
-const CATEGORY_OPTIONS = ["totes", "shoulder-bags", "crossbody-bags", "clutches-wristlets"];
+const CATEGORY_OPTIONS = ["furniture", "decor", "organization", "supplies"];
 
 function Field({
   label, value, onChange, placeholder, type = "text",

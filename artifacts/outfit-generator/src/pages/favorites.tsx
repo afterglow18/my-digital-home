@@ -35,10 +35,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "totes":              "Totes",
-  "shoulder-bags":      "Shoulder Bags",
-  "crossbody-bags":     "Crossbody Bags",
-  "clutches-wristlets": "Clutches + Wristlets",
+  "furniture":    "Furniture",
+  "decor":        "Décor",
+  "organization": "Organization",
+  "supplies":     "Supplies",
 };
 
 const ORDER_KEY = "closet-favorites-order";
@@ -92,10 +92,10 @@ function SortableTile({ item, onTap }: { item: ClothingItem; onTap: (item: Cloth
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span className="text-2xl opacity-30">
-              {item.category === "clutches-wristlets" ? "👛"
-                : item.category === "crossbody-bags" ? "👜"
-                : item.category === "shoulder-bags" ? "👝"
-                : "🛍️"}
+              {item.category === "supplies" ? "🧴"
+                : item.category === "organization" ? "📦"
+                : item.category === "decor" ? "🪴"
+                : "🛋️"}
             </span>
           </div>
         )}
