@@ -1,5 +1,5 @@
 /**
- * WardrobePage — bg-shelves.png background
+ * WardrobePage — vanity-bg.png (1024×1536 PNG)
  * Local-first: data comes from IndexedDB via useListClothing / useSaveOutfit.
  */
 

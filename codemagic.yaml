@@ -33,7 +33,7 @@ workflows:
         COREPACK_ENABLE_STRICT: "0"
         BUNDLE_ID: com.mydigitalhome.app
         TEAM_ID: 2A78MFVCJS
-        PROFILE_NAME: My Digital Home
+        PROFILE_NAME: My Digital Home App
 
     scripts:
       - name: Install pnpm and dependencies

@@ -1,8 +1,8 @@
 /**
- * RevenueCat seed script — My Digital Home
+ * RevenueCat seed script — My Digital Vanity
  *
  * Creates:
- *   - Project: "My Digital Home"
+ *   - Project: "My Digital Vanity"
  *   - Apps: Test Store (auto-exists), App Store (iOS), optional Android
  *   - Products: monthly ($1.99), yearly ($19.99), lifetime ($9.99 one-time)
  *   - Entitlement: "unlock"
@@ -38,9 +38,9 @@ import {
 } from "@replit/revenuecat-sdk";
 
 // ── Config ──────────────────────────────────────────────────────────────────
-const PROJECT_NAME     = "My Digital Home";
-const IOS_BUNDLE_ID    = "com.mydigitalhome.app";
-const IOS_APP_NAME     = "My Digital Home";
+const PROJECT_NAME     = "My Digital Vanity";
+const IOS_BUNDLE_ID    = "com.mydigitalvanity.app";
+const IOS_APP_NAME     = "My Digital Vanity";
 
 const ENTITLEMENT_ID           = "unlock";
 const ENTITLEMENT_DISPLAY_NAME = "Unlock Forever";
