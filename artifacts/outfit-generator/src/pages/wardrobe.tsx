@@ -233,14 +233,14 @@ export default function WardrobePage() {
 
       {ready && (
         <>
-          {/* Fancy title at top of background */}
+          {/* Fancy title + item counter stacked */}
           <div
             style={{
               position: "absolute",
               top: `calc(${ir.top + pH(ir, 0.005)}px + env(safe-area-inset-top))`,
               left: 0, right: 0,
-              textAlign: "center",
-              zIndex: 20,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+              zIndex: 25,
               pointerEvents: "none",
               userSelect: "none",
             }}
@@ -254,34 +254,31 @@ export default function WardrobePage() {
             }}>
               My Digital Handbags
             </span>
-          </div>
 
-          {/* Item-count badge (free tier) */}
-          {itemsLeft !== null && (
-            <button
-              onClick={() => setUpgradeReason("items")}
-              data-testid="badge-item-count"
-              aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
-              style={{
-                position: "absolute",
-                top: pY(ir, 0.13), left: "50%", transform: "translateX(-50%)",
-                zIndex: 25,
-                padding: "3px 14px", borderRadius: 20, border: "none",
-                background: totalItems >= FREE_ITEM_LIMIT
-                  ? "rgba(200,40,40,0.18)"
-                  : "rgba(212,175,55,0.18)",
-                boxShadow: totalItems >= FREE_ITEM_LIMIT
-                  ? "0 0 0 2px rgba(200,40,40,0.50)"
-                  : "0 0 0 1.5px rgba(212,175,55,0.50)",
-                color: totalItems >= FREE_ITEM_LIMIT ? "#ff6060" : "#f0d080",
-                fontWeight: 700, fontSize: 10,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-                whiteSpace: "nowrap", cursor: "pointer",
-              }}
-            >
-              {totalItems}/{FREE_ITEM_LIMIT} ITEMS
-            </button>
-          )}
+            {itemsLeft !== null && (
+              <button
+                onClick={() => setUpgradeReason("items")}
+                data-testid="badge-item-count"
+                aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
+                style={{
+                  pointerEvents: "auto",
+                  padding: "2px 12px", borderRadius: 20, border: "none",
+                  background: totalItems >= FREE_ITEM_LIMIT
+                    ? "rgba(200,40,40,0.15)"
+                    : "rgba(92,15,30,0.12)",
+                  boxShadow: totalItems >= FREE_ITEM_LIMIT
+                    ? "0 0 0 1.5px rgba(200,40,40,0.45)"
+                    : "0 0 0 1.5px rgba(92,15,30,0.35)",
+                  color: totalItems >= FREE_ITEM_LIMIT ? "#c02020" : "#5C0F1E",
+                  fontWeight: 700, fontSize: 9,
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  whiteSpace: "nowrap", cursor: "pointer",
+                }}
+              >
+                {totalItems}/{FREE_ITEM_LIMIT} ITEMS
+              </button>
+            )}
+          </div>
 
           {/* 4 shelf rows — heading pinned to top of section, photos below at consistent height */}
           {ROWS.map(({ key, btnLabel }, rowIdx) => {
