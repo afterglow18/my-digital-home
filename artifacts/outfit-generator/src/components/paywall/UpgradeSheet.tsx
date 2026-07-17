@@ -134,7 +134,7 @@ export function UpgradeSheet({ onClose }: Props) {
           style={{ fontSize: 34, letterSpacing: "-0.02em" }}
         >
           UNLOCK YOUR<br />
-          <span style={{ color: ROSE }}>JEWELRY BOX</span>
+          <span style={{ color: ROSE }}>HANDBAGS</span>
         </h1>
         <p className="text-xs font-semibold text-black/45 mt-1.5 tracking-wide">
           A premium feature — unlock it once.

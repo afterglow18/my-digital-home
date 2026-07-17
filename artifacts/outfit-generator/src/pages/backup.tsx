@@ -165,7 +165,7 @@ export default function AccountPage() {
           className="font-black uppercase leading-none"
           style={{ fontSize: 32, letterSpacing: '-0.02em' }}
         >
-          MY DIGITAL JEWELRY BOX
+          MY DIGITAL HANDBAGS
         </h1>
       </div>
 
@@ -330,7 +330,7 @@ export default function AccountPage() {
             </div>
             <p className="text-sm text-black/50 font-medium">Version {APP_VERSION}</p>
             <p className="text-sm text-black/60 leading-snug">
-              Your jewelry box stays on your device, works offline, and can be backed up with iCloud.
+              Your handbag collection stays on your device, works offline, and can be backed up with iCloud.
             </p>
           </div>
         </Card>

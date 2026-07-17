@@ -30,7 +30,7 @@ const GOLD_LIGHT = "#f0d080";
 // Fraction of image height reserved at the top of every section for the heading.
 const LABEL_FRAC = 0.042;
 
-// Layout markers calibrated for jewelry-box-bg.png (1086×1448).
+// Layout markers calibrated for handbag-bg.png (1086×1448).
 // All four sections are ~16-18% tall so photos render at the same size.
 const LM = {
   doorL: 0.06,

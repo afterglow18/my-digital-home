@@ -1,9 +1,9 @@
 /**
- * WelcomePage — Jewelry box opening animation.
+ * WelcomePage — Handbag collection opening animation.
  *
  * CLOSED : deep plum box face with gold trim and a clasp.
  * OPENING: 3-D lid swings open (rotateX around the top hinge).
- * OPEN   : jewelry box interior image fully revealed.
+ * OPEN   : handbag collection image fully revealed.
  * EXITING: fade out → onEnter().
  */
 
@@ -16,7 +16,7 @@ type Phase = "closed" | "opening" | "open" | "exiting";
 const OPEN_DURATION_MS  = 2200;  // lid swing (slow, physical feel)
 const HERO_FADE_IN_MS   = 1800;  // hero fades in during the lid swing
 const HOLD_AFTER_MS     = 200;   // brief pause once lid is fully open
-const EXIT_DURATION_MS  = 700;   // whole-screen fade-out → jewelry page
+const EXIT_DURATION_MS  = 700;   // whole-screen fade-out → handbags page
 
 interface Props { onEnter: () => void; }
 
@@ -101,7 +101,7 @@ export default function WelcomePage({ onEnter }: Props) {
           {/* Hero photo — fades IN once lid is fully open, then whole screen fades out */}
           <img
             src="/jewelry-box-open.jpg"
-            alt="Jewelry box interior"
+            alt="Handbag collection interior"
             draggable={false}
             style={{
               width: "100%",
@@ -230,7 +230,7 @@ export default function WelcomePage({ onEnter }: Props) {
               >
                 MY DIGITAL
                 <br />
-                JEWELRY BOX
+                HANDBAGS
               </div>
               <div
                 style={{
