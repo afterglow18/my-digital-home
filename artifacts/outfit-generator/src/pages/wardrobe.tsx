@@ -184,8 +184,11 @@ export default function WardrobePage() {
   const labelH          = ready ? pH(ir, LABEL_FRAC) : 0;
   const minSecH         = ready ? Math.min(...LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))) : 0;
   const consistentPhotoH = Math.max(0, minSecH - labelH);
-  const carLeft         = ready ? pX(ir, LM.doorL) : 0;
-  const carW            = ready ? pW(ir, LM.doorR - LM.doorL) : 0;
+  // Use container-relative insets so the carousel always stays inside the
+  // visible viewport regardless of how much the cover-scaled image overflows.
+  const INSET   = ready ? ir.containerW * 0.10 : 0;   // 10% padding each side
+  const carLeft = ready ? INSET : 0;
+  const carW    = ready ? ir.containerW - INSET * 2 : 0;
 
   return (
     <>
