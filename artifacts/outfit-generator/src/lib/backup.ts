@@ -43,7 +43,7 @@ async function exportNative(json: string, filename: string): Promise<void> {
     const { uri } = await Filesystem.getUri({ path, directory: Directory.Cache });
 
     await Share.share({
-      title: 'My Digital Handbags Backup',
+      title: 'My Digital Home Backup',
       url: uri,
       dialogTitle: 'Save or share your vanity backup',
     });
