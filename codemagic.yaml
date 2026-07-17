@@ -14,16 +14,12 @@ workflows:
         BUNDLE_ID: com.mydigitalhandbags.app
         XCODE_PROJECT: artifacts/outfit-generator/ios/App/App.xcodeproj
         XCODE_SCHEME: App
+        COREPACK_ENABLE_STRICT: "0"
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.mydigitalhandbags.app
 
     scripts:
-      - name: Activate pnpm
-        script: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
       - name: Install dependencies
         script: |
           pnpm install --frozen-lockfile
