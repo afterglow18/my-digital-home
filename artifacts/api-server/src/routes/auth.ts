@@ -39,7 +39,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
   const existing = await db
     .select()
     .from(usersTable)
-    .where(and(eq(usersTable.email, normalized), eq(usersTable.app, "vanity")));
+    .where(and(eq(usersTable.email, normalized), eq(usersTable.app, "home")));
 
   if (existing.length > 0) {
     res.status(409).json({ error: "An account with this email already exists" });
@@ -49,7 +49,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
   const passwordHash = await bcrypt.hash(password, 12);
   const [user] = await db
     .insert(usersTable)
-    .values({ email: normalized, app: "vanity", passwordHash })
+    .values({ email: normalized, app: "home", passwordHash })
     .returning();
 
   const token = await makeToken(user.id);
@@ -68,7 +68,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   const [user] = await db
     .select()
     .from(usersTable)
-    .where(and(eq(usersTable.email, email.toLowerCase().trim()), eq(usersTable.app, "vanity")));
+    .where(and(eq(usersTable.email, email.toLowerCase().trim()), eq(usersTable.app, "home")));
 
   if (!user) {
     res.status(401).json({ error: "Incorrect email or password" });
@@ -121,7 +121,7 @@ router.patch("/auth/me", requireAuth, async (req, res): Promise<void> => {
       res.status(400).json({ error: "That's already your email address" });
       return;
     }
-    const [taken] = await db.select().from(usersTable).where(and(eq(usersTable.email, normalized), eq(usersTable.app, "vanity")));
+    const [taken] = await db.select().from(usersTable).where(and(eq(usersTable.email, normalized), eq(usersTable.app, "home")));
     if (taken) { res.status(409).json({ error: "An account with that email already exists" }); return; }
     updates.email = normalized;
   }

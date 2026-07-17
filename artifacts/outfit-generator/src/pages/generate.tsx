@@ -367,7 +367,7 @@ export default function GeneratePage() {
               )}
             </AnimatePresence>
 
-            {/* Empty vanity prompt */}
+            {/* Empty home prompt */}
             {!hasItems && (
               <div style={{
                 position: "absolute", top: "46%", left: "50%",

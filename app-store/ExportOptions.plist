@@ -13,8 +13,8 @@
   <string>Apple Distribution</string>
   <key>provisioningProfiles</key>
   <dict>
-    <key>com.mydigitalvanity.app</key>
-    <string>My Digital Vanity App</string>
+    <key>com.mydigitalhome.app</key>
+    <string>My Digital Home App</string>
   </dict>
   <key>uploadSymbols</key>
   <true/>
