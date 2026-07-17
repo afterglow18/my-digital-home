@@ -233,7 +233,7 @@ export default function GeneratePage() {
     >
       {/* Background image — centred via CSS transform; iOS clips transform overflow correctly */}
       <img
-        src="/jewelry-box-bg.png"
+        src="/closet-bg.png"
         alt="My Digital Handbags"
         style={{
           position: "absolute",
