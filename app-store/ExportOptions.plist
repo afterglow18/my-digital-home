@@ -14,7 +14,7 @@
   <key>provisioningProfiles</key>
   <dict>
     <key>com.mydigitalhome.app</key>
-    <string>My Digital Home App</string>
+    <string>My Digital Home</string>
   </dict>
   <key>uploadSymbols</key>
   <true/>
