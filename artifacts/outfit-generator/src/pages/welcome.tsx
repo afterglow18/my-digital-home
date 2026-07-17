@@ -183,7 +183,7 @@ export default function WelcomePage({ onEnter }: Props) {
             transition={{ duration: 0.6, delay: 0.4 }}
             style={{
               position: "absolute",
-              top: "calc(env(safe-area-inset-top) + 38px)",
+              top: "calc(env(safe-area-inset-top) + 16px)",
               left: 0, right: 0,
               display: "flex", flexDirection: "column", alignItems: "center",
               zIndex: 10, pointerEvents: "none",
