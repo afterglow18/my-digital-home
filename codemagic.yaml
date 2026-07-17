@@ -1,71 +1,47 @@
 workflows:
-  ios-distribution:
-    name: My Digital Jewelry Box – iOS
+  ios-release:
+    name: iOS Release – My Digital Handbags
+    instance_type: mac_mini_m2
     max_build_duration: 60
+
+    integrations:
+      app_store_connect: codemagic  # set up in Codemagic dashboard → Integrations
+
     environment:
-      groups:
-        - app_store_credentials
+      xcode: latest
+      node: "18"
+      vars:
+        BUNDLE_ID: com.mydigitalhandbags.app
+        XCODE_PROJECT: artifacts/outfit-generator/ios/App/App.xcodeproj
+        XCODE_SCHEME: App
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.mydigitaljewelrybox.app
-      vars:
-        XCODE_PROJECT: "artifacts/outfit-generator/ios/App/App.xcodeproj"
-        XCODE_SCHEME: "App"
-        BUNDLE_ID: "com.mydigitaljewelrybox.app"
-        APPLE_TEAM_ID: "2A78MFVCJS"
+        bundle_identifier: com.mydigitalhandbags.app
+
     scripts:
+      - name: Install pnpm
+        script: |
+          npm install -g pnpm@9
+
       - name: Install dependencies
         script: |
-          npm install -g pnpm@11.4.0 --force
-          # Patch pnpm-workspace.yaml in-place:
-          # - Remove Linux/Replit-only platform exclusions (darwin binaries are needed on macOS)
-          # - Remove minimumReleaseAge (not needed in CI)
-          # - Keep catalog, packages, onlyBuiltDependencies, allowBuilds, and all other settings
-          python3 - << 'PYEOF'
-          import re
+          pnpm install --frozen-lockfile
 
-          with open('pnpm-workspace.yaml', 'r') as f:
-              content = f.read()
-
-          # Remove minimumReleaseAge and minimumReleaseAgeExclude blocks
-          content = re.sub(r'minimumReleaseAge:.*?\n', '', content)
-          content = re.sub(r'minimumReleaseAgeExclude:(\n  -[^\n]*)+\n', '', content)
-
-          # Remove all platform-exclusion overrides (every exclusion has value "-")
-          # This covers esbuild, rollup, lightningcss, tailwind oxide, expo ngrok, etc.
-          content = re.sub(r'[ \t]+"[^"]+": "-"\n', '', content)
-
-          with open('pnpm-workspace.yaml', 'w') as f:
-              f.write(content)
-
-          print("pnpm-workspace.yaml patched successfully")
-          PYEOF
-          # Delete the Linux-generated lockfile so pnpm resolves fresh for macOS ARM64
-          rm -f pnpm-lock.yaml
-          pnpm install
-
-      - name: Build web app
-        script: pnpm --filter @workspace/outfit-generator build
-
-      - name: Sync Capacitor
+      - name: Build web + sync Capacitor
         script: |
-          cd artifacts/outfit-generator
-          CAP="./node_modules/.bin/cap"
-          if [ ! -f "$CAP" ]; then
-            npm install -g @capacitor/cli
-            CAP="cap"
-          fi
-          $CAP sync ios
-
-      - name: Set build number
-        script: |
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" \
-            artifacts/outfit-generator/ios/App/App/Info.plist
+          pnpm --filter @workspace/outfit-generator run build:ios
 
       - name: Set up code signing
-        script: xcode-project use-profiles
+        script: |
+          xcode-project use-profiles
 
-      - name: Build and archive
+      - name: Increment build number
+        script: |
+          LATEST=$(app-store-connect get-latest-build-number "$BUNDLE_ID" 2>/dev/null || echo "0")
+          cd artifacts/outfit-generator/ios/App
+          agvtool new-version -all $((LATEST + 1))
+
+      - name: Build IPA
         script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
@@ -74,10 +50,10 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
 
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        auth: integration
         submit_to_testflight: true
+        submit_to_app_store: false  # flip to true when ready for full review
