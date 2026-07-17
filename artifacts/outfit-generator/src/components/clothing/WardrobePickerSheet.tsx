@@ -13,13 +13,13 @@ import { getImageUrl } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { QuickAddSheet } from "./QuickAddSheet";
 
-type Category = "rings" | "earrings" | "necklaces" | "bracelets";
+type Category = "totes" | "shoulder-bags" | "crossbody-bags" | "clutches-wristlets";
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  rings:     "Rings",
-  earrings:  "Earrings",
-  necklaces: "Necklaces",
-  bracelets: "Bracelets",
+  "totes":              "Totes",
+  "shoulder-bags":      "Shoulder Bags",
+  "crossbody-bags":     "Crossbody Bags",
+  "clutches-wristlets": "Clutches + Wristlets",
 };
 
 interface Props {
@@ -34,7 +34,7 @@ interface Props {
 export function WardrobePickerSheet({ open, onOpenChange, category, onPick, existingItemIds = [] }: Props) {
   const [showQuickAdd, setShowQuickAdd]         = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
-  const [quickAddCategory, setQuickAddCategory] = useState<Category>("rings");
+  const [quickAddCategory, setQuickAddCategory] = useState<Category>("totes");
   const queryClient = useQueryClient();
 
   const params = category ? { category } : {};

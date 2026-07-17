@@ -154,7 +154,7 @@ export async function dbGetWardrobeStats(): Promise<WardrobeStats> {
   const allItems = await db.getAll('clothing');
   const allOutfits = await db.getAll('outfits');
 
-  const byCategory = (['rings', 'earrings', 'necklaces', 'bracelets'] as const).map((cat) => ({
+  const byCategory = (['totes', 'shoulder-bags', 'crossbody-bags', 'clutches-wristlets'] as const).map((cat) => ({
     category: cat,
     count: allItems.filter((i) => i.category === cat).length,
   }));

@@ -26,14 +26,14 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { FREE_ITEM_LIMIT } from "@/types/local";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type RowKey   = "rings" | "earrings" | "necklaces" | "bracelets";
-type Category = "rings" | "earrings" | "necklaces" | "bracelets";
+type RowKey   = "totes" | "shoulder-bags" | "crossbody-bags" | "clutches-wristlets";
+type Category = "totes" | "shoulder-bags" | "crossbody-bags" | "clutches-wristlets";
 
 const ROWS: { key: RowKey; btnLabel: string }[] = [
-  { key: "rings",     btnLabel: "+ ADD RINGS"     },
-  { key: "earrings",  btnLabel: "+ ADD EARRINGS"  },
-  { key: "necklaces", btnLabel: "+ ADD NECKLACES" },
-  { key: "bracelets", btnLabel: "+ ADD BRACELETS" },
+  { key: "totes",              btnLabel: "+ ADD TOTES"              },
+  { key: "shoulder-bags",      btnLabel: "+ ADD SHOULDER BAGS"      },
+  { key: "crossbody-bags",     btnLabel: "+ ADD CROSSBODY BAGS"     },
+  { key: "clutches-wristlets", btnLabel: "+ ADD CLUTCHES & WRISTLETS" },
 ];
 
 // ── Image constants ───────────────────────────────────────────────────────────
@@ -97,10 +97,10 @@ export default function WardrobePage() {
   const ir = useImageRect(containerRef);
 
   const rowRefs: Record<RowKey, RefObject<ClosetRowHandle | null>> = {
-    rings:     useRef<ClosetRowHandle | null>(null),
-    earrings:  useRef<ClosetRowHandle | null>(null),
-    necklaces: useRef<ClosetRowHandle | null>(null),
-    bracelets: useRef<ClosetRowHandle | null>(null),
+    "totes":              useRef<ClosetRowHandle | null>(null),
+    "shoulder-bags":      useRef<ClosetRowHandle | null>(null),
+    "crossbody-bags":     useRef<ClosetRowHandle | null>(null),
+    "clutches-wristlets": useRef<ClosetRowHandle | null>(null),
   };
 
   const [centred,       setCentred]       = useState<Partial<Record<RowKey, ClothingItem>>>({});
@@ -113,14 +113,19 @@ export default function WardrobePage() {
 
   const saveOutfit = useSaveOutfit();
 
-  const { data: rings     = [] } = useListClothing({ category: "rings"     }, { query: { queryKey: getListClothingQueryKey({ category: "rings"     }) } });
-  const { data: earrings  = [] } = useListClothing({ category: "earrings"  }, { query: { queryKey: getListClothingQueryKey({ category: "earrings"  }) } });
-  const { data: necklaces = [] } = useListClothing({ category: "necklaces" }, { query: { queryKey: getListClothingQueryKey({ category: "necklaces" }) } });
-  const { data: bracelets = [] } = useListClothing({ category: "bracelets" }, { query: { queryKey: getListClothingQueryKey({ category: "bracelets" }) } });
+  const { data: totes            = [] } = useListClothing({ category: "totes"              }, { query: { queryKey: getListClothingQueryKey({ category: "totes"              }) } });
+  const { data: shoulderBags     = [] } = useListClothing({ category: "shoulder-bags"      }, { query: { queryKey: getListClothingQueryKey({ category: "shoulder-bags"      }) } });
+  const { data: crossbodyBags    = [] } = useListClothing({ category: "crossbody-bags"     }, { query: { queryKey: getListClothingQueryKey({ category: "crossbody-bags"     }) } });
+  const { data: clutchesWristlets = [] } = useListClothing({ category: "clutches-wristlets" }, { query: { queryKey: getListClothingQueryKey({ category: "clutches-wristlets" }) } });
   const { data: outfits = [] } = useListOutfits();
 
-  const rowData: Record<RowKey, ClothingItem[]> = { rings, earrings, necklaces, bracelets };
-  const totalItems = rings.length + earrings.length + necklaces.length + bracelets.length;
+  const rowData: Record<RowKey, ClothingItem[]> = {
+    "totes":              totes,
+    "shoulder-bags":      shoulderBags,
+    "crossbody-bags":     crossbodyBags,
+    "clutches-wristlets": clutchesWristlets,
+  };
+  const totalItems = totes.length + shoulderBags.length + crossbodyBags.length + clutchesWristlets.length;
 
   const queryClient = useQueryClient();
   const { tier, canAddItem } = useEntitlements();
