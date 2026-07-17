@@ -43,123 +43,78 @@ export default function WelcomePage({ onEnter }: Props) {
         position: "fixed", inset: 0, zIndex: 200,
         cursor: phase === "splash" ? "pointer" : "default",
         overflow: "hidden",
-        background: "#1a2218",
+        background: "#d8ccb4",
       }}
     >
-      {/* ── Hero image — zooms on tap ── */}
-      <motion.img
-        src="/hero-home.png"
-        alt="My Digital Home"
-        draggable={false}
-        animate={phase === "zooming" ? { scale: 1.18, opacity: 0 } : { scale: 1, opacity: 1 }}
-        initial={{ scale: 1.06, opacity: 0 }}
+      {/* ── Scrollable column: image + CTA panel ── */}
+      <motion.div
+        animate={phase === "zooming" ? { scale: 1.14, opacity: 0 } : { scale: 1, opacity: 1 }}
+        initial={{ scale: 1.03, opacity: 0 }}
         transition={
           phase === "zooming"
             ? { duration: ZOOM_MS / 1000, ease: [0.4, 0, 1, 1] }
-            : { duration: 1.1, ease: "easeOut" }
+            : { duration: 1.0, ease: "easeOut" }
         }
         style={{
           position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover", objectPosition: "center top",
-        }}
-      />
-
-      {/* ── Dark gradient overlay for text legibility ── */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: [
-          "linear-gradient(to bottom,",
-          "  rgba(15,20,12,0.55) 0%,",
-          "  rgba(15,20,12,0.10) 38%,",
-          "  rgba(15,20,12,0.10) 62%,",
-          "  rgba(15,20,12,0.75) 100%",
-          ")"
-        ].join(" "),
-      }} />
-
-      {/* ── Top branding ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-        style={{
-          position: "absolute", top: "calc(env(safe-area-inset-top) + 52px)",
-          left: 0, right: 0,
-          display: "flex", flexDirection: "column", alignItems: "center",
-          pointerEvents: "none", zIndex: 10,
+          display: "flex", flexDirection: "column",
+          alignItems: "stretch",
         }}
       >
-        <div style={{
-          fontFamily: "'Great Vibes', cursive",
-          fontWeight: 400,
-          fontSize: "clamp(42px, 13vw, 62px)",
-          color: "#ffffff",
-          textShadow: "0 2px 24px rgba(0,0,0,0.7), 0 1px 6px rgba(0,0,0,0.9)",
-          lineHeight: 1.1,
-          textAlign: "center",
-        }}>
-          My Digital<br />Home
-        </div>
-        <div style={{
-          fontSize: 10, fontWeight: 600,
-          letterSpacing: "0.30em", textTransform: "uppercase",
-          color: "rgba(255,255,255,0.65)", marginTop: 8,
-          textShadow: "0 1px 6px rgba(0,0,0,0.8)",
-        }}>
-          your collection, curated
-        </div>
-      </motion.div>
+        {/* Hero image — full width, natural square ratio */}
+        <img
+          src="/hero-home.jpg"
+          alt="My Digital Home"
+          draggable={false}
+          style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover", objectPosition: "center top", display: "block", flexShrink: 0 }}
+        />
 
-      {/* ── Bottom CTA ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9, duration: 0.7, ease: "easeOut" }}
-        style={{
-          position: "absolute",
-          bottom: "calc(env(safe-area-inset-bottom) + 88px)",
-          left: 0, right: 0,
-          display: "flex", flexDirection: "column", alignItems: "center",
-          gap: 14, zIndex: 10, pointerEvents: "none",
-        }}
-      >
-        {/* Enter button */}
-        <AnimatePresence>
-          {phase === "splash" && (
-            <motion.div
-              key="enter-btn"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35 }}
-              style={{
-                background: "rgba(107,122,82,0.92)",
-                border: "1.5px solid rgba(255,255,255,0.35)",
-                borderRadius: 28,
-                padding: "13px 44px",
-                color: "#ffffff",
-                fontSize: 15, fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.45)",
-                backdropFilter: "blur(6px)",
-                pointerEvents: "auto",
-                cursor: "pointer",
-              }}
-            >
-              Enter My Home
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+        {/* CTA panel — fills remaining height below the image */}
         <div style={{
-          fontSize: 10, letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.45)",
-          textShadow: "0 1px 4px rgba(0,0,0,0.7)",
+          flex: 1,
+          background: "linear-gradient(to bottom, #d4c9ab, #bfb698)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: 18, paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)",
         }}>
-          tap to open
+          <div style={{
+            fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase",
+            color: "rgba(60,52,30,0.6)", fontWeight: 600,
+          }}>
+            your collection, curated
+          </div>
+
+          <AnimatePresence>
+            {phase === "splash" && (
+              <motion.div
+                key="enter-btn"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  background: "#6B7A52",
+                  borderRadius: 30,
+                  padding: "14px 52px",
+                  color: "#ffffff",
+                  fontSize: 15, fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  boxShadow: "0 4px 18px rgba(60,70,40,0.35)",
+                  cursor: "pointer",
+                }}
+              >
+                Enter My Home
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div style={{
+            fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase",
+            color: "rgba(60,52,30,0.4)",
+          }}>
+            tap anywhere to open
+          </div>
         </div>
       </motion.div>
 
