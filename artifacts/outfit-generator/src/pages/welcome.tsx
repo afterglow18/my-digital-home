@@ -100,7 +100,7 @@ export default function WelcomePage({ onEnter }: Props) {
         >
           {/* Hero photo — fades IN once lid is fully open, then whole screen fades out */}
           <img
-            src="/jewelry-box-open.jpg"
+            src="/handbag-hero.jpg"
             alt="Handbag collection interior"
             draggable={false}
             style={{
