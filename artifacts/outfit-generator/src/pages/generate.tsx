@@ -258,7 +258,7 @@ export default function GeneratePage() {
         <div
           style={{
             position: "absolute",
-            top: `calc(${ir.top + pH(ir, 0.02)}px + env(safe-area-inset-top))`,
+            top: `calc(${ir.top + pH(ir, 0.005)}px + env(safe-area-inset-top))`,
             left: 0, right: 0,
             textAlign: "center",
             zIndex: 20,
