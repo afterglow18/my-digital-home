@@ -9,7 +9,7 @@ workflows:
 
     environment:
       xcode: latest
-      node: "18"
+      node: "20"
       vars:
         BUNDLE_ID: com.mydigitalhandbags.app
         XCODE_PROJECT: artifacts/outfit-generator/ios/App/App.xcodeproj
