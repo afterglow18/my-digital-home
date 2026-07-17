@@ -23,7 +23,7 @@ const ROSE_MID   = "#d4af37";   // gold border / badge colour
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  "Unlimited beauty products",
+  "Unlimited handbags",
   "Unlimited saved looks",
   "Save your entire handbag collection",
   "One-time payment options",
