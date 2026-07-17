@@ -206,7 +206,7 @@ export default function WardrobePage() {
       {/* Background image — centred via CSS transform; iOS clips transform overflow correctly */}
       <img
         src="/jewelry-box-bg.png"
-        alt="My Digital Jewelry Box"
+        alt="My Digital Handbags"
         style={{
           position: "absolute",
           top:       ready ? ir.top   : 0,
@@ -220,7 +220,7 @@ export default function WardrobePage() {
           zIndex: 0,
         }}
       />
-      {/* Plum tint overlay — shifts tones toward jewelry box palette */}
+      {/* Plum tint overlay — shifts tones toward handbag collection palette */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "rgba(40, 5, 60, 0.22)",
@@ -247,7 +247,7 @@ export default function WardrobePage() {
               textShadow: "0 2px 12px rgba(0,0,0,0.7), 0 0 24px rgba(212,175,55,0.4)",
               lineHeight: 1,
             }}>
-              My Digital Jewelry Box
+              My Digital Handbags
             </span>
           </div>
 

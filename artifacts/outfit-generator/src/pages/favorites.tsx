@@ -182,7 +182,7 @@ export default function FavoritesPage() {
           </div>
           <h3 className="font-display font-bold text-xl mb-2">No faves yet.</h3>
           <p className="text-sm font-medium text-muted-foreground">
-            Tap any item in your jewelry box, then tap the ❤️ to save it here.
+            Tap any item in your handbag collection, then tap the ❤️ to save it here.
           </p>
         </div>
       )}

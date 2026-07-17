@@ -144,7 +144,7 @@ export default function AccountPage() {
     } catch (err) {
       setErrorMsg(
         err instanceof Error && err.message.includes('Invalid')
-          ? "This file doesn't look like a valid jewelry box backup."
+          ? "This file doesn't look like a valid handbag collection backup."
           : 'Import failed. The backup file may be corrupted.',
       );
       setBackupStatus('error');
@@ -222,7 +222,7 @@ export default function AccountPage() {
 
             {/* Description */}
             <p className="text-sm text-black/60 leading-snug">
-              Export your jewelry box to a JSON file. Save it to iCloud Drive or Files to keep
+              Export your handbag collection to a JSON file. Save it to iCloud Drive or Files to keep
               it safe across phone upgrades.
             </p>
 
@@ -234,7 +234,7 @@ export default function AccountPage() {
 
             {/* Warning */}
             <p className="text-xs font-bold leading-snug" style={{ color: '#C0392B' }}>
-              ⚠️ Deleting the app removes all your jewelry box data.
+              ⚠️ Deleting the app removes all your handbag collection data.
               Export a backup first to keep it safe.
             </p>
 
@@ -246,7 +246,7 @@ export default function AccountPage() {
 
             {/* Import note */}
             <p className="text-xs text-black/40 text-center leading-snug">
-              Importing replaces your current jewelry box with the backup.
+              Importing replaces your current handbag collection with the backup.
             </p>
 
             {/* Error message */}
@@ -326,7 +326,7 @@ export default function AccountPage() {
           <div className="px-4 pt-4 pb-5 flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <span className="text-2xl leading-none">💍</span>
-              <h2 className="font-black text-base uppercase tracking-wide">My Digital Jewelry Box</h2>
+              <h2 className="font-black text-base uppercase tracking-wide">My Digital Handbags</h2>
             </div>
             <p className="text-sm text-black/50 font-medium">Version {APP_VERSION}</p>
             <p className="text-sm text-black/60 leading-snug">
@@ -356,7 +356,7 @@ export default function AccountPage() {
                 Replace everything?
               </h3>
               <p className="text-sm text-black/60 mb-5 leading-snug">
-                This will permanently delete your current jewelry box and replace it with the backup.
+                This will permanently delete your current handbag collection and replace it with the backup.
                 This cannot be undone.
               </p>
               <div className="flex gap-3">

@@ -1,5 +1,5 @@
 /**
- * GeneratePage — "Spin It" screen for My Digital Jewelry Box.
+ * GeneratePage — "Spin It" screen for My Digital Handbags.
  * Local-first: data comes from IndexedDB via useListClothing / useSaveOutfit.
  */
 
@@ -234,7 +234,7 @@ export default function GeneratePage() {
       {/* Background image — centred via CSS transform; iOS clips transform overflow correctly */}
       <img
         src="/jewelry-box-bg.png"
-        alt="My Digital Jewelry Box"
+        alt="My Digital Handbags"
         style={{
           position: "absolute",
           top:       ready ? ir.top   : 0,
@@ -248,7 +248,7 @@ export default function GeneratePage() {
           zIndex: 0,
         }}
       />
-      {/* Subtle plum overlay — preserves jewelry box warmth */}
+      {/* Subtle plum overlay — preserves handbag collection warmth */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "rgba(30, 5, 50, 0.12)",
@@ -273,7 +273,7 @@ export default function GeneratePage() {
             textShadow: "0 2px 12px rgba(0,0,0,0.7), 0 0 24px rgba(212,175,55,0.4)",
             lineHeight: 1,
           }}>
-            My Digital Jewelry Box
+            My Digital Handbags
           </span>
         </div>
       )}
@@ -382,7 +382,7 @@ export default function GeneratePage() {
                   fontFamily: "var(--font-display)", margin: 0,
                 }}>Your vanity is empty</p>
                 <p style={{ fontSize: 11, color: "#9a5060", marginTop: 5, lineHeight: 1.5 }}>
-                  Add rings, earrings, necklaces or bracelets in the Jewelry Box tab first.
+                  Add rings, earrings, necklaces or bracelets in the Handbags tab first.
                 </p>
               </div>
             )}

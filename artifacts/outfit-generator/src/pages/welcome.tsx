@@ -210,7 +210,7 @@ export default function WelcomePage({ onEnter }: Props) {
               }}>
                 <img
                   src="/app-icon.jpg"
-                  alt="My Digital Jewelry Box"
+                  alt="My Digital Handbags"
                   draggable={false}
                   style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 />
