@@ -35,9 +35,8 @@ workflows:
 
       - name: Increment build number
         script: |
-          LATEST=$(app-store-connect get-latest-build-number "$BUNDLE_ID" 2>/dev/null || echo "1")
           cd artifacts/outfit-generator/ios/App
-          agvtool new-version -all $((LATEST + 1))
+          agvtool new-version -all $(date +%s)
 
       - name: Build IPA
         script: |
