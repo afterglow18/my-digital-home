@@ -117,40 +117,22 @@ workflows:
             -workspace App.xcodeproj/project.xcworkspace \
             -scheme App
 
-      - name: Xcode archive
+      - name: Build IPA
         script: |
-          cd artifacts/outfit-generator/ios/App
-          xcodebuild \
-            -workspace App.xcodeproj/project.xcworkspace \
-            -scheme App \
-            -sdk iphoneos \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=NO \
-            ARCHS=arm64 \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            DEVELOPMENT_TEAM=2A78MFVCJS \
-            -archivePath "$CM_BUILD_DIR/build/App.xcarchive" \
-            archive
-
-      - name: Export IPA
-        script: |
-          xcodebuild \
-            -exportArchive \
-            -archivePath "$CM_BUILD_DIR/build/App.xcarchive" \
-            -exportOptionsPlist app-store/ExportOptions.plist \
-            -exportPath "$CM_BUILD_DIR/build/ipa"
+          xcode-project build-ipa \
+            --workspace "artifacts/outfit-generator/ios/App/App.xcodeproj/project.xcworkspace" \
+            --scheme "$XCODE_SCHEME"
 
       - name: Upload to TestFlight
         script: |
           echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/AuthKey.p8
           app-store-connect publish \
-            --path "$CM_BUILD_DIR/build/ipa/App.ipa" \
+            --path $(find $CM_BUILD_DIR/build/ios/ipa -name "*.ipa" | head -1) \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
             --private-key "@file:/tmp/AuthKey.p8" \
             --testflight
 
     artifacts:
-      - $CM_BUILD_DIR/build/ipa/*.ipa
+      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
