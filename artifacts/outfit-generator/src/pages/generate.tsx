@@ -30,7 +30,7 @@ const GOLD_LIGHT = "#f0d080";
 // Fraction of image height reserved at the top of every section for the heading.
 const LABEL_FRAC = 0.042;
 
-// Layout markers calibrated for handbag-bg.png (1086×1448).
+// Layout markers calibrated for home-bg.png (1086×1448).
 // All four sections are ~16-18% tall so photos render at the same size.
 const LM = {
   doorL: 0.06,
@@ -248,7 +248,7 @@ export default function GeneratePage() {
           zIndex: 0,
         }}
       />
-      {/* Subtle plum overlay — preserves handbag collection warmth */}
+      {/* Subtle plum overlay — preserves home collection warmth */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "rgba(50, 5, 15, 0.12)",
@@ -382,7 +382,7 @@ export default function GeneratePage() {
                   fontFamily: "var(--font-display)", margin: 0,
                 }}>Your shelves are empty</p>
                 <p style={{ fontSize: 11, color: "#9a5060", marginTop: 5, lineHeight: 1.5 }}>
-                  Add totes, shoulder bags, crossbody bags or clutches in the Handbags tab first.
+                  Add totes, shoulder bags, crossbody bags or clutches in the Home tab first.
                 </p>
               </div>
             )}

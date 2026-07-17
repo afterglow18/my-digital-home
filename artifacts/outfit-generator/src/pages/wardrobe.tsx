@@ -44,7 +44,7 @@ const NAV_H = 90;
 // Fraction of image height reserved at the top of every section for the heading.
 const LABEL_FRAC = 0.042;
 
-// Layout markers calibrated for handbag-bg.png (1086×1448).
+// Layout markers calibrated for home-bg.png (1086×1448).
 // All four sections are ~16-18% tall so photos render at the same size.
 // Row 1 → LED + velvet roll; Rows 2-4 → the three open shelf bays.
 const LM = {
@@ -225,7 +225,7 @@ export default function WardrobePage() {
           zIndex: 0,
         }}
       />
-      {/* Plum tint overlay — shifts tones toward handbag collection palette */}
+      {/* Plum tint overlay — shifts tones toward home collection palette */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "rgba(60, 5, 15, 0.22)",

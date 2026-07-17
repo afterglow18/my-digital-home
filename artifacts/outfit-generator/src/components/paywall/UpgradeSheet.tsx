@@ -23,9 +23,9 @@ const ROSE_MID   = "#d4af37";   // gold border / badge colour
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  "Unlimited handbags",
+  "Unlimited home",
   "Unlimited saved looks",
-  "Save your entire handbag collection",
+  "Save your entire home collection",
   "One-time payment options",
 ] as const;
 
@@ -134,7 +134,7 @@ export function UpgradeSheet({ onClose }: Props) {
           style={{ fontSize: 34, letterSpacing: "-0.02em" }}
         >
           UNLOCK YOUR<br />
-          <span style={{ color: ROSE }}>HANDBAGS</span>
+          <span style={{ color: ROSE }}>HOME</span>
         </h1>
         <p className="text-xs font-semibold text-black/45 mt-1.5 tracking-wide">
           A premium feature — unlock it once.

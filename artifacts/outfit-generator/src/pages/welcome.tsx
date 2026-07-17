@@ -1,7 +1,7 @@
 /**
- * WelcomePage — Burgundy handbag unzip animation.
+ * WelcomePage — Burgundy home unzip animation.
  *
- * SPLASH    : side-view burgundy handbag with handles, gold zipper, branding.
+ * SPLASH    : side-view burgundy home with handles, gold zipper, branding.
  * UNZIPPING : zipper pull slides left→right (pixel-based); interior wipes open.
  * ZOOMING   : whole bag scales up — camera dives into the opening.
  * HERO      : hero image crossfades in at peak zoom.
@@ -22,7 +22,7 @@ const EXIT_MS  = 700;
 const GOLD    = "#d4af37";
 const GOLD_LT = "#f0d080";
 
-// ── Handbag geometry (all in SVG px) ─────────────────────────────────────────
+// ── Home geometry (all in SVG px) ─────────────────────────────────────────
 const W  = 300;   // SVG canvas width
 const H  = 260;   // SVG canvas height
 const BX = 18;    // body left
@@ -117,8 +117,8 @@ export default function WelcomePage({ onEnter }: Props) {
 
       {/* Hero image */}
       <motion.img
-        src="/handbag-hero.jpg"
-        alt="Handbag collection"
+        src="/home-hero.jpg"
+        alt="Home collection"
         draggable={false}
         animate={{ opacity: heroVisible ? 1 : 0 }}
         transition={{ duration: HERO_MS / 1000, ease: "easeOut" }}
@@ -137,7 +137,7 @@ export default function WelcomePage({ onEnter }: Props) {
           transformOrigin: "50% 36%",   // aim zoom toward the zipper opening
         }}
       >
-        {/* ── Handbag illustration ── */}
+        {/* ── Home illustration ── */}
         <div style={{
           position: "relative", width: W, height: H,
           filter: "drop-shadow(0 20px 50px rgba(0,0,0,0.9)) drop-shadow(0 4px 16px rgba(120,10,35,0.55))",
@@ -304,7 +304,7 @@ export default function WelcomePage({ onEnter }: Props) {
             textShadow: "0 0 32px rgba(212,175,55,0.5), 0 2px 10px rgba(0,0,0,0.9)",
             lineHeight: 1.15,
           }}>
-            My Digital<br />Handbags
+            My Digital<br />Home
           </div>
           <div style={{
             fontSize: 10, fontWeight: 500,
