@@ -303,7 +303,7 @@ export default function WardrobePage() {
                   aria-label={btnLabel}
                   data-testid={`add-btn-${key}`}
                   style={{
-                    position: "absolute", top: shelfTop, left: carLeft,
+                    position: "absolute", top: shelfTop - labelH, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 24, background: "none", border: "none", cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",

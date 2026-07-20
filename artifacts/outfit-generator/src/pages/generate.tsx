@@ -293,7 +293,7 @@ export default function GeneratePage() {
                 <React.Fragment key={key}>
                   {/* Heading — centred on the shelf glow line */}
                   <div style={{
-                    position: "absolute", top: shelfTop, left: carLeft,
+                    position: "absolute", top: shelfTop - labelH, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 12, display: "flex", alignItems: "center", justifyContent: "center",
                     pointerEvents: "none",
