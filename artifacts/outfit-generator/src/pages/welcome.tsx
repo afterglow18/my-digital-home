@@ -59,7 +59,7 @@ export default function WelcomePage({ onEnter }: Props) {
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
-          objectFit: "contain", objectPosition: "center center",
+          objectFit: "cover", objectPosition: "center center",
           pointerEvents: "none",
         }}
       />
