@@ -185,10 +185,15 @@ export default function WardrobePage() {
   const itemsLeft = isFree ? Math.max(0, FREE_ITEM_LIMIT - totalItems) : null;
   const ready     = ir.width > 0;
 
-  // Consistent photo height = smallest section minus the heading strip.
+  // Consistent photo height = smallest gap between adjacent label tops, minus
+  // one label height and a small buffer so photos never touch the next heading.
   const labelH          = ready ? pH(ir, LABEL_FRAC) : 0;
-  const minSecH         = ready ? Math.min(...LM.rows.map(lm => pH(ir, lm.shelfY - lm.sectionTop))) : 0;
-  const consistentPhotoH = Math.max(0, minSecH - labelH);
+  const minAvailH       = ready ? Math.min(
+    pH(ir, LM.rows[1].labelY - LM.rows[0].labelY) - labelH,
+    pH(ir, LM.rows[2].labelY - LM.rows[1].labelY) - labelH,
+    pH(ir, LM.rows[3].labelY - LM.rows[2].labelY) - labelH,
+  ) : 0;
+  const consistentPhotoH = Math.max(0, minAvailH - 4);
   // Use container-relative insets so the carousel always stays inside the
   // visible viewport regardless of how much the cover-scaled image overflows.
   const INSET   = ready ? ir.containerW * 0.10 : 0;   // 10% padding each side
