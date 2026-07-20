@@ -60,7 +60,7 @@ export default function WelcomePage({ onEnter }: Props) {
         }}
         transition={{
           opacity: { duration: 0.25, ease: "easeIn" },
-          scale:   { duration: (OPEN_MS + HOLD_MS) / 1000, ease: [0.2, 0, 0.6, 1] },
+          scale:   { duration: (OPEN_MS + HOLD_MS + EXIT_MS) / 1000, ease: [0.1, 0, 0.3, 1] },
         }}
         style={{
           position: "absolute", inset: 0,
