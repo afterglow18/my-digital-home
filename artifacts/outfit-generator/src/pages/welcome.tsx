@@ -53,10 +53,10 @@ export default function WelcomePage({ onEnter }: Props) {
         src="/hero-home.jpg"
         alt="My Digital Home"
         draggable={false}
-        initial={{ opacity: 0, scale: 0.25 }}
+        initial={{ opacity: 0, scale: 0.5 }}
         animate={{
           opacity: phase === "splash" ? 0 : 1,
-          scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 2.0 : 0.25,
+          scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 2.0 : 0.5,
         }}
         transition={{
           opacity: { duration: 0.25, ease: "easeIn" },
