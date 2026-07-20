@@ -32,7 +32,7 @@ import React, {
 const SCALE_CTR   = 1.12;            // center card is 12% larger
 const SCALE_SIDE  = 0.88;            // side cards are 88% of center
 const OPACITY_SIDE = 0.72;           // side cards fade to 72%
-const BG_CENTER   = "hsla(84,30%,62%,0.28)";   // frosted sage glow for selected item
+const BG_CENTER   = "hsla(84,30%,62%,0.60)";   // frosted sage glow for selected item
 const SHADOW_CTR  = "0 0 18px 6px rgba(150,190,100,0.40), 0 2px 8px rgba(0,0,0,0.12)";
 import type { ClothingItem } from "@/types/local";
 import { getImageUrl } from "@/lib/utils";
@@ -287,7 +287,7 @@ export const ClosetRow = forwardRef<ClosetRowHandle, ClosetRowProps>(
               const p = Math.max(0, Math.min(1, 1 - distSlots));
               scale   = SCALE_SIDE  + (SCALE_CTR   - SCALE_SIDE)   * p;
               opacity = OPACITY_SIDE + (1           - OPACITY_SIDE) * p;
-              bg      = p > 0.5 ? `hsla(84,30%,62%,${((p - 0.5) * 2 * 0.28).toFixed(3)})` : "transparent";
+              bg      = p > 0.5 ? `hsla(84,30%,62%,${((p - 0.5) * 2 * 0.60).toFixed(3)})` : "transparent";
               shadow  = p > 0.05
                 ? `0 0 ${(18 * p).toFixed(1)}px ${(6 * p).toFixed(1)}px rgba(150,190,100,${(0.40 * p).toFixed(3)})`
                 : "none";
