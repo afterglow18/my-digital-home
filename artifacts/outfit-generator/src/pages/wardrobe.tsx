@@ -238,15 +238,14 @@ export default function WardrobePage() {
 
       {ready && (
         <>
-          {/* Fancy title */}
+          {/* Fancy title + item counter */}
           <div
             style={{
               position: "absolute",
               top: `calc(${ir.top + pH(ir, -0.015)}px + env(safe-area-inset-top))`,
               left: 0, right: 0,
-              display: "flex", flexDirection: "column", alignItems: "center",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
               zIndex: 25,
-              pointerEvents: "none",
               userSelect: "none",
             }}
           >
@@ -256,41 +255,29 @@ export default function WardrobePage() {
               color: "#0a0a0a",
               textShadow: "0 1px 4px rgba(255,255,255,0.3)",
               lineHeight: 1,
+              pointerEvents: "none",
             }}>
               My Digital Home
             </span>
+            {itemsLeft !== null && (
+              <button
+                onClick={() => setUpgradeReason("items")}
+                data-testid="badge-item-count"
+                aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
+                style={{
+                  background: "none", border: "none", padding: 0, cursor: "pointer",
+                  color: "#ffffff",
+                  fontWeight: 700, fontSize: 9,
+                  letterSpacing: "0.10em", textTransform: "uppercase",
+                  textShadow: "0 1px 3px rgba(0,0,0,0.40)",
+                  whiteSpace: "nowrap",
+                  pointerEvents: "auto",
+                }}
+              >
+                {totalItems}/{FREE_ITEM_LIMIT} ITEMS
+              </button>
+            )}
           </div>
-
-          {/* Item counter — bottom of shelving unit, below last shelf */}
-          {itemsLeft !== null && (
-            <button
-              onClick={() => setUpgradeReason("items")}
-              data-testid="badge-item-count"
-              aria-label={`${totalItems} of ${FREE_ITEM_LIMIT} items used — tap to upgrade`}
-              style={{
-                position: "absolute",
-                top: pY(ir, 0.825),
-                left: 0, right: 0,
-                margin: "0 auto",
-                width: "fit-content",
-                pointerEvents: "auto",
-                padding: "2px 12px", borderRadius: 20, border: "none",
-                background: totalItems >= FREE_ITEM_LIMIT
-                  ? "rgba(200,40,40,0.15)"
-                  : "rgba(92,15,30,0.12)",
-                boxShadow: totalItems >= FREE_ITEM_LIMIT
-                  ? "0 0 0 1.5px rgba(200,40,40,0.45)"
-                  : "0 0 0 1.5px rgba(92,15,30,0.35)",
-                color: totalItems >= FREE_ITEM_LIMIT ? "#c02020" : "#4F5E3C",
-                fontWeight: 700, fontSize: 9,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-                whiteSpace: "nowrap", cursor: "pointer",
-                zIndex: 25,
-              }}
-            >
-              {totalItems}/{FREE_ITEM_LIMIT} ITEMS
-            </button>
-          )}
 
           {/* 4 shelf rows — heading pinned to top of section, photos below at consistent height */}
           {ROWS.map(({ key, heading, btnLabel }, rowIdx) => {
