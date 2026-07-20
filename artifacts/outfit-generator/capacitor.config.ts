@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.mydigitalhome.app',
-  appName: 'My Digital Home',
+  appName: 'My Home',
   webDir: 'dist/public',
 
   // -------------------------------------------------------------------------
