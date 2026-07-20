@@ -38,8 +38,14 @@ export default function WelcomePage({ onEnter }: Props) {
 
   return (
     <motion.div
-      animate={{ opacity: phase === "exiting" ? 0 : 1 }}
-      transition={{ duration: EXIT_MS / 1000, ease: "easeIn" }}
+      animate={{
+        opacity: phase === "exiting" ? 0 : 1,
+        scale:   (phase === "opening" || phase === "open" || phase === "exiting") ? 1.35 : 1,
+      }}
+      transition={{
+        opacity: { duration: EXIT_MS / 1000, ease: "easeIn" },
+        scale:   { duration: OPEN_MS / 1000, ease: [0.4, 0, 0.2, 1] },
+      }}
       onClick={phase === "splash" ? handleTap : undefined}
       style={{
         position: "fixed", inset: 0, zIndex: 200,
