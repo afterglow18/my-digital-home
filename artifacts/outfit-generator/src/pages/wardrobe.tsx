@@ -308,7 +308,7 @@ export default function WardrobePage() {
                     fontFamily: "var(--font-display)", textTransform: "uppercase",
                     textShadow: "0 1px 3px rgba(255,255,255,0.25)",
                   }}>
-                    {heading}
+                    {btnLabel}
                   </span>
                 </button>
 
