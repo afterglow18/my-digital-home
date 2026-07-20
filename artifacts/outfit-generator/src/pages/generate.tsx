@@ -395,8 +395,8 @@ export default function GeneratePage() {
 
             {/* Action bar background */}
             <div aria-hidden="true" style={{
-              position: "absolute", top: pY(ir, LM.barY), left: 0, width: "100%",
-              height: pH(ir, LM.barBot - LM.barY), zIndex: 18, pointerEvents: "none",
+              position: "absolute", top: pY(ir, LM.barY), left: 0, right: 0, bottom: 0,
+              zIndex: 18, pointerEvents: "none",
               background: "rgba(255,248,250,0.96)", borderTop: "1px solid rgba(220,150,160,0.25)",
             }} />
 
