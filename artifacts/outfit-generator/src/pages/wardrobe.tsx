@@ -52,9 +52,9 @@ const LM = {
   doorR: 0.88,
   rows: [
     { sectionTop: 0.07,  shelfY: 0.24, labelY: 0.24  },
-    { sectionTop: 0.27,  shelfY: 0.45, labelY: 0.41  },
-    { sectionTop: 0.445, shelfY: 0.61, labelY: 0.57  },
-    { sectionTop: 0.60,  shelfY: 0.77, labelY: 0.73  },
+    { sectionTop: 0.27,  shelfY: 0.45, labelY: 0.37  },
+    { sectionTop: 0.445, shelfY: 0.61, labelY: 0.53  },
+    { sectionTop: 0.60,  shelfY: 0.77, labelY: 0.69  },
   ],
   saveAreaY: 0.81,
 } as const;
