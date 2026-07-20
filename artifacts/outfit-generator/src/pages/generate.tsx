@@ -36,10 +36,10 @@ const LM = {
   doorL: 0.06,
   doorR: 0.94,
   rows: [
-    { sectionTop: 0.07, shelfY: 0.24 },
-    { sectionTop: 0.27, shelfY: 0.45 },
-    { sectionTop: 0.445, shelfY: 0.61 },
-    { sectionTop: 0.60, shelfY: 0.77 },
+    { sectionTop: 0.07,  shelfY: 0.24, labelY: 0.172 },
+    { sectionTop: 0.27,  shelfY: 0.45, labelY: 0.352 },
+    { sectionTop: 0.445, shelfY: 0.61, labelY: 0.491 },
+    { sectionTop: 0.60,  shelfY: 0.77, labelY: 0.650 },
   ],
   barY:   0.85,
   barBot: 1.00,
@@ -291,9 +291,9 @@ export default function GeneratePage() {
 
               return (
                 <React.Fragment key={key}>
-                  {/* Heading — anchored just above the shelf line */}
+                  {/* Heading — centred on the shelf glow line */}
                   <div style={{
-                    position: "absolute", top: shelfTop - labelH, left: carLeft,
+                    position: "absolute", top: pY(ir, lm.labelY) - labelH / 2, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 12, display: "flex", alignItems: "center", justifyContent: "center",
                     pointerEvents: "none",

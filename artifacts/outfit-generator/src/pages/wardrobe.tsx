@@ -51,10 +51,10 @@ const LM = {
   doorL: 0.12,
   doorR: 0.88,
   rows: [
-    { sectionTop: 0.07, shelfY: 0.24 },
-    { sectionTop: 0.27, shelfY: 0.45 },
-    { sectionTop: 0.445, shelfY: 0.61 },
-    { sectionTop: 0.60, shelfY: 0.77 },
+    { sectionTop: 0.07,  shelfY: 0.24, labelY: 0.172 },
+    { sectionTop: 0.27,  shelfY: 0.45, labelY: 0.352 },
+    { sectionTop: 0.445, shelfY: 0.61, labelY: 0.491 },
+    { sectionTop: 0.60,  shelfY: 0.77, labelY: 0.650 },
   ],
   saveAreaY: 0.81,
 } as const;
@@ -297,13 +297,13 @@ export default function WardrobePage() {
 
             return (
               <React.Fragment key={key}>
-                {/* Heading — anchored just above the shelf line, tappable to add */}
+                {/* Heading — centred on the shelf glow line */}
                 <button
                   onClick={addHandlers[key]}
                   aria-label={btnLabel}
                   data-testid={`add-btn-${key}`}
                   style={{
-                    position: "absolute", top: shelfTop - labelH, left: carLeft,
+                    position: "absolute", top: pY(ir, lm.labelY) - labelH / 2, left: carLeft,
                     width: carW, height: labelH,
                     zIndex: 24, background: "none", border: "none", cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
