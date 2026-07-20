@@ -71,8 +71,11 @@ export default function WelcomePage({ onEnter }: Props) {
         perspectiveOrigin: "0% 50%",  /* hinge side = left */
       }}>
         <motion.div
-          initial={{ rotateY: 0 }}
-          animate={{ rotateY: phase === "opening" || phase === "open" || phase === "exiting" ? -108 : 0 }}
+          initial={{ rotateY: 0, scale: 1 }}
+          animate={{
+            rotateY: phase === "opening" || phase === "open" || phase === "exiting" ? -108 : 0,
+            scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 1.35 : 1,
+          }}
           transition={{ duration: OPEN_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
           style={{
             position: "absolute", inset: 0,
