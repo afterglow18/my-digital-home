@@ -9,18 +9,13 @@ import BackupPage from './pages/backup';
 import WelcomePage from './pages/welcome';
 import { LockedScreen } from './components/LockedScreen';
 import { queryClient } from '@/lib/queryClient';
-import { useState } from 'react';
-import { initRevenueCat } from '@/lib/revenuecat';
+import { useState, useEffect } from 'react';
+import { Purchases } from '@revenuecat/purchases-capacitor';
+import { initRevenueCat, tierFromCustomerInfo } from '@/lib/revenuecat';
+import { syncFromRevenueCat, setGlobalTier } from '@/hooks/useEntitlements';
 import { useBiometricLock } from '@/hooks/useBiometricLock';
 import { BiometricLockContext } from '@/contexts/BiometricLockContext';
 import { AnimatePresence } from 'framer-motion';
-
-// Initialise RevenueCat as early as possible
-try {
-  initRevenueCat();
-} catch (e) {
-  console.error('[RevenueCat] Init failed:', e);
-}
 
 function NotFound() {
   return (
@@ -50,6 +45,52 @@ function AppShell() {
   const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
   const [entered, setEntered] = useState<boolean>(() => isPreview);
   const { enabled, isLocked, authenticate, enableLock, disableLock } = useBiometricLock();
+
+  useEffect(() => {
+    let listenerId: string | null = null;
+
+    // 1. Init SDK then immediately sync entitlement from RevenueCat.
+    //    This ensures the cached tier is validated against a live server
+    //    check on every cold launch.
+    (async () => {
+      try {
+        await initRevenueCat();
+        await syncFromRevenueCat();
+      } catch (e) {
+        console.error('[RevenueCat] Launch init/sync failed:', e);
+      }
+
+      // 2. Real-time listener — fires whenever RevenueCat detects a change
+      //    (purchase, refund, subscription expiry, billing retry, etc.).
+      //    Tier is derived from live CustomerInfo, never from a local flag.
+      try {
+        listenerId = await Purchases.addCustomerInfoUpdateListener(
+          (customerInfo) => {
+            const tier = tierFromCustomerInfo(customerInfo);
+            setGlobalTier(tier);
+          },
+        );
+      } catch (e) {
+        console.warn('[RevenueCat] Could not add CustomerInfo listener:', e);
+      }
+    })();
+
+    // 3. Re-sync whenever the app returns to the foreground.
+    //    Catches subscription lapses / refunds that happened while backgrounded.
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        syncFromRevenueCat();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (listenerId) {
+        Purchases.removeCustomerInfoUpdateListener({ listenerToRemove: listenerId }).catch(() => {});
+      }
+    };
+  }, []);
 
   return (
     <BiometricLockContext.Provider value={{ enabled, enableLock, disableLock }}>

@@ -162,7 +162,7 @@ export function WardrobePickerSheet({ open, onOpenChange, category, onPick, exis
                 Choose a category
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {(["rings", "earrings", "necklaces", "bracelets"] as Category[]).map((cat) => (
+                {(["rings", "earrings", "necklaces", "bracelets"] as unknown as Category[]).map((cat) => (
                   <button
                     key={cat}
                     onClick={() => { setQuickAddCategory(cat); setShowQuickAdd(true); setShowCategoryPicker(false); }}
