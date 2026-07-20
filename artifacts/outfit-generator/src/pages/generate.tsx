@@ -300,7 +300,7 @@ export default function GeneratePage() {
                   }}>
                     <span style={{
                       fontSize: Math.max(9, labelH * 0.55),
-                      fontWeight: 300, letterSpacing: "0.22em",
+                      fontWeight: 700, letterSpacing: "0.22em",
                       color: "#3a4a2a",
                       fontFamily: "var(--font-display)", textTransform: "uppercase",
                       textShadow: "0 1px 3px rgba(255,255,255,0.25)",
