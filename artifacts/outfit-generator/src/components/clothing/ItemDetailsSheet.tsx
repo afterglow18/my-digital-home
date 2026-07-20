@@ -196,8 +196,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
             }}
             className={`w-9 h-9 border-2 border-black rounded-full flex items-center justify-center transition-all
                         ${form.isFavorite
-                          ? "bg-red-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                          ? "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                           : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"}`}
+                      style={form.isFavorite ? { background: "#4F5E3C" } : {}}
           >
             <Heart
               className="w-4 h-4"
