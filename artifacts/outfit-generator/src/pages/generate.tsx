@@ -319,7 +319,6 @@ export default function GeneratePage() {
                       top: pY(ir, lm.labelY), left: carLeft,
                       width: carW, height: consistentPhotoH,
                       zIndex: 10, overflow: "visible",
-                      background: "hsl(45,33%,98%)",
                     }}>
                       <ClosetRow
                         ref={rowRefs[key]}
