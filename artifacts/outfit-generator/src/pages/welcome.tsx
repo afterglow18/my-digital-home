@@ -53,9 +53,15 @@ export default function WelcomePage({ onEnter }: Props) {
         src="/hero-home.jpg"
         alt="My Digital Home"
         draggable={false}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: phase === "splash" ? 0 : 1 }}
-        transition={{ duration: 0.25, ease: "easeIn" }}
+        initial={{ opacity: 0, scale: 1 }}
+        animate={{
+          opacity: phase === "splash" ? 0 : 1,
+          scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 1.35 : 1,
+        }}
+        transition={{
+          opacity: { duration: 0.25, ease: "easeIn" },
+          scale:   { duration: (OPEN_MS + HOLD_MS) / 1000, ease: [0.2, 0, 0.4, 1] },
+        }}
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
@@ -71,11 +77,8 @@ export default function WelcomePage({ onEnter }: Props) {
         perspectiveOrigin: "0% 50%",  /* hinge side = left */
       }}>
         <motion.div
-          initial={{ rotateY: 0, scale: 1 }}
-          animate={{
-            rotateY: phase === "opening" || phase === "open" || phase === "exiting" ? -108 : 0,
-            scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 1.35 : 1,
-          }}
+          initial={{ rotateY: 0 }}
+          animate={{ rotateY: phase === "opening" || phase === "open" || phase === "exiting" ? -108 : 0 }}
           transition={{ duration: OPEN_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
           style={{
             position: "absolute", inset: 0,
