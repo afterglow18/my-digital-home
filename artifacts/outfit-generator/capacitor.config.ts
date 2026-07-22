@@ -15,6 +15,15 @@ const config: CapacitorConfig = {
     backgroundColor: '#F4D6DD',
     // Allow inline media playback (used for wardrobe image previews)
     allowsInlineMediaPlayback: true,
+    // Privacy usage descriptions — required by iOS / App Store Review
+    infoPlist: {
+      NSCameraUsageDescription:
+        'My Digital Home uses your camera so you can photograph and add items to your home collection.',
+      NSPhotoLibraryUsageDescription:
+        'My Digital Home reads your photo library so you can add existing photos to your home collection.',
+      NSPhotoLibraryAddUsageDescription:
+        'My Digital Home saves photos you take to your photo library.',
+    },
   },
 
   plugins: {

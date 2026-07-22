@@ -4,6 +4,12 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>My Digital Home uses your camera so you can photograph and add items to your home collection.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>My Digital Home reads your photo library so you can add existing photos to your home collection.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>My Digital Home saves photos you take to your photo library.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>My Digital Home uses Face ID to keep your home collection private.</string>
     <key>CAPACITOR_DEBUG</key>
