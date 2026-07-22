@@ -77,7 +77,11 @@ export function UpgradeSheet({ onClose }: Props) {
     const result: PurchaseResult = await purchase(selected);
     if (result === "success") {
       onClose();
+    } else if (result === "unavailable") {
+      setStatus("idle");
+      alert("Purchase unavailable. Please check your internet connection and try again, or contact support.");
     } else {
+      // cancelled — user dismissed Apple sheet
       setStatus("idle");
     }
   }, [status, purchase, selected, onClose]);
