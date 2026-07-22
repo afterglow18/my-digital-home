@@ -65,14 +65,14 @@ const PLANS: Plan[] = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function UpgradeSheet({ onClose }: Props) {
-  const { purchase } = useEntitlements();
+  const { purchase, restore } = useEntitlements();
   const [selected, setSelected] = useState<PurchaseProduct>("lifetime");
-  const [status, setStatus]     = useState<"idle" | "pending">("idle");
+  const [status, setStatus]     = useState<"idle" | "pending" | "restoring">("idle");
 
   const selectedPlan = PLANS.find(p => p.id === selected)!;
 
   const handlePurchase = useCallback(async () => {
-    if (status === "pending") return;
+    if (status !== "idle") return;
     setStatus("pending");
     const result: PurchaseResult = await purchase(selected);
     if (result === "success") {
@@ -81,6 +81,17 @@ export function UpgradeSheet({ onClose }: Props) {
       setStatus("idle");
     }
   }, [status, purchase, selected, onClose]);
+
+  const handleRestore = useCallback(async () => {
+    if (status !== "idle") return;
+    setStatus("restoring");
+    const result: PurchaseResult = await restore();
+    if (result === "success") {
+      onClose();
+    } else {
+      setStatus("idle");
+    }
+  }, [status, restore, onClose]);
 
   return (
     <motion.div
@@ -249,13 +260,47 @@ export function UpgradeSheet({ onClose }: Props) {
                 : `UNLOCK FOREVER – ${selectedPlan.price} ›`}
         </button>
 
-        <button
-          onClick={onClose}
-          className="text-sm font-bold text-black/35 text-center
-                     underline underline-offset-2 hover:text-black/55 transition-colors"
-        >
-          Maybe Later
-        </button>
+        {/* Restore + Maybe Later row */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={handleRestore}
+            disabled={status !== "idle"}
+            className="text-xs font-bold text-black/40 underline underline-offset-2
+                       hover:text-black/60 transition-colors disabled:opacity-50"
+          >
+            {status === "restoring" ? "Restoring…" : "Restore Purchases"}
+          </button>
+          <button
+            onClick={onClose}
+            className="text-xs font-bold text-black/35 underline underline-offset-2
+                       hover:text-black/55 transition-colors"
+          >
+            Maybe Later
+          </button>
+        </div>
+
+        {/* Legal links — required by Apple */}
+        <div className="flex items-center justify-center gap-4 pt-1">
+          <a
+            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-semibold text-black/35 underline underline-offset-2
+                       hover:text-black/55 transition-colors"
+          >
+            Terms of Use
+          </a>
+          <span className="text-black/20 text-[10px]">·</span>
+          <a
+            href="https://app.notion.com/p/My-Digital-Collection-Privacy-Policy-39682db6065380b19dedcb108d4a0ef4?source=copy_link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-semibold text-black/35 underline underline-offset-2
+                       hover:text-black/55 transition-colors"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </div>
     </motion.div>
   );
