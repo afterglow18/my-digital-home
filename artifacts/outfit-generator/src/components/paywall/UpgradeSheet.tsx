@@ -6,6 +6,7 @@ import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { useEntitlements, type PurchaseResult } from "@/hooks/useEntitlements";
+import { isNativePlatform } from "@/lib/revenuecat";
 import type { PurchaseProduct } from "@/types/local";
 
 export type UpgradeReason = "items" | "outfits" | "mannequin";
@@ -79,7 +80,11 @@ export function UpgradeSheet({ onClose }: Props) {
       onClose();
     } else if (result === "unavailable") {
       setStatus("idle");
-      alert("Purchase unavailable. Please check your internet connection and try again, or contact support.");
+      if (!isNativePlatform()) {
+        alert("Purchases are only available inside the iOS app. Download My Digital Home from the App Store to subscribe.");
+      } else {
+        alert("Purchase unavailable. Please check your internet connection and try again.");
+      }
     } else {
       // cancelled — user dismissed Apple sheet
       setStatus("idle");

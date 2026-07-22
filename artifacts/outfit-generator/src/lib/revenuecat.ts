@@ -34,6 +34,24 @@ export const PRODUCT_TIER_MAP: Record<PurchaseProduct, Tier> = {
   premium:  "premium",
 };
 
+/** True when running inside a real iOS/Android Capacitor shell. */
+export function isNativePlatform(): boolean {
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
+
+/**
+ * Wrap any promise with a hard timeout.
+ * Rejects with an Error whose message starts with "TIMEOUT" if ms elapses.
+ */
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`TIMEOUT after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 let _initialised = false;
 
 /**
@@ -44,7 +62,7 @@ export async function initRevenueCat(): Promise<void> {
   if (_initialised) return;
   _initialised = true;
 
-  const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+  const isNative = isNativePlatform();
   const apiKey   = isNative ? (IOS_KEY ?? TEST_KEY) : (TEST_KEY ?? IOS_KEY);
 
   if (!apiKey) {
