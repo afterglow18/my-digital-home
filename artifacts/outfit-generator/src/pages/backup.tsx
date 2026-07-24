@@ -160,7 +160,7 @@ export default function AccountPage() {
       style={{ background: '#F5F0E8' }}
     >
       {/* Page title */}
-      <div className="px-5 pt-8 pb-5">
+      <div className="px-5 md:px-8 pt-8 pb-5 md:max-w-4xl md:mx-auto md:w-full">
         <h1
           className="font-black uppercase leading-none"
           style={{ fontSize: 32, letterSpacing: '-0.02em' }}
@@ -169,7 +169,7 @@ export default function AccountPage() {
         </h1>
       </div>
 
-      <div className="px-5 flex flex-col gap-4">
+      <div className="px-5 md:px-8 flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:max-w-4xl md:mx-auto md:w-full">
 
         {/* ── MY PLAN ─────────────────────────────────────────────────────── */}
         <Card>
