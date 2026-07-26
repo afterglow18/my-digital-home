@@ -349,7 +349,10 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
               >
                 <span className="text-4xl leading-none">🖼️</span>
                 <span className="font-display font-bold text-base uppercase tracking-tight text-center leading-tight">
-                  Upload<br />Photo
+                  Upload<br />Photos
+                </span>
+                <span className="text-[10px] font-medium text-black/50 uppercase tracking-wider -mt-1">
+                  select multiple
                 </span>
               </button>
             </div>
