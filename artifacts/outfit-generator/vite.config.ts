@@ -31,7 +31,10 @@ export default defineConfig({
       : []),
   ],
   optimizeDeps: {
-    exclude: ['@imgly/background-removal'],
+    // Both packages use WASM/workers that Vite's pre-bundler can't handle.
+    // Dynamic import("onnxruntime-web") in backgroundRemoval.ts keeps it out
+    // of the initial parse so pre-bundling never triggers mid-session.
+    exclude: ['@imgly/background-removal', 'onnxruntime-web'],
   },
   resolve: {
     alias: {
