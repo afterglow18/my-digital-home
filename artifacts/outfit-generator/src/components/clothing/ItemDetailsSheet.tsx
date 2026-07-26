@@ -1,18 +1,23 @@
 /**
  * ItemDetailsSheet — full-screen overlay showing a clothing item's details.
- * Every field is optional and editable. A "Save" button appears only when
- * the form is dirty. Delete is always available.
  *
- * Replace-photo flow (single photo):
- *   pick ──► encoding ──► preview (Original | Cleaned ✨) ──► uploading ──► done
+ * Two separate photo flows, each a slide-up overlay:
+ *
+ * 1. Replace Photo  (new file from camera / gallery)
+ *    pick ──► encoding ──► preview (Original | Cleaned ✨) ──► uploading ──► done
+ *
+ * 2. Clean Up Photo  (process the existing stored image)
+ *    overlay opens → spinner while removal runs → side-by-side Original | Cleaned
+ *    User taps a card (pink ring), then "Save Original" or "Save Cleaned Version".
+ *    Optimistic: displayImageUrl updates instantly; DB write fires in the background.
  *
  * IMPORTANT: No AnimatePresence around phase blocks — any exit-animation window
- * creates a blank screen between phase changes. The replacement overlay itself
- * slides in with motion.div; inner phases switch instantly with plain divs.
+ * creates a blank screen between phase changes. The overlays themselves slide in
+ * with motion.div; inner phases switch instantly with plain conditional divs.
  */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera } from "lucide-react";
+import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles } from "lucide-react";
 import type { ClothingItem, ClothingItemUpdateCategory } from "@/types/local";
 import { useUpdateClothingItem, useDeleteClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
 import { getListOutfitsQueryKey } from "@/hooks/useLocalOutfits";
@@ -28,9 +33,7 @@ const CATEGORY_OPTIONS = ["furniture", "decor", "organization", "supplies"];
 
 type PhotoPhase = "pick" | "encoding" | "preview" | "uploading";
 
-/**
- * Compress any image File/Blob to a JPEG ≤ 2048 px on the longest edge.
- */
+/** Compress any image File/Blob to a JPEG ≤ 2048 px on the longest edge. */
 async function encodeForUpload(input: File | Blob): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(input);
@@ -156,6 +159,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [form, setForm]                           = useState<FormState | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Optimistic image display — overrides item.imageObjectPath immediately on save,
+  // before the DB write completes, so the screen never flashes back to the old photo.
+  const [displayImageUrl, setDisplayImageUrl] = useState<string | null>(null);
+
   // ── Replace-photo overlay state ──────────────────────────────────────────
   const [replaceOpen,  setReplaceOpen]  = useState(false);
   const [photoPhase,   setPhotoPhase]   = useState<PhotoPhase>("pick");
@@ -167,11 +174,17 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [bgProcessing, setBgProcessing] = useState(false);
   const [bgFailed,     setBgFailed]     = useState(false);
   const [selected,     setSelected]     = useState<"original" | "cleaned">("original");
-
-  // Generation counter — prevents a slow first photo clobbering a fast second one
-  const bgGenRef        = useRef(0);
+  const bgGenRef        = useRef(0); // cancel stale async results
   const cameraInputRef  = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Clean Up Photo overlay state ─────────────────────────────────────────
+  const [cleanupOpen,       setCleanupOpen]       = useState(false);
+  const [cleanupProcessing, setCleanupProcessing] = useState(false);
+  const [cleanupResult,     setCleanupResult]     = useState<string | null>(null); // cleaned data URL
+  const [cleanupFailed,     setCleanupFailed]     = useState(false);
+  const [cleanupSelected,   setCleanupSelected]   = useState<"original" | "cleaned">("cleaned");
+  const cleanupGenRef = useRef(0);
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
@@ -180,6 +193,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   useEffect(() => {
     if (item) setForm(toForm(item));
     setShowDeleteConfirm(false);
+    setDisplayImageUrl(null); // reset optimistic override when item changes
   }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item || !form) return null;
@@ -187,6 +201,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const dirty = isDirty(form, item);
   const patch = (key: keyof FormState) => (value: string | boolean) =>
     setForm((prev) => prev ? { ...prev, [key]: value } : prev);
+
+  // The URL currently shown in the photo area (optimistic override wins)
+  const shownImageUrl = displayImageUrl ?? getImageUrl(item.imageObjectPath);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
@@ -231,8 +248,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   // ── Replace-photo callbacks ───────────────────────────────────────────────
 
   const handleReplaceClose = useCallback(() => {
-    bgGenRef.current += 1;   // cancel any in-flight removal
-    setBgProcessing(false);  // MUST reset — close can happen mid-removal
+    bgGenRef.current += 1;
+    setBgProcessing(false);
     setPhotoPhase("pick");
     setPhotoError(null);
     setOriginalBlob(null);
@@ -247,8 +264,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const handleReplaceFile = useCallback(async (file: File | Blob) => {
     setPhotoError(null);
     const myGen = ++bgGenRef.current;
-
-    // Reset comparison state
     setOriginalBlob(null);
     setOriginalUrl(null);
     setCleanedBlob(null);
@@ -256,9 +271,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     setBgFailed(false);
     setBgProcessing(false);
     setSelected("original");
-
-    // Show spinner immediately before any async work
-    setPhotoPhase("encoding");
+    setPhotoPhase("encoding"); // show spinner immediately
 
     let jpeg: Blob;
     try {
@@ -271,12 +284,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     }
     if (bgGenRef.current !== myGen) return;
 
-    // Show original, switch to comparison screen
     setOriginalBlob(jpeg);
     setOriginalUrl(URL.createObjectURL(jpeg));
     setPhotoPhase("preview");
 
-    // Background removal
     setBgProcessing(true);
     try {
       const dataUrl   = await blobToDataUrl(jpeg);
@@ -304,13 +315,12 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     setPhotoPhase("uploading");
     try {
       const dataUrl = await blobToDataUrl(blob);
+      // Optimistic: update display immediately so screen doesn't flash on close
+      setDisplayImageUrl(dataUrl);
       await new Promise<void>((resolve, reject) => {
         updateItem.mutate(
           { id: item.id, data: { imageObjectPath: dataUrl } },
-          {
-            onSuccess: () => { invalidate(); resolve(); },
-            onError: reject,
-          },
+          { onSuccess: () => { invalidate(); resolve(); }, onError: reject },
         );
       });
       handleReplaceClose();
@@ -320,6 +330,55 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, cleanedBlob, originalBlob, item.id, handleReplaceClose]);
+
+  // ── Clean Up Photo callbacks ──────────────────────────────────────────────
+
+  const handleCleanupOpen = useCallback(async (sourceUrl: string) => {
+    const myGen = ++cleanupGenRef.current;
+    setCleanupResult(null);
+    setCleanupFailed(false);
+    setCleanupSelected("cleaned");
+    setCleanupProcessing(true);
+    setCleanupOpen(true);
+
+    try {
+      const resultUrl = await removeBackground(sourceUrl);
+      if (cleanupGenRef.current !== myGen) return;
+      setCleanupResult(resultUrl);
+    } catch (err) {
+      if (cleanupGenRef.current !== myGen) return;
+      console.warn("Cleanup background removal failed:", err);
+      setCleanupFailed(true);
+    } finally {
+      if (cleanupGenRef.current === myGen) setCleanupProcessing(false);
+    }
+  }, []);
+
+  const handleCleanupClose = useCallback(() => {
+    cleanupGenRef.current += 1; // cancel any in-flight removal
+    setCleanupProcessing(false);
+    setCleanupOpen(false);
+    setCleanupResult(null);
+    setCleanupFailed(false);
+    setCleanupSelected("cleaned");
+  }, []);
+
+  const handleCleanupSave = useCallback((choice: "original" | "cleaned") => {
+    const sourceUrl  = displayImageUrl ?? item.imageObjectPath;
+    const chosenUrl  = choice === "cleaned" && cleanupResult ? cleanupResult : sourceUrl;
+    if (!chosenUrl) return;
+
+    // Optimistic update — screen reflects the choice immediately, no flash
+    setDisplayImageUrl(chosenUrl);
+    handleCleanupClose();
+
+    // DB write in the background — no await, no spinner
+    updateItem.mutate(
+      { id: item.id, data: { imageObjectPath: chosenUrl } },
+      { onSuccess: invalidate },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cleanupResult, displayImageUrl, item.id, item.imageObjectPath, handleCleanupClose]);
 
   // ── File input handlers ───────────────────────────────────────────────────
 
@@ -339,6 +398,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
   return (
     <>
+      {/* ── Main details sheet ────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: "100%" }}
         animate={{ opacity: 1, y: 0 }}
@@ -352,7 +412,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
           style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
           <h2 className="font-display font-bold text-xl uppercase tracking-tight">Item Details</h2>
           <div className="flex items-center gap-2">
-            {/* Favourite toggle */}
             <button
               onClick={() => {
                 const next = !form.isFavorite;
@@ -374,7 +433,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 stroke={form.isFavorite ? "white" : "currentColor"}
               />
             </button>
-            {/* Close */}
             <button
               onClick={onClose}
               className="w-9 h-9 border-2 border-black rounded-full flex items-center justify-center
@@ -394,27 +452,39 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
             backgroundSize: "16px 16px",
           }}
         >
-          {item.imageObjectPath ? (
+          {shownImageUrl ? (
             <>
               <img
-                src={getImageUrl(item.imageObjectPath)!}
+                src={shownImageUrl}
                 alt={item.name}
                 className="w-full h-full object-contain"
               />
-              {/* Replace Photo button — bottom-right corner */}
-              <button
-                onClick={() => setReplaceOpen(true)}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5
-                           bg-white border-2 border-black rounded-full text-xs font-bold uppercase
-                           shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                           active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                Replace Photo
-              </button>
+              {/* Action buttons — bottom of photo */}
+              <div className="absolute bottom-3 right-3 flex gap-2">
+                <button
+                  onClick={() => handleCleanupOpen(shownImageUrl)}
+                  className="flex items-center gap-1.5 px-3 py-1.5
+                             bg-white border-2 border-pink-400 text-pink-600 rounded-full
+                             text-xs font-bold uppercase
+                             shadow-[2px_2px_0px_0px_rgba(244,114,182,0.5)]
+                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Clean Up
+                </button>
+                <button
+                  onClick={() => setReplaceOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5
+                             bg-white border-2 border-black rounded-full text-xs font-bold uppercase
+                             shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Replace
+                </button>
+              </div>
             </>
           ) : (
-            /* No photo yet — centred Add Photo button */
             <div className="w-full h-full flex items-center justify-center">
               <button
                 onClick={() => setReplaceOpen(true)}
@@ -525,9 +595,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
       </motion.div>
 
       {/* ── Replace-photo overlay ─────────────────────────────────────────────
-          Slides in on top of the ItemDetailsSheet. Plain conditional divs for
-          phase blocks — no AnimatePresence, which would blank the screen on
-          every phase change.
+          No AnimatePresence around phase blocks — plain conditional divs only.
       ──────────────────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {replaceOpen && (
@@ -539,11 +607,10 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
             transition={{ type: "spring", damping: 28, stiffness: 240 }}
             className="fixed inset-0 z-[70] flex flex-col max-w-md mx-auto bg-[#f9f4ee]"
           >
-            {/* Overlay header */}
             <div className="flex items-center justify-between px-4 pb-3 bg-white border-b-2 border-black flex-shrink-0"
               style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
               <h2 className="font-display font-bold text-xl uppercase tracking-tight">
-                {item.imageObjectPath ? "Replace Photo" : "Add Photo"}
+                {shownImageUrl ? "Replace Photo" : "Add Photo"}
               </h2>
               <button
                 onClick={handleReplaceClose}
@@ -555,22 +622,17 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               </button>
             </div>
 
-            {/* Hidden file inputs */}
             <input ref={cameraInputRef}  type="file" accept="image/*" capture="environment"
                    className="hidden" onChange={onCameraChange} />
             <input ref={galleryInputRef} type="file" accept="image/*" multiple={false}
                    className="hidden" onChange={onGalleryChange} />
 
-            {/* Phase content — plain divs, no AnimatePresence */}
             <div className="flex-1 flex flex-col overflow-y-auto">
-
-              {/* ── Pick ── */}
               {photoPhase === "pick" && (
                 <div className="flex flex-col flex-1 px-5 py-6 gap-4">
                   {photoError && (
                     <p className="text-red-600 text-sm font-medium text-center">{photoError}</p>
                   )}
-
                   <button
                     onClick={() => cameraInputRef.current?.click()}
                     className="w-full btn-brutalist py-4 rounded-2xl flex items-center justify-center gap-2 text-sm"
@@ -578,7 +640,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                     <Camera className="w-5 h-5" />
                     Take Photo
                   </button>
-
                   <button
                     onClick={() => galleryInputRef.current?.click()}
                     className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-sm
@@ -588,8 +649,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                   >
                     Upload from Camera Roll
                   </button>
-
-                  {/* Tips */}
                   <div className="mt-4 flex flex-col gap-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-black/40">Tips for best results</p>
                     {[
@@ -604,7 +663,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 </div>
               )}
 
-              {/* ── Encoding — full-screen spinner, shown immediately after pick ── */}
               {photoPhase === "encoding" && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-5 px-6">
                   <Loader2 size={48} className="animate-spin text-black/60" />
@@ -613,20 +671,15 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 </div>
               )}
 
-              {/* ── Preview — side-by-side comparison ── */}
               {photoPhase === "preview" && (
                 <div className="flex flex-col gap-4 px-5 py-5">
                   {photoError && (
                     <p className="text-red-600 text-sm font-medium text-center">{photoError}</p>
                   )}
-
                   <p className="text-center text-[10px] font-bold uppercase tracking-[0.15em] text-black/40">
                     {bgProcessing ? "This will take a moment…" : bgFailed ? "Original" : "Tap to choose"}
                   </p>
-
-                  {/* Cards */}
                   <div className="flex gap-3">
-                    {/* Original */}
                     <button
                       onClick={() => setSelected("original")}
                       className="flex-1 rounded-2xl overflow-hidden border-[3px] transition-all p-0"
@@ -648,7 +701,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                       <p className="text-center text-[10px] font-bold uppercase tracking-widest py-1.5">Original</p>
                     </button>
 
-                    {/* Cleaned */}
                     <button
                       onClick={() => cleanedUrl && setSelected("cleaned")}
                       disabled={!cleanedUrl}
@@ -691,7 +743,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                     </button>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-3 pt-1">
                     <button
                       onClick={() => setPhotoPhase("pick")}
@@ -715,14 +766,183 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 </div>
               )}
 
-              {/* ── Uploading ── */}
               {photoPhase === "uploading" && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-5">
                   <Loader2 size={48} className="animate-spin text-black/60" />
                   <p className="font-display font-bold text-2xl uppercase tracking-tight">Saving…</p>
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* ── Clean Up Photo overlay ────────────────────────────────────────────
+          Uses the EXISTING stored image — no file picker.
+          Optimistic save: displayImageUrl updates instantly, DB write is fire-and-forget.
+          Pink ring + checkmark for the selected card.
+      ──────────────────────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {cleanupOpen && (
+          <motion.div
+            key="cleanup-photo"
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 240 }}
+            className="fixed inset-0 z-[75] flex flex-col max-w-md mx-auto bg-[#f9f4ee]"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 pb-3 bg-white border-b-2 border-black flex-shrink-0"
+              style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
+              <div>
+                <h2 className="font-display font-bold text-xl uppercase tracking-tight">Clean Up Photo</h2>
+                <p className="text-[10px] text-black/40 font-medium uppercase tracking-wider mt-0.5">
+                  {cleanupProcessing ? "Removing background…" : cleanupFailed ? "Could not remove background" : "Tap to choose, then save"}
+                </p>
+              </div>
+              <button
+                onClick={handleCleanupClose}
+                className="w-9 h-9 border-2 border-black rounded-full flex items-center justify-center
+                           bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                           active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Cards + actions */}
+            <div className="flex-1 flex flex-col overflow-y-auto px-5 py-6 gap-5">
+
+              {/* Side-by-side comparison */}
+              <div className="flex gap-3">
+
+                {/* Original card */}
+                <button
+                  onClick={() => setCleanupSelected("original")}
+                  className="flex-1 rounded-2xl overflow-hidden transition-all p-0"
+                  style={{
+                    border: cleanupSelected === "original"
+                      ? "3px solid #f472b6"   // pink-400
+                      : "3px solid rgba(0,0,0,0.12)",
+                    opacity: cleanupSelected === "original" ? 1 : 0.55,
+                  }}
+                >
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      background: "repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%) 0 0 / 16px 16px",
+                      minHeight: 200,
+                    }}
+                  >
+                    {shownImageUrl && (
+                      <img
+                        src={shownImageUrl}
+                        alt="Original"
+                        className="w-full object-contain block"
+                        style={{ maxHeight: 200 }}
+                      />
+                    )}
+                    {cleanupSelected === "original" && (
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full
+                                      flex items-center justify-center"
+                           style={{ background: "#f472b6" }}>
+                        <Check size={13} color="white" strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-center text-[10px] font-bold uppercase tracking-widest py-2">
+                    Original
+                  </p>
+                </button>
+
+                {/* Cleaned card */}
+                <button
+                  onClick={() => !cleanupProcessing && cleanupResult && setCleanupSelected("cleaned")}
+                  disabled={cleanupProcessing || !cleanupResult}
+                  className="flex-1 rounded-2xl overflow-hidden transition-all p-0"
+                  style={{
+                    border: cleanupSelected === "cleaned" && cleanupResult
+                      ? "3px solid #f472b6"
+                      : "3px solid rgba(0,0,0,0.12)",
+                    opacity: cleanupSelected === "cleaned" && cleanupResult ? 1 : 0.55,
+                  }}
+                >
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      background: "repeating-conic-gradient(#d1d5db 0% 25%, white 0% 50%) 0 0 / 12px 12px",
+                      minHeight: 200,
+                    }}
+                  >
+                    {cleanupResult ? (
+                      <>
+                        <img
+                          src={cleanupResult}
+                          alt="Cleaned"
+                          className="w-full object-contain block"
+                          style={{ maxHeight: 200 }}
+                        />
+                        {cleanupSelected === "cleaned" && (
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full
+                                          flex items-center justify-center"
+                               style={{ background: "#f472b6" }}>
+                            <Check size={13} color="white" strokeWidth={3} />
+                          </div>
+                        )}
+                      </>
+                    ) : cleanupFailed ? (
+                      <p className="text-[11px] font-bold uppercase text-black/40 text-center px-4">
+                        Could not remove background
+                      </p>
+                    ) : (
+                      /* Spinner while model runs */
+                      <div className="flex flex-col items-center gap-3 py-4">
+                        <Loader2 size={36} className="animate-spin" style={{ color: "#f472b6" }} />
+                        <p className="text-[11px] font-bold uppercase tracking-wider"
+                           style={{ color: "#f472b6" }}>
+                          This will take a moment…
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-center text-[10px] font-bold uppercase tracking-widest py-2">
+                    Cleaned ✨
+                  </p>
+                </button>
+              </div>
+
+              {/* Save buttons — only shown once we have a result (or failure) */}
+              {!cleanupProcessing && (
+                <div className="flex flex-col gap-3 mt-auto">
+                  {!cleanupFailed && cleanupResult && (
+                    <button
+                      onClick={() => handleCleanupSave("cleaned")}
+                      className="w-full py-4 rounded-2xl text-sm font-bold uppercase
+                                 flex items-center justify-center gap-2
+                                 border-[3px] text-white transition-all
+                                 active:scale-[0.98]"
+                      style={{
+                        background: "#f472b6",
+                        borderColor: "#ec4899",
+                        boxShadow: "0 3px 0 0 #be185d",
+                      }}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Save Cleaned Version
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleCleanupSave("original")}
+                    className="w-full py-4 rounded-2xl text-sm font-bold uppercase border-2 border-black bg-white
+                               shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                               active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
+                               flex items-center justify-center"
+                  >
+                    {cleanupFailed ? "Keep Original" : "Save Original"}
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
