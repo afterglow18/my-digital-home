@@ -184,6 +184,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [cleanupResult,     setCleanupResult]     = useState<string | null>(null); // cleaned data URL
   const [cleanupFailed,     setCleanupFailed]     = useState(false);
   const [cleanupSelected,   setCleanupSelected]   = useState<"original" | "cleaned">("cleaned");
+  const [cleanupDone,       setCleanupDone]       = useState(false); // disable button after save
   const cleanupGenRef = useRef(0);
 
   const updateItem  = useUpdateClothingItem();
@@ -194,6 +195,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     if (item) setForm(toForm(item));
     setShowDeleteConfirm(false);
     setDisplayImageUrl(null); // reset optimistic override when item changes
+    setCleanupDone(false);    // allow cleanup again on a new item
   }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── invalidate (stable ref — queryClient never changes) ──────────────────
@@ -330,6 +332,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
     // Optimistic update — screen reflects the choice immediately, no flash
     setDisplayImageUrl(chosenUrl);
+    setCleanupDone(true); // prevent re-opening cleanup on the same item
     handleCleanupClose();
 
     // DB write in the background — no await, no spinner
@@ -468,15 +471,18 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               {/* Action buttons — bottom of photo */}
               <div className="absolute bottom-3 right-3 flex gap-2">
                 <button
-                  onClick={() => handleCleanupOpen(shownImageUrl)}
-                  className="flex items-center gap-1.5 px-3 py-1.5
-                             bg-white border-2 border-pink-400 text-pink-600 rounded-full
-                             text-xs font-bold uppercase
-                             shadow-[2px_2px_0px_0px_rgba(244,114,182,0.5)]
-                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                  onClick={() => !cleanupDone && handleCleanupOpen(shownImageUrl)}
+                  disabled={cleanupDone}
+                  className={`flex items-center gap-1.5 px-3 py-1.5
+                             bg-white border-2 rounded-full
+                             text-xs font-bold uppercase transition-all
+                             ${cleanupDone
+                               ? "border-green-400 text-green-600 opacity-40 cursor-not-allowed"
+                               : "border-green-500 text-green-700 shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+                             }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  Clean Up
+                  {cleanupDone ? "Cleaned ✓" : "Clean Up"}
                 </button>
                 <button
                   onClick={() => setReplaceOpen(true)}
@@ -829,7 +835,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                   className="flex-1 rounded-2xl overflow-hidden transition-all p-0"
                   style={{
                     border: cleanupSelected === "original"
-                      ? "3px solid #f472b6"   // pink-400
+                      ? "3px solid #22c55e"   // green-500
                       : "3px solid rgba(0,0,0,0.12)",
                     opacity: cleanupSelected === "original" ? 1 : 0.55,
                   }}
@@ -852,7 +858,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                     {cleanupSelected === "original" && (
                       <div className="absolute top-2 right-2 w-6 h-6 rounded-full
                                       flex items-center justify-center"
-                           style={{ background: "#f472b6" }}>
+                           style={{ background: "#22c55e" }}>
                         <Check size={13} color="white" strokeWidth={3} />
                       </div>
                     )}
@@ -869,7 +875,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                   className="flex-1 rounded-2xl overflow-hidden transition-all p-0"
                   style={{
                     border: cleanupSelected === "cleaned" && cleanupResult
-                      ? "3px solid #f472b6"
+                      ? "3px solid #22c55e"
                       : "3px solid rgba(0,0,0,0.12)",
                     opacity: cleanupSelected === "cleaned" && cleanupResult ? 1 : 0.55,
                   }}
@@ -892,7 +898,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                         {cleanupSelected === "cleaned" && (
                           <div className="absolute top-2 right-2 w-6 h-6 rounded-full
                                           flex items-center justify-center"
-                               style={{ background: "#f472b6" }}>
+                               style={{ background: "#22c55e" }}>
                             <Check size={13} color="white" strokeWidth={3} />
                           </div>
                         )}
@@ -904,9 +910,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                     ) : (
                       /* Spinner while model runs */
                       <div className="flex flex-col items-center gap-3 py-4">
-                        <Loader2 size={36} className="animate-spin" style={{ color: "#f472b6" }} />
+                        <Loader2 size={36} className="animate-spin" style={{ color: "#22c55e" }} />
                         <p className="text-[11px] font-bold uppercase tracking-wider"
-                           style={{ color: "#f472b6" }}>
+                           style={{ color: "#22c55e" }}>
                           This will take a moment…
                         </p>
                       </div>
@@ -929,9 +935,9 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                                border-[3px] text-white transition-all
                                active:scale-[0.98]"
                     style={{
-                      background: "#f472b6",
-                      borderColor: "#ec4899",
-                      boxShadow: "0 3px 0 0 #be185d",
+                      background: "#22c55e",
+                      borderColor: "#16a34a",
+                      boxShadow: "0 3px 0 0 #15803d",
                     }}
                   >
                     <Sparkles className="w-4 h-4" />
