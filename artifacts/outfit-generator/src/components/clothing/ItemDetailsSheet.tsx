@@ -472,20 +472,19 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               />
               {/* Action buttons — bottom of photo */}
               <div className="absolute bottom-3 right-3 flex gap-2">
-                <button
-                  onClick={() => !cleanupDone && handleCleanupOpen(shownImageUrl)}
-                  disabled={cleanupDone}
-                  className={`flex items-center gap-1.5 px-3 py-1.5
-                             bg-white border-2 rounded-full
-                             text-xs font-bold uppercase transition-all
-                             ${cleanupDone
-                               ? "border-green-400 text-green-600 opacity-40 cursor-not-allowed"
-                               : "border-green-500 text-green-700 shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
-                             }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {cleanupDone ? "Cleaned ✓" : "Clean Up"}
-                </button>
+                {!cleanupDone && (
+                  <button
+                    onClick={() => handleCleanupOpen(shownImageUrl)}
+                    className="flex items-center gap-1.5 px-3 py-1.5
+                               bg-white border-2 border-green-500 text-green-700 rounded-full
+                               text-xs font-bold uppercase
+                               shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)]
+                               active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Clean Up
+                  </button>
+                )}
                 <button
                   onClick={() => setReplaceOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5
