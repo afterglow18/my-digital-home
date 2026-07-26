@@ -912,37 +912,37 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                 </button>
               </div>
 
-              {/* Save buttons — only shown once we have a result (or failure) */}
-              {!cleanupProcessing && (
-                <div className="flex flex-col gap-3 mt-auto">
-                  {!cleanupFailed && cleanupResult && (
-                    <button
-                      onClick={() => handleCleanupSave("cleaned")}
-                      className="w-full py-4 rounded-2xl text-sm font-bold uppercase
-                                 flex items-center justify-center gap-2
-                                 border-[3px] text-white transition-all
-                                 active:scale-[0.98]"
-                      style={{
-                        background: "#f472b6",
-                        borderColor: "#ec4899",
-                        boxShadow: "0 3px 0 0 #be185d",
-                      }}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      Save Cleaned Version
-                    </button>
-                  )}
+              {/* Save buttons */}
+              <div className="flex flex-col gap-3 mt-auto">
+                {/* Save Cleaned Version — only once the result is ready */}
+                {!cleanupProcessing && !cleanupFailed && cleanupResult && (
                   <button
-                    onClick={() => handleCleanupSave("original")}
-                    className="w-full py-4 rounded-2xl text-sm font-bold uppercase border-2 border-black bg-white
-                               shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                               active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
-                               flex items-center justify-center"
+                    onClick={() => handleCleanupSave("cleaned")}
+                    className="w-full py-4 rounded-2xl text-sm font-bold uppercase
+                               flex items-center justify-center gap-2
+                               border-[3px] text-white transition-all
+                               active:scale-[0.98]"
+                    style={{
+                      background: "#f472b6",
+                      borderColor: "#ec4899",
+                      boxShadow: "0 3px 0 0 #be185d",
+                    }}
                   >
-                    {cleanupFailed ? "Keep Original" : "Save Original"}
+                    <Sparkles className="w-4 h-4" />
+                    Save Cleaned Version
                   </button>
-                </div>
-              )}
+                )}
+                {/* Save Original — always available so users don't have to wait */}
+                <button
+                  onClick={() => handleCleanupSave("original")}
+                  className="w-full py-4 rounded-2xl text-sm font-bold uppercase border-2 border-black bg-white
+                             shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
+                             flex items-center justify-center"
+                >
+                  {cleanupFailed ? "Keep Original" : "Save Original"}
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
