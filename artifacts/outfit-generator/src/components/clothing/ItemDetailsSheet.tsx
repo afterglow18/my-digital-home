@@ -195,7 +195,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     if (item) setForm(toForm(item));
     setShowDeleteConfirm(false);
     setDisplayImageUrl(null); // reset optimistic override when item changes
-    setCleanupDone(false);    // allow cleanup again on a new item
+    // Restore persisted cleanup-done flag so the button stays disabled after a restart
+    setCleanupDone(item ? localStorage.getItem(`cleanup-done-${item.id}`) === "1" : false);
   }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── invalidate (stable ref — queryClient never changes) ──────────────────
@@ -333,6 +334,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     // Optimistic update — screen reflects the choice immediately, no flash
     setDisplayImageUrl(chosenUrl);
     setCleanupDone(true); // prevent re-opening cleanup on the same item
+    if (item?.id) localStorage.setItem(`cleanup-done-${item.id}`, "1"); // survives restarts
     handleCleanupClose();
 
     // DB write in the background — no await, no spinner
