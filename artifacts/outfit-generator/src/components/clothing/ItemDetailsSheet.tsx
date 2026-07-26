@@ -196,56 +196,16 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     setDisplayImageUrl(null); // reset optimistic override when item changes
   }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!item || !form) return null;
-
-  const dirty = isDirty(form, item);
-  const patch = (key: keyof FormState) => (value: string | boolean) =>
-    setForm((prev) => prev ? { ...prev, [key]: value } : prev);
-
-  // The URL currently shown in the photo area (optimistic override wins)
-  const shownImageUrl = displayImageUrl ?? getImageUrl(item.imageObjectPath);
-
-  const invalidate = () => {
+  // ── invalidate (stable ref — queryClient never changes) ──────────────────
+  const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
     queryClient.invalidateQueries({ queryKey: getListOutfitsQueryKey() });
-  };
-
-  const handleSave = () => {
-    updateItem.mutate(
-      {
-        id: item.id,
-        data: {
-          name:          form.name.trim() || item.name,
-          brand:         form.brand.trim() || null,
-          color:         form.color.trim() || null,
-          size:          form.size.trim() || null,
-          season:        form.season || null,
-          occasion:      form.occasion || null,
-          purchasePrice: form.purchasePrice.trim() || null,
-          purchaseDate:  form.purchaseDate.trim() || null,
-          notes:         form.notes.trim() || null,
-          isFavorite:    form.isFavorite,
-          category:      (form.category || item.category) as ClothingItemUpdateCategory,
-        },
-      },
-      { onSuccess: () => { invalidate(); onClose(); } },
-    );
-  };
-
-  const handleDelete = () => {
-    deleteItem.mutate(
-      { id: item.id },
-      {
-        onSuccess: () => {
-          invalidate();
-          onDeleted?.();
-          onClose();
-        },
-      },
-    );
-  };
+  }, [queryClient]);
 
   // ── Replace-photo callbacks ───────────────────────────────────────────────
+  // ALL useCallback hooks must be declared unconditionally (before any early
+  // return) to satisfy React's Rules of Hooks. They safely handle a null item
+  // via optional chaining where needed.
 
   const handleReplaceClose = useCallback(() => {
     bgGenRef.current += 1;
@@ -319,7 +279,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
       setDisplayImageUrl(dataUrl);
       await new Promise<void>((resolve, reject) => {
         updateItem.mutate(
-          { id: item.id, data: { imageObjectPath: dataUrl } },
+          { id: item?.id ?? "", data: { imageObjectPath: dataUrl } },
           { onSuccess: () => { invalidate(); resolve(); }, onError: reject },
         );
       });
@@ -329,7 +289,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
       setPhotoPhase("preview");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, cleanedBlob, originalBlob, item.id, handleReplaceClose]);
+  }, [selected, cleanedBlob, originalBlob, item?.id, invalidate, handleReplaceClose]);
 
   // ── Clean Up Photo callbacks ──────────────────────────────────────────────
 
@@ -364,7 +324,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   }, []);
 
   const handleCleanupSave = useCallback((choice: "original" | "cleaned") => {
-    const sourceUrl  = displayImageUrl ?? item.imageObjectPath;
+    const sourceUrl  = displayImageUrl ?? item?.imageObjectPath;
     const chosenUrl  = choice === "cleaned" && cleanupResult ? cleanupResult : sourceUrl;
     if (!chosenUrl) return;
 
@@ -374,11 +334,57 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
 
     // DB write in the background — no await, no spinner
     updateItem.mutate(
-      { id: item.id, data: { imageObjectPath: chosenUrl } },
+      { id: item?.id ?? "", data: { imageObjectPath: chosenUrl } },
       { onSuccess: invalidate },
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cleanupResult, displayImageUrl, item.id, item.imageObjectPath, handleCleanupClose]);
+  }, [cleanupResult, displayImageUrl, item?.id, item?.imageObjectPath, invalidate, handleCleanupClose]);
+
+  // ── Early return (after all hooks) ────────────────────────────────────────
+
+  if (!item || !form) return null;
+
+  const dirty = isDirty(form, item);
+  const patch = (key: keyof FormState) => (value: string | boolean) =>
+    setForm((prev) => prev ? { ...prev, [key]: value } : prev);
+
+  // The URL currently shown in the photo area (optimistic override wins)
+  const shownImageUrl = displayImageUrl ?? getImageUrl(item.imageObjectPath);
+
+  const handleSave = () => {
+    updateItem.mutate(
+      {
+        id: item.id,
+        data: {
+          name:          form.name.trim() || item.name,
+          brand:         form.brand.trim() || null,
+          color:         form.color.trim() || null,
+          size:          form.size.trim() || null,
+          season:        form.season || null,
+          occasion:      form.occasion || null,
+          purchasePrice: form.purchasePrice.trim() || null,
+          purchaseDate:  form.purchaseDate.trim() || null,
+          notes:         form.notes.trim() || null,
+          isFavorite:    form.isFavorite,
+          category:      (form.category || item.category) as ClothingItemUpdateCategory,
+        },
+      },
+      { onSuccess: () => { invalidate(); onClose(); } },
+    );
+  };
+
+  const handleDelete = () => {
+    deleteItem.mutate(
+      { id: item.id },
+      {
+        onSuccess: () => {
+          invalidate();
+          onDeleted?.();
+          onClose();
+        },
+      },
+    );
+  };
 
   // ── File input handlers ───────────────────────────────────────────────────
 
