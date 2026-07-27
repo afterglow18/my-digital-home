@@ -408,15 +408,11 @@ export default function GeneratePage() {
               height: pH(ir, LM.barBot - LM.barY),
               zIndex: 22, display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <AnimatePresence mode="wait">
+              {/* No AnimatePresence mode="wait" — the exit-animation gap renders black on iOS */}
 
                 {/* IDLE: Spin It */}
                 {phase === "idle" && !isSaveOpen && (
-                  <motion.button
-                    key="spin-btn"
-                    initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.88 }}
-                    transition={{ type: "spring", stiffness: 360, damping: 26 }}
+                  <button
                     onClick={handleSpin} disabled={!hasItems}
                     style={{
                       width: "auto", minWidth: 160, maxWidth: 240,
@@ -432,13 +428,12 @@ export default function GeneratePage() {
                       fontFamily: "var(--font-display)",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                     }}
-                  >✨ Spin It!</motion.button>
+                  >✨ Spin It!</button>
                 )}
 
                 {/* SPINNING: dots */}
                 {phase === "spinning" && (
-                  <motion.div
-                    key="dots" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  <div
                     style={{
                       display: "flex", gap: 6, padding: "0 24px", height: 44,
                       alignItems: "center", justifyContent: "center", borderRadius: 24,
@@ -453,14 +448,12 @@ export default function GeneratePage() {
                         style={{ width: 7, height: 7, borderRadius: "50%", background: GOLD }}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* RESULT: Next + Save */}
                 {phase === "result" && !isSaveOpen && (
-                  <motion.div
-                    key="result-btns"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                  <div
                     style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%" }}
                   >
                     <button
@@ -496,14 +489,12 @@ export default function GeneratePage() {
                     >
                       <span>Save It</span><span style={{ fontSize: 14, lineHeight: 1 }}>♡</span>
                     </button>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* SAVE INPUT */}
                 {isSaveOpen && (
-                  <motion.div
-                    key="save-input"
-                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
+                  <div
                     style={{ display: "flex", gap: 6, width: "100%", padding: "0 8px" }}
                   >
                     <input
@@ -538,10 +529,8 @@ export default function GeneratePage() {
                         cursor: "pointer",
                       }}
                     >{saveOutfit.isPending ? "…" : "Save ♡"}</button>
-                  </motion.div>
+                  </div>
                 )}
-
-              </AnimatePresence>
             </div>
           </>
         );
