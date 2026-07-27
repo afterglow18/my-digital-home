@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { Purchases } from '@revenuecat/purchases-capacitor';
 import { initRevenueCat, tierFromCustomerInfo } from '@/lib/revenuecat';
 import { syncFromRevenueCat, setGlobalTier } from '@/hooks/useEntitlements';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function NotFound() {
   return (
@@ -97,9 +98,11 @@ function AppShell() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppShell />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AppShell />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
