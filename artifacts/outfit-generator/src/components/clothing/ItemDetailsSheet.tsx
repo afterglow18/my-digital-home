@@ -112,7 +112,7 @@ function SelectField({
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface ItemDetailsSheetProps {
-  item: ClothingItem | null;
+  item: ClothingItem;
   onClose: () => void;
   onDeleted?: () => void;
 }
@@ -156,7 +156,12 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
 }
 
 export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetProps) {
-  const [form, setForm]                           = useState<FormState | null>(null);
+  // Lazy init — form is always non-null on the first render so the sheet
+  // motion.div appears immediately. A useState(null)+useEffect pattern causes
+  // the component to return null on its first render, which creates exactly the
+  // same blank-gap as AnimatePresence mode="wait" — on iOS WKWebView that gap
+  // renders as a black screen.
+  const [form, setForm]                           = useState<FormState>(() => toForm(item));
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Optimistic image display — overrides item.imageObjectPath immediately on save,
@@ -184,19 +189,22 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   const [cleanupResult,     setCleanupResult]     = useState<string | null>(null); // cleaned data URL
   const [cleanupFailed,     setCleanupFailed]     = useState(false);
   const [cleanupSelected,   setCleanupSelected]   = useState<"original" | "cleaned">("cleaned");
-  const [cleanupDone,       setCleanupDone]       = useState(false); // disable button after save
+  const [cleanupDone,       setCleanupDone]       = useState<boolean>(() =>
+    localStorage.getItem(`cleanup-done-${item.id}`) === "1"
+  );
   const cleanupGenRef = useRef(0);
 
   const updateItem  = useUpdateClothingItem();
   const deleteItem  = useDeleteClothingItem();
   const queryClient = useQueryClient();
 
+  // Runs when item.id changes (component is remounted via key= in wardrobe.tsx,
+  // so this only fires once per lifetime — but kept for safety in case of reuse).
   useEffect(() => {
-    if (item) setForm(toForm(item));
+    setForm(toForm(item));
     setShowDeleteConfirm(false);
-    setDisplayImageUrl(null); // reset optimistic override when item changes
-    // Restore persisted cleanup-done flag so the button stays disabled after a restart
-    setCleanupDone(item ? localStorage.getItem(`cleanup-done-${item.id}`) === "1" : false);
+    setDisplayImageUrl(null);
+    setCleanupDone(localStorage.getItem(`cleanup-done-${item.id}`) === "1");
   }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── invalidate (stable ref — queryClient never changes) ──────────────────
@@ -346,12 +354,13 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   }, [cleanupResult, displayImageUrl, item?.id, item?.imageObjectPath, invalidate, handleCleanupClose]);
 
   // ── Early return (after all hooks) ────────────────────────────────────────
+  // Note: form is always non-null (lazy-initialized from item above).
 
-  if (!item || !form) return null;
+  if (!item) return null;
 
   const dirty = isDirty(form, item);
   const patch = (key: keyof FormState) => (value: string | boolean) =>
-    setForm((prev) => prev ? { ...prev, [key]: value } : prev);
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   // The URL currently shown in the photo area (optimistic override wins)
   const shownImageUrl = displayImageUrl ?? getImageUrl(item.imageObjectPath);
