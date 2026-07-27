@@ -7,15 +7,11 @@ import SavedPage from './pages/saved';
 import FavoritesPage from './pages/favorites';
 import BackupPage from './pages/backup';
 import WelcomePage from './pages/welcome';
-import { LockedScreen } from './components/LockedScreen';
 import { queryClient } from '@/lib/queryClient';
 import { useState, useEffect } from 'react';
 import { Purchases } from '@revenuecat/purchases-capacitor';
 import { initRevenueCat, tierFromCustomerInfo } from '@/lib/revenuecat';
 import { syncFromRevenueCat, setGlobalTier } from '@/hooks/useEntitlements';
-import { useBiometricLock } from '@/hooks/useBiometricLock';
-import { BiometricLockContext } from '@/contexts/BiometricLockContext';
-import { AnimatePresence } from 'framer-motion';
 
 function NotFound() {
   return (
@@ -44,7 +40,6 @@ function Router() {
 function AppShell() {
   const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
   const [entered, setEntered] = useState<boolean>(() => isPreview);
-  const { enabled, isLocked, authenticate, enableLock, disableLock } = useBiometricLock();
 
   useEffect(() => {
     let listenerId: string | null = null;
@@ -93,19 +88,10 @@ function AppShell() {
   }, []);
 
   return (
-    <BiometricLockContext.Provider value={{ enabled, enableLock, disableLock }}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <Router />
-        {!entered && <WelcomePage onEnter={() => setEntered(true)} />}
-      </WouterRouter>
-
-      {/* Biometric lock gate — sits above everything including the welcome splash */}
-      <AnimatePresence>
-        {isLocked && (
-          <LockedScreen key="locked" onAuthenticate={authenticate} />
-        )}
-      </AnimatePresence>
-    </BiometricLockContext.Provider>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <Router />
+      {!entered && <WelcomePage onEnter={() => setEntered(true)} />}
+    </WouterRouter>
   );
 }
 

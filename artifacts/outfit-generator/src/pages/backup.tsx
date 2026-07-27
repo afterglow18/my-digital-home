@@ -10,8 +10,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEntitlements, readStoredProduct } from '@/hooks/useEntitlements';
 import { AnimatePresence, motion } from 'framer-motion';
 import { UpgradeSheet } from '@/components/paywall/UpgradeSheet';
-import { useBiometricLockContext } from '@/contexts/BiometricLockContext';
-
 const APP_VERSION = '1.0.0';
 
 type BackupStatus = 'idle' | 'exporting' | 'importing' | 'success' | 'error';
@@ -64,22 +62,6 @@ function PurpleButton({
 
 export default function AccountPage() {
   const { tier, restore } = useEntitlements();
-  const { enabled: lockEnabled, enableLock, disableLock } = useBiometricLockContext();
-  const [lockPending, setLockPending] = useState(false);
-
-  const handleLockToggle = useCallback(async () => {
-    if (lockPending) return;
-    setLockPending(true);
-    if (lockEnabled) {
-      await disableLock();
-    } else {
-      const result = await enableLock();
-      if (result === 'unavailable') {
-        alert('Face ID / Touch ID is not available on this device.');
-      }
-    }
-    setLockPending(false);
-  }, [lockPending, lockEnabled, enableLock, disableLock]);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
@@ -268,56 +250,6 @@ export default function AccountPage() {
               className="hidden"
               onChange={handleFileChange}
             />
-          </div>
-        </Card>
-
-        {/* ── PRIVACY & SECURITY ──────────────────────────────────────────── */}
-        <Card>
-          <div className="px-4 pt-4 pb-5 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl leading-none">🔒</span>
-              <h2 className="font-black text-base uppercase tracking-wide">Privacy &amp; Security</h2>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-bold text-black">Lock with Face ID / Touch ID</span>
-                <span className="text-xs text-black/50 leading-snug">
-                  Require biometrics to open the app
-                </span>
-              </div>
-
-              {/* Toggle */}
-              <button
-                role="switch"
-                aria-checked={lockEnabled}
-                onClick={handleLockToggle}
-                disabled={lockPending}
-                className="relative flex-shrink-0 w-12 h-7 rounded-full border-2 border-black
-                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: lockEnabled
-                    ? 'linear-gradient(to bottom, #6B7A52, #4F5E3C)'
-                    : '#e5e7eb',
-                  boxShadow: '2px 2px 0 rgba(0,0,0,0.25)',
-                }}
-              >
-                <span
-                  className="absolute top-0.5 w-5 h-5 rounded-full bg-white border-2 border-black
-                             transition-transform"
-                  style={{
-                    transform: lockEnabled ? 'translateX(22px)' : 'translateX(2px)',
-                    boxShadow: '1px 1px 0 rgba(0,0,0,0.2)',
-                  }}
-                />
-              </button>
-            </div>
-
-            {lockEnabled && (
-              <p className="text-xs text-black/40 leading-snug">
-                The app will lock whenever it goes to the background.
-              </p>
-            )}
           </div>
         </Card>
 
