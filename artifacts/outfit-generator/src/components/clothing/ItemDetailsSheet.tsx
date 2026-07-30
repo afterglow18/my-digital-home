@@ -669,7 +669,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               </button>
             </div>
 
-            <input ref={cameraInputRef}  type="file" accept="image/*" capture="environment"
+            <input ref={cameraInputRef}  type="file" accept="image/*"
                    className="hidden" onChange={onCameraChange} />
             <input ref={galleryInputRef} type="file" accept="image/*" multiple={false}
                    className="hidden" onChange={onGalleryChange} />
