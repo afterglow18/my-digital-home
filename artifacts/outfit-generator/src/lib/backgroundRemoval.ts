@@ -90,7 +90,7 @@ export async function removeBackground(dataUrl: string): Promise<string> {
   const smallDataUrl = await resizeForInference(dataUrl);
   const sourceBlob   = await dataUrlToBlob(smallDataUrl);
   const resultBlob   = await imglyRemoveBackground(sourceBlob, {
-    model: "isnet_fp16",   // better quality than quint8; resize above keeps memory safe
+    model: "isnet_quint8", // half the RAM of isnet_fp16 — required to avoid iOS WKWebView jetsam kills
     output: { format: "image/png", quality: 0.9 },
   });
   return blobToDataUrl(resultBlob);
