@@ -53,10 +53,16 @@ export default function WelcomePage({ onEnter }: Props) {
         position: "fixed", inset: 0, zIndex: 200,
         cursor: phase === "splash" ? "pointer" : "default",
         overflow: "hidden",
-        background: "#2a3325",
+        background: "transparent",
       }}
     >
 
+      {/* ── Sage background — fades out as door starts opening, revealing the app ── */}
+      <motion.div
+        animate={{ opacity: phase === "hero" || phase === "splash" ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: "easeIn" }}
+        style={{ position: "absolute", inset: 0, background: "#2a3325", zIndex: 0 }}
+      />
 
       {/* ── 3-D door wrapper — perspective lives here ── */}
       <div style={{
