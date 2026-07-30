@@ -11,13 +11,12 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Phase = "hero" | "splash" | "opening" | "open" | "exiting";
+type Phase = "hero" | "splash" | "opening" | "exiting";
 
 const HERO_MS      = 2500;   // how long Phase 1 is shown before fading
 const HERO_FADE_MS = 600;    // hero overlay fade-out duration
 const OPEN_MS      = 1000;
-const HOLD_MS      = 600;
-const EXIT_MS      = 600;
+const EXIT_MS      = 400;
 
 interface Props { onEnter: () => void; }
 
@@ -41,9 +40,8 @@ export default function WelcomePage({ onEnter }: Props) {
   const handleTap = () => {
     if (phase !== "splash") return;
     setPhase("opening");
-    setTimeout(() => setPhase("open"),    OPEN_MS);
-    setTimeout(() => setPhase("exiting"), OPEN_MS + HOLD_MS);
-    setTimeout(finish,                    OPEN_MS + HOLD_MS + EXIT_MS);
+    setTimeout(() => setPhase("exiting"), OPEN_MS);
+    setTimeout(finish,                    OPEN_MS + EXIT_MS);
   };
 
   return (
@@ -59,27 +57,6 @@ export default function WelcomePage({ onEnter }: Props) {
       }}
     >
 
-      {/* ── Hero image (behind door) — revealed as door swings open ── */}
-      <motion.img
-        src="/hero-home.jpg"
-        alt="My Digital Home"
-        draggable={false}
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{
-          opacity: (phase === "opening" || phase === "open" || phase === "exiting") ? 1 : 0,
-          scale:   (phase === "opening" || phase === "open" || phase === "exiting") ? 2.0 : 0.7,
-        }}
-        transition={{
-          opacity: { duration: 0.25, ease: "easeIn" },
-          scale:   { duration: 5, ease: [0.1, 0, 0.3, 1] },
-        }}
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "contain", objectPosition: "center center",
-          pointerEvents: "none",
-        }}
-      />
 
       {/* ── 3-D door wrapper — perspective lives here ── */}
       <div style={{
@@ -89,7 +66,7 @@ export default function WelcomePage({ onEnter }: Props) {
       }}>
         <motion.div
           initial={{ rotateY: 0 }}
-          animate={{ rotateY: (phase === "opening" || phase === "open" || phase === "exiting") ? -108 : 0 }}
+          animate={{ rotateY: (phase === "opening" || phase === "exiting") ? -108 : 0 }}
           transition={{ duration: OPEN_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
           style={{
             position: "absolute", inset: 0,
