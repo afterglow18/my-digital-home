@@ -24,6 +24,8 @@ import { getListOutfitsQueryKey } from "@/hooks/useLocalOutfits";
 import { useQueryClient } from "@tanstack/react-query";
 import { getImageUrl } from "@/lib/utils";
 import { removeBackground, blobToDataUrl, dataUrlToBlob } from "@/lib/backgroundRemoval";
+import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -408,6 +410,29 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
     e.target.value = "";
   };
 
+  // On native iOS, use the Capacitor Camera plugin — presents camera as a modal
+  // over the WKWebView so iOS never suspends the view (no jetsam kill).
+  const handleCameraCapture = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const photo = await CapCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera,
+        });
+        if (photo.dataUrl) {
+          const blob = await dataUrlToBlob(photo.dataUrl);
+          handleReplaceFile(blob);
+        }
+      } catch {
+        // User cancelled — ignore silently
+      }
+    } else {
+      cameraInputRef.current?.click();
+    }
+  }, [handleReplaceFile]);
+
   const onGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleReplaceFile(file);
@@ -656,7 +681,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
                     <p className="text-red-600 text-sm font-medium text-center">{photoError}</p>
                   )}
                   <button
-                    onClick={() => cameraInputRef.current?.click()}
+                    onClick={handleCameraCapture}
                     className="w-full btn-brutalist py-4 rounded-2xl flex items-center justify-center gap-2 text-sm"
                   >
                     <Camera className="w-5 h-5" />

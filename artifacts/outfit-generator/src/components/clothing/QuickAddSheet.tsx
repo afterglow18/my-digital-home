@@ -13,6 +13,8 @@
  */
 import React, { useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 import { X, Loader2, Check, RotateCcw } from "lucide-react";
 import { useCreateClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
 import type { ClothingItem } from "@/types/local";
@@ -279,6 +281,30 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
     else if (files.length > 1) handleBulkFiles(files);
   };
 
+  // On native iOS, use the Capacitor Camera plugin — it presents the camera as
+  // a modal over the WKWebView so iOS never suspends the view (no jetsam kill).
+  // On web, fall back to the hidden <input capture> as before.
+  const handleCameraCapture = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const photo = await CapCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera,
+        });
+        if (photo.dataUrl) {
+          const blob = await dataUrlToBlob(photo.dataUrl);
+          handleSingleFile(blob);
+        }
+      } catch {
+        // User cancelled — ignore silently
+      }
+    } else {
+      cameraInputRef.current?.click();
+    }
+  }, [handleSingleFile]);
+
   if (!open) return null;
 
   const label = CATEGORY_LABELS[category];
@@ -325,7 +351,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
 
             <div className="flex gap-3">
               <button
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={handleCameraCapture}
                 className="flex-1 flex flex-col items-center justify-center gap-3 py-8
                            border-4 border-black rounded-2xl
                            shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]
