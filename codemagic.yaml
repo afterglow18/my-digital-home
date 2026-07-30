@@ -53,13 +53,31 @@ workflows:
           npx cap add ios
           npx cap sync ios
 
-      - name: Add export compliance to Info.plist
+      - name: Inject Info.plist permission strings and export compliance
         script: |
           PLIST="artifacts/outfit-generator/ios/App/App/Info.plist"
+
+          # Export compliance
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" || \
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
-          echo "Export compliance set:"
+
+          # Camera — required by @capacitor/camera (ITMS-90683 if missing)
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'My Digital Home uses your camera so you can photograph and add items to your home collection.'" "$PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'My Digital Home uses your camera so you can photograph and add items to your home collection.'" "$PLIST"
+
+          # Photo library read — required by @capacitor/camera (ITMS-90683 if missing)
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'My Digital Home reads your photo library so you can add existing photos to your home collection.'" "$PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'My Digital Home reads your photo library so you can add existing photos to your home collection.'" "$PLIST"
+
+          # Photo library write — required when saving captured photos
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'My Digital Home saves photos you take to your photo library.'" "$PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryAddUsageDescription 'My Digital Home saves photos you take to your photo library.'" "$PLIST"
+
+          echo "Info.plist keys set:"
           /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryAddUsageDescription" "$PLIST"
 
       - name: Inject app icon
         script: |
