@@ -1,26 +1,35 @@
 /**
- * WelcomePage — Front door swings open to reveal the hero image.
+ * WelcomePage — Three-phase splash sequence.
  *
- * SPLASH   : Sage-green front door fills screen, "My Digital Home" above it.
- * OPENING  : Door swings open left on hinge (CSS 3D rotateY).
- * HOLD     : Hero image fully visible.
- * EXITING  : Whole screen fades out → onEnter().
+ * HERO    : Full-screen hero image, auto-advances after 2.5 s.
+ * SPLASH  : Animated front door + branding + CTA button.
+ * OPENING : Door swings open on hinge.
+ * OPEN    : Hero image fully visible (hold).
+ * EXITING : Whole screen fades out → onEnter().
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Phase = "splash" | "opening" | "open" | "exiting";
+type Phase = "hero" | "splash" | "opening" | "open" | "exiting";
 
-const OPEN_MS  = 1000;
-const HOLD_MS  = 600;
-const EXIT_MS  = 600;
+const HERO_MS      = 2500;   // how long Phase 1 is shown before fading
+const HERO_FADE_MS = 600;    // hero overlay fade-out duration
+const OPEN_MS      = 1000;
+const HOLD_MS      = 600;
+const EXIT_MS      = 600;
 
 interface Props { onEnter: () => void; }
 
 export default function WelcomePage({ onEnter }: Props) {
-  const [phase, setPhase] = useState<Phase>("splash");
+  const [phase, setPhase] = useState<Phase>("hero");
   const calledRef = useRef(false);
+
+  // Phase 1 → Phase 2: auto-advance after HERO_MS
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("splash"), HERO_MS);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finish = useCallback(() => {
     if (calledRef.current) return;
@@ -28,6 +37,7 @@ export default function WelcomePage({ onEnter }: Props) {
     onEnter();
   }, [onEnter]);
 
+  // Phase 2 → Phase 3: user taps the CTA button
   const handleTap = () => {
     if (phase !== "splash") return;
     setPhase("opening");
@@ -45,18 +55,19 @@ export default function WelcomePage({ onEnter }: Props) {
         position: "fixed", inset: 0, zIndex: 200,
         cursor: phase === "splash" ? "pointer" : "default",
         overflow: "hidden",
-        background: "#2a3325",         /* deep sage — seen at edges of door */
+        background: "#2a3325",
       }}
     >
-      {/* ── Hero image — always behind the door ── */}
+
+      {/* ── Hero image (behind door) — revealed as door swings open ── */}
       <motion.img
         src="/hero-home.jpg"
         alt="My Digital Home"
         draggable={false}
         initial={{ opacity: 0, scale: 0.7 }}
         animate={{
-          opacity: phase === "splash" ? 0 : 1,
-          scale:   phase === "opening" || phase === "open" || phase === "exiting" ? 2.0 : 0.7,
+          opacity: (phase === "opening" || phase === "open" || phase === "exiting") ? 1 : 0,
+          scale:   (phase === "opening" || phase === "open" || phase === "exiting") ? 2.0 : 0.7,
         }}
         transition={{
           opacity: { duration: 0.25, ease: "easeIn" },
@@ -74,11 +85,11 @@ export default function WelcomePage({ onEnter }: Props) {
       <div style={{
         position: "absolute", inset: 0,
         perspective: "900px",
-        perspectiveOrigin: "0% 50%",  /* hinge side = left */
+        perspectiveOrigin: "0% 50%",
       }}>
         <motion.div
           initial={{ rotateY: 0 }}
-          animate={{ rotateY: phase === "opening" || phase === "open" || phase === "exiting" ? -108 : 0 }}
+          animate={{ rotateY: (phase === "opening" || phase === "open" || phase === "exiting") ? -108 : 0 }}
           transition={{ duration: OPEN_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
           style={{
             position: "absolute", inset: 0,
@@ -102,7 +113,7 @@ export default function WelcomePage({ onEnter }: Props) {
             }} />
 
             {/* Top panel pair */}
-            <DoorPanel top="12%" left="8%" width="38%" height="22%" />
+            <DoorPanel top="12%" left="8%"  width="38%" height="22%" />
             <DoorPanel top="12%" left="54%" width="38%" height="22%" />
 
             {/* Middle rail */}
@@ -112,7 +123,7 @@ export default function WelcomePage({ onEnter }: Props) {
             }} />
 
             {/* Large lower panels */}
-            <DoorPanel top="42%" left="8%" width="38%" height="34%" />
+            <DoorPanel top="42%" left="8%"  width="38%" height="34%" />
             <DoorPanel top="42%" left="54%" width="38%" height="34%" />
 
             {/* Bottom rail */}
@@ -178,52 +189,106 @@ export default function WelcomePage({ onEnter }: Props) {
         </motion.div>
       </div>
 
-      {/* ── Branding above door — fades out as door opens ── */}
+      {/* ── Phase 1: Hero image overlay — fades out when entering Phase 2 ── */}
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: phase === "hero" ? 1 : 0 }}
+        transition={{ duration: HERO_FADE_MS / 1000, ease: "easeInOut" }}
+        style={{
+          position: "absolute", inset: 0, zIndex: 20,
+          pointerEvents: phase === "hero" ? "auto" : "none",
+          background: "#1a1410",
+        }}
+      >
+        {/* Hero image */}
+        <img
+          src="/hero-splash.jpg"
+          alt="My Digital Home"
+          draggable={false}
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center top",
+            userSelect: "none", pointerEvents: "none",
+          }}
+        />
+
+        {/* Dark gradient over lower portion for text readability */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          height: "55%",
+          background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.80) 100%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Bottom branding — "Welcome to" + app name */}
+        <div style={{
+          position: "absolute",
+          bottom: "calc(env(safe-area-inset-bottom) + 72px)",
+          left: 0, right: 0,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          pointerEvents: "none",
+        }}>
+          <div style={{
+            fontSize: 11, fontWeight: 600, letterSpacing: "0.20em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.65)",
+            marginBottom: 6,
+          }}>
+            Welcome to
+          </div>
+          <div style={{
+            fontFamily: "'Great Vibes', cursive",
+            fontSize: "clamp(38px, 11vw, 54px)",
+            color: "#f0d080",
+            textShadow: "0 2px 20px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)",
+            lineHeight: 1.1, textAlign: "center",
+          }}>
+            My Digital<br />Home
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Phase 2: Bottom block — branding + CTA button ── */}
       <AnimatePresence>
         {phase === "splash" && (
           <motion.div
-            key="branding"
-            initial={{ opacity: 0, y: -8 }}
+            key="bottom-block"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             style={{
               position: "absolute",
-              top: "calc(env(safe-area-inset-top) + 16px)",
+              bottom: "calc(env(safe-area-inset-bottom) + 52px)",
               left: 0, right: 0,
               display: "flex", flexDirection: "column", alignItems: "center",
               zIndex: 10, pointerEvents: "none",
             }}
           >
+            {/* "Welcome to" label */}
+            <div style={{
+              fontSize: 11, fontWeight: 600, letterSpacing: "0.20em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.65)",
+              marginBottom: 4,
+            }}>
+              Welcome to
+            </div>
+
+            {/* App name in script font */}
             <div style={{
               fontFamily: "'Great Vibes', cursive",
               fontSize: "clamp(38px, 11vw, 54px)",
               color: "#f0d080",
               textShadow: "0 2px 16px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9)",
               lineHeight: 1.1, textAlign: "center",
+              marginBottom: 22,
             }}>
               My Digital<br />Home
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* ── Tap hint at bottom ── */}
-      <AnimatePresence>
-        {phase === "splash" && (
-          <motion.div
-            key="hint"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-            style={{
-              position: "absolute",
-              bottom: "calc(env(safe-area-inset-bottom) + 52px)",
-              left: 0, right: 0, textAlign: "center",
-              zIndex: 10, pointerEvents: "none",
-            }}
-          >
+            {/* CTA button */}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 10,
               background: "rgba(107,122,82,0.88)",
@@ -237,7 +302,7 @@ export default function WelcomePage({ onEnter }: Props) {
               boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
               backdropFilter: "blur(4px)",
             }}>
-              {/* door icon */}
+              {/* Door icon */}
               <svg width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <rect x="1" y="1" width="16" height="18" rx="2" stroke="white" strokeWidth="1.5"/>
                 <circle cx="13.5" cy="10" r="1.5" fill="white"/>
@@ -245,6 +310,8 @@ export default function WelcomePage({ onEnter }: Props) {
               </svg>
               Enter My Digital Home
             </div>
+
+            {/* Tap hint */}
             <div style={{
               marginTop: 12, fontSize: 10, letterSpacing: "0.22em",
               textTransform: "uppercase", color: "rgba(255,255,255,0.4)",
@@ -255,26 +322,31 @@ export default function WelcomePage({ onEnter }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── Footer links ── */}
+      {/* ── Footer links — always present ── */}
       <div style={{
         position: "fixed", bottom: "calc(env(safe-area-inset-bottom) + 10px)",
         left: 0, right: 0, display: "flex", flexDirection: "column",
         alignItems: "center", gap: 4, zIndex: 210,
-        pointerEvents: phase === "splash" ? "none" : "none",
+        pointerEvents: "none",
       }}>
-        <a href="https://classy-alpaca-441.notion.site/Privacy-Policy-39682db6065380b19dedcb108d4a0ef4"
+        <a
+          href="https://classy-alpaca-441.notion.site/Privacy-Policy-39682db6065380b19dedcb108d4a0ef4"
           target="_blank" rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
-          style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", textDecoration: "none", letterSpacing: "0.02em", pointerEvents: "auto" }}>
+          style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", textDecoration: "none", letterSpacing: "0.02em", pointerEvents: "auto" }}
+        >
           Privacy Policy
         </a>
-        <a href="https://app.notion.com/p/My-Digital-Closet-Support-39782db60653802a9088dcbae84c0527?source=copy_link"
+        <a
+          href="https://app.notion.com/p/My-Digital-Closet-Support-39782db60653802a9088dcbae84c0527?source=copy_link"
           target="_blank" rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
-          style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", textDecoration: "none", letterSpacing: "0.02em", pointerEvents: "auto" }}>
+          style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", textDecoration: "none", letterSpacing: "0.02em", pointerEvents: "auto" }}
+        >
           Support
         </a>
       </div>
+
     </motion.div>
   );
 }
