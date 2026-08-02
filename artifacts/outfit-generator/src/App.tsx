@@ -42,7 +42,7 @@ function Router() {
 function AppShell() {
   const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
   const [entered, setEntered] = useState<boolean>(() => isPreview);
-  const { isIndexing } = useVisionIndexer();
+  useVisionIndexer();
 
   useEffect(() => {
     let listenerId: string | null = null;
@@ -94,16 +94,7 @@ function AppShell() {
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Router />
       {!entered && <WelcomePage onEnter={() => setEntered(true)} />}
-      {isIndexing && (
-        <div
-          className="fixed left-4 right-4 max-w-xs mx-auto z-[200] pointer-events-none
-                     bg-black/80 text-white text-xs font-bold uppercase tracking-wide
-                     px-4 py-2.5 rounded-full text-center"
-          style={{ bottom: "max(20px, calc(env(safe-area-inset-bottom) + 72px))" }}
-        >
-          Preparing photo search…
-        </div>
-      )}
+
     </WouterRouter>
   );
 }
