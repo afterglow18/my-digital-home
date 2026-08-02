@@ -27,6 +27,15 @@ export interface ClothingItem {
   timesWorn: number;
   createdAt: string;
   updatedAt: string;
+  /** Color / object labels — web canvas extraction (version 4) or iOS Vision (version 1). */
+  visionLabels?: string[];
+  /** Text detected inside the photo via OCR. */
+  visionText?: string[];
+  /**
+   * 0 = unanalyzed  |  1 = iOS Vision  |  4 = web canvas  |  5 = web, no labels found (skip retry)
+   * Re-run anything < 4 on web to pick up threshold improvements.
+   */
+  visionVersion?: number;
 }
 
 export interface SavedOutfit {

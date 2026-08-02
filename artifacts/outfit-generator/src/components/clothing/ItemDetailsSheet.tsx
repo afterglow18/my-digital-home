@@ -17,7 +17,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles } from "lucide-react";
+import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles, Bookmark } from "lucide-react";
 import type { ClothingItem, ClothingItemUpdateCategory } from "@/types/local";
 import { useUpdateClothingItem, useDeleteClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
 import { getListOutfitsQueryKey } from "@/hooks/useLocalOutfits";
@@ -26,6 +26,7 @@ import { getImageUrl } from "@/lib/utils";
 import { removeBackground, blobToDataUrl, dataUrlToBlob } from "@/lib/backgroundRemoval";
 import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
+import { AddToLookbookSheet } from "@/components/lookbook/AddToLookbookSheet";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -117,6 +118,8 @@ interface ItemDetailsSheetProps {
   item: ClothingItem;
   onClose: () => void;
   onDeleted?: () => void;
+  /** When true: photo overlay shows "Add to Lookbook" instead of "Clean Up". */
+  showAddToLookbook?: boolean;
 }
 
 interface FormState {
@@ -157,7 +160,7 @@ function isDirty(form: FormState, item: ClothingItem): boolean {
   );
 }
 
-export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetProps) {
+export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook = false }: ItemDetailsSheetProps) {
   // Lazy init — form is always non-null on the first render so the sheet
   // motion.div appears immediately. A useState(null)+useEffect pattern causes
   // the component to return null on its first render, which creates exactly the
@@ -173,6 +176,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
   // ── Replace-photo overlay state ──────────────────────────────────────────
   const [replaceOpen,  setReplaceOpen]  = useState(false);
   const [photoPhase,   setPhotoPhase]   = useState<PhotoPhase>("pick");
+  const [addToLookbookOpen, setAddToLookbookOpen] = useState(false);
   const [photoError,   setPhotoError]   = useState<string | null>(null);
   const [originalBlob, setOriginalBlob] = useState<Blob | null>(null);
   const [originalUrl,  setOriginalUrl]  = useState<string | null>(null);
@@ -506,18 +510,32 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               />
               {/* Action buttons — bottom of photo */}
               <div className="absolute bottom-3 right-3 flex gap-2">
-                {!cleanupDone && (
+                {showAddToLookbook ? (
                   <button
-                    onClick={() => handleCleanupOpen(shownImageUrl)}
+                    onClick={() => setAddToLookbookOpen(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5
-                               bg-white border-2 border-green-500 text-green-700 rounded-full
+                               bg-white border-2 border-[#6B7A52] text-[#6B7A52] rounded-full
                                text-xs font-bold uppercase
-                               shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)]
+                               shadow-[2px_2px_0px_0px_rgba(107,122,82,0.5)]
                                active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Clean Up
+                    <Bookmark className="w-3.5 h-3.5" />
+                    Lookbook
                   </button>
+                ) : (
+                  !cleanupDone && (
+                    <button
+                      onClick={() => handleCleanupOpen(shownImageUrl)}
+                      className="flex items-center gap-1.5 px-3 py-1.5
+                                 bg-white border-2 border-green-500 text-green-700 rounded-full
+                                 text-xs font-bold uppercase
+                                 shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)]
+                                 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Clean Up
+                    </button>
+                  )
                 )}
                 <button
                   onClick={() => setReplaceOpen(true)}
@@ -605,6 +623,26 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               </motion.button>
             )}
           </AnimatePresence>
+
+          {/* ── Wearing Today ─────────────────────────────────────────── */}
+          <button
+            onClick={() =>
+              updateItem.mutate(
+                { id: item.id, data: { timesWorn: (item.timesWorn ?? 0) + 1 } },
+                { onSuccess: invalidate },
+              )
+            }
+            disabled={updateItem.isPending}
+            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm
+                       font-bold uppercase border-2
+                       shadow-[2px_2px_0px_0px_rgba(79,94,60,1)]
+                       active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
+                       text-white disabled:opacity-50"
+            style={{ background: "#6B7A52", borderColor: "#4F5E3C" }}
+          >
+            <span className="text-base leading-none">👕</span>
+            Wearing Today
+          </button>
 
           {!showDeleteConfirm ? (
             <button
@@ -992,6 +1030,16 @@ export function ItemDetailsSheet({ item, onClose, onDeleted }: ItemDetailsSheetP
               </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+      {/* ── Add to Lookbook sheet ──────────────────────────────────────────── */}
+      <AnimatePresence>
+        {addToLookbookOpen && (
+          <AddToLookbookSheet
+            key="add-to-lookbook"
+            item={item}
+            onClose={() => setAddToLookbookOpen(false)}
+          />
         )}
       </AnimatePresence>
     </>

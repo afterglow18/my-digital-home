@@ -101,6 +101,9 @@ export async function dbCreateClothing(data: CreateClothingData): Promise<Clothi
     timesWorn: 0,
     createdAt: now,
     updatedAt: now,
+    visionLabels:  [],
+    visionText:    [],
+    visionVersion: 0,
   };
   await db.put('clothing', item);
   return item;

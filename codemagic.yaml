@@ -79,6 +79,18 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$PLIST"
           /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryAddUsageDescription" "$PLIST"
 
+      - name: Inject Vision plugin
+        script: |
+          # Copy native plugin source files into iOS App target
+          cp artifacts/outfit-generator/ios-native/VisionPlugin.swift \
+             artifacts/outfit-generator/ios/App/App/VisionPlugin.swift
+          cp artifacts/outfit-generator/ios-native/VisionPlugin.m \
+             artifacts/outfit-generator/ios/App/App/VisionPlugin.m
+
+          # Register the files in the Xcode project (xcodeproj gem ships with CocoaPods on Codemagic)
+          gem list xcodeproj | grep -q xcodeproj || gem install xcodeproj --no-document
+          ruby artifacts/outfit-generator/ios-native/add_to_xcode.rb
+
       - name: Inject app icon
         script: |
           ICONSET="artifacts/outfit-generator/ios/App/App/Assets.xcassets/AppIcon.appiconset"
