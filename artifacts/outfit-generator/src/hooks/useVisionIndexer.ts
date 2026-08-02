@@ -2,17 +2,22 @@
  * useVisionIndexer — background hook that processes clothing photos for search.
  *
  * On web:    extracts dominant colors via canvas (version 4 / 5)
- * On iOS:    calls native VisionPlugin for label + text detection (version 1)
+ * On iOS:    runs native VisionPlugin (object labels + OCR) AND canvas color
+ *            extraction in parallel, then merges the results (version 2).
+ *            Running both ensures color names appear in search on iOS, where
+ *            Apple Vision classifies objects ("couch", "lamp") but never emits
+ *            color names directly.
  *
  * Runs automatically on app startup after a 1.5 s delay.
  * Call `notifyNewItemPhoto()` from anywhere to trigger a re-run immediately
  * after creating or replacing a photo (e.g. QuickAddSheet success).
  *
  * Version scheme:
- *   0 = unanalyzed   → process
- *   1 = iOS Vision   → skip on web, re-process on native if desired
- *   4 = web canvas   → skip
- *   5 = web, no labels found → skip (image may be too noisy)
+ *   0 = unanalyzed                    → process
+ *   1 = iOS Vision only (no colors)   → re-process on native (upgrade to v2)
+ *   2 = iOS Vision + canvas colors    → skip on native
+ *   4 = web canvas                    → skip on web
+ *   5 = web, no labels found          → skip (image may be too noisy)
  */
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
@@ -23,9 +28,9 @@ import { getImageUrl } from '@/lib/utils';
 
 const ITEM_DELAY_MS        = 350;   // gap between items to keep UI responsive
 const STARTUP_DELAY_MS     = 1500;  // wait for initial render before indexing
-const WEB_VERSION          = 4;
+const WEB_VERSION           = 4;
 const WEB_NO_LABELS_VERSION = 5;
-const IOS_VERSION          = 1;
+const IOS_VERSION           = 2;  // v1 = Vision only (no colors); v2 = Vision + canvas colors
 
 // ── Module-level trigger so any component can kick a re-run ──────────────────
 type Listener = () => void;
@@ -73,9 +78,16 @@ export function useVisionIndexer() {
           let version: number;
 
           if (isNative) {
-            const result = await analyzeWithVision(url);
-            labels  = result.labels;
-            text    = result.text;
+            // Run native Vision (object labels + OCR) and canvas color extraction
+            // in parallel — Apple Vision never emits color names, so canvas fills that gap.
+            const [visionResult, colorLabels] = await Promise.all([
+              analyzeWithVision(url),
+              extractColorsFromDataUrl(url),
+            ]);
+            // Merge, deduplicate — color names first so they rank higher in search
+            const merged = [...new Set([...colorLabels, ...visionResult.labels])];
+            labels  = merged;
+            text    = visionResult.text;
             version = IOS_VERSION;
           } else {
             labels  = await extractColorsFromDataUrl(url);
