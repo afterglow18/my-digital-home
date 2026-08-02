@@ -595,16 +595,8 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
                          placeholder:font-normal placeholder:text-black/25"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <SelectField label="Category" value={form.category}
-                         onChange={patch("category") as (v: string) => void} options={CATEGORY_OPTIONS} />
-            <div className="flex flex-col gap-1 opacity-50 pointer-events-none">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">Times Worn</span>
-              <div className="border-2 border-black/20 rounded-lg px-3 py-2 text-sm font-medium bg-white/50">
-                {item.timesWorn ?? 0}
-              </div>
-            </div>
-          </div>
+          <SelectField label="Category" value={form.category}
+                       onChange={patch("category") as (v: string) => void} options={CATEGORY_OPTIONS} />
         </div>
 
         {/* Footer */}
@@ -625,25 +617,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
             )}
           </AnimatePresence>
 
-          {/* ── Wearing Today ─────────────────────────────────────────── */}
-          <button
-            onClick={() =>
-              updateItem.mutate(
-                { id: item.id, data: { timesWorn: (item.timesWorn ?? 0) + 1 } },
-                { onSuccess: invalidate },
-              )
-            }
-            disabled={updateItem.isPending}
-            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm
-                       font-bold uppercase border-2 border-black
-                       shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                       active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
-                       text-white disabled:opacity-50"
-            style={{ background: "#6B7A52", borderColor: "#4F5E3C" }}
-          >
-            <span className="text-base leading-none">👕</span>
-            Wearing Today
-          </button>
 
           {!showDeleteConfirm ? (
             <button
