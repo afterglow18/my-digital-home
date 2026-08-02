@@ -12,7 +12,7 @@ interface Props {
   scrollTargetRef?: React.RefObject<HTMLElement>;
 }
 
-export function SearchBar({ value, onChange, placeholder = 'Search…', scrollTargetRef }: Props) {
+export function SearchBar({ value, onChange, placeholder = 'Search by name, category, or notes...', scrollTargetRef }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to top the instant text is entered
