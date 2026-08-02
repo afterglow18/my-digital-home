@@ -317,7 +317,7 @@ export default function SavedPage() {
 
       {/* ── Search bar ─────────────────────────────────────────────────────── */}
       <div className="mb-4">
-        <SearchBar value={query} onChange={setQuery} placeholder="Search items & looks…" />
+        <SearchBar value={query} onChange={setQuery} placeholder="Search by name, category, or notes..." />
       </div>
 
       {query.trim() ? (
