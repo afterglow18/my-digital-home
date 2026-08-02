@@ -17,7 +17,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles, Bookmark } from "lucide-react";
+import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles } from "lucide-react";
 import type { ClothingItem, ClothingItemUpdateCategory } from "@/types/local";
 import { useUpdateClothingItem, useDeleteClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
 import { getListOutfitsQueryKey } from "@/hooks/useLocalOutfits";
@@ -535,8 +535,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
                            shadow-[2px_2px_0px_0px_rgba(107,122,82,0.5)]
                            active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
               >
-                <Bookmark className="w-3.5 h-3.5" />
-                Lookbook
+                💚 Lookbook
               </button>
             ) : (
               !cleanupDone && (
