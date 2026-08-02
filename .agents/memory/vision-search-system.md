@@ -20,7 +20,7 @@ On native: re-run anything `< 2` (versions 0, 1). Skip 2+.
 ## notifyNewItemPhoto() — immediate indexing trigger
 After creating or replacing a photo, call `notifyNewItemPhoto()` from `src/hooks/useVisionIndexer.ts` to kick the indexer without waiting for next launch.
 
-**Not yet wired** to `QuickAddSheet.tsx` or the Replace Photo success path in `ItemDetailsSheet.tsx`. New photos won't be indexed until next app launch until this is added.
+**Wired** in `QuickAddSheet.tsx` (single-save and bulk-save) and `ItemDetailsSheet.tsx` (Replace Photo and Clean Up Photo success paths). New photos index within ~2 seconds of being saved.
 
 ## iOS native plugin location
 Files live in `ios-native/` (outside `ios/` which gets deleted by Codemagic on each build):

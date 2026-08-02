@@ -17,6 +17,7 @@ import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/
 import { Capacitor } from "@capacitor/core";
 import { X, Loader2, Check, RotateCcw } from "lucide-react";
 import { useCreateClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
+import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 import type { ClothingItem } from "@/types/local";
 import { useQueryClient } from "@tanstack/react-query";
 import { encodeToPng } from "@/lib/processImage";
@@ -25,7 +26,6 @@ import {
   blobToDataUrl,
   dataUrlToBlob,
 } from "@/lib/backgroundRemoval";
-import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

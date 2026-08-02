@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, Trash2, Save, ChevronDown, Loader2, Check, Camera, Sparkles } from "lucide-react";
 import type { ClothingItem, ClothingItemUpdateCategory } from "@/types/local";
 import { useUpdateClothingItem, useDeleteClothingItem, getListClothingQueryKey } from "@/hooks/useLocalWardrobe";
+import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 import { getListOutfitsQueryKey } from "@/hooks/useLocalOutfits";
 import { useQueryClient } from "@tanstack/react-query";
 import { getImageUrl } from "@/lib/utils";
@@ -27,7 +28,6 @@ import { removeBackground, blobToDataUrl, dataUrlToBlob } from "@/lib/background
 import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 import { AddToLookbookSheet } from "@/components/lookbook/AddToLookbookSheet";
-import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -624,6 +624,26 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
               </motion.button>
             )}
           </AnimatePresence>
+
+          {/* ── Wearing Today ─────────────────────────────────────────── */}
+          <button
+            onClick={() =>
+              updateItem.mutate(
+                { id: item.id, data: { timesWorn: (item.timesWorn ?? 0) + 1 } },
+                { onSuccess: invalidate },
+              )
+            }
+            disabled={updateItem.isPending}
+            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm
+                       font-bold uppercase border-2 border-black
+                       shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                       active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
+                       text-white disabled:opacity-50"
+            style={{ background: "#6B7A52", borderColor: "#4F5E3C" }}
+          >
+            <span className="text-base leading-none">👕</span>
+            Wearing Today
+          </button>
 
           {!showDeleteConfirm ? (
             <button
