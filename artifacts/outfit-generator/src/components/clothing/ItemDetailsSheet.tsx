@@ -503,53 +503,11 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
           }}
         >
           {shownImageUrl ? (
-            <>
-              <img
-                src={shownImageUrl}
-                alt={item.name}
-                className="w-full h-full object-contain"
-              />
-              {/* Action buttons — bottom of photo */}
-              <div className="absolute bottom-3 right-3 flex gap-2">
-                {showAddToLookbook ? (
-                  <button
-                    onClick={() => setAddToLookbookOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5
-                               bg-white border-2 border-[#6B7A52] text-[#6B7A52] rounded-full
-                               text-xs font-bold uppercase
-                               shadow-[2px_2px_0px_0px_rgba(107,122,82,0.5)]
-                               active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
-                  >
-                    <Bookmark className="w-3.5 h-3.5" />
-                    Lookbook
-                  </button>
-                ) : (
-                  !cleanupDone && (
-                    <button
-                      onClick={() => handleCleanupOpen(shownImageUrl)}
-                      className="flex items-center gap-1.5 px-3 py-1.5
-                                 bg-white border-2 border-green-500 text-green-700 rounded-full
-                                 text-xs font-bold uppercase
-                                 shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)]
-                                 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Clean Up
-                    </button>
-                  )
-                )}
-                <button
-                  onClick={() => setReplaceOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5
-                             bg-white border-2 border-black rounded-full text-xs font-bold uppercase
-                             shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  Replace
-                </button>
-              </div>
-            </>
+            <img
+              src={shownImageUrl}
+              alt={item.name}
+              className="w-full h-full object-contain"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <button
@@ -564,6 +522,49 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
             </div>
           )}
         </div>
+
+        {/* Action buttons — below photo */}
+        {shownImageUrl && (
+          <div className="flex gap-2 px-4 py-3 border-b-2 border-black bg-white flex-shrink-0">
+            {showAddToLookbook ? (
+              <button
+                onClick={() => setAddToLookbookOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5
+                           bg-white border-2 border-[#6B7A52] text-[#6B7A52] rounded-full
+                           text-xs font-bold uppercase
+                           shadow-[2px_2px_0px_0px_rgba(107,122,82,0.5)]
+                           active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+                Lookbook
+              </button>
+            ) : (
+              !cleanupDone && (
+                <button
+                  onClick={() => handleCleanupOpen(shownImageUrl)}
+                  className="flex items-center gap-1.5 px-3 py-1.5
+                             bg-white border-2 border-green-500 text-green-700 rounded-full
+                             text-xs font-bold uppercase
+                             shadow-[2px_2px_0px_0px_rgba(34,197,94,0.5)]
+                             active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Clean Up
+                </button>
+              )
+            )}
+            <button
+              onClick={() => setReplaceOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5
+                         bg-white border-2 border-black rounded-full text-xs font-bold uppercase
+                         shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                         active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              Replace
+            </button>
+          </div>
+        )}
 
         {/* Form */}
         <div className="flex-1 px-4 py-5 flex flex-col gap-4">
