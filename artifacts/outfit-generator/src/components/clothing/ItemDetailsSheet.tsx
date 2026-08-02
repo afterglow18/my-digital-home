@@ -27,6 +27,7 @@ import { removeBackground, blobToDataUrl, dataUrlToBlob } from "@/lib/background
 import { Camera as CapCamera, CameraSource, CameraResultType } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 import { AddToLookbookSheet } from "@/components/lookbook/AddToLookbookSheet";
+import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -297,7 +298,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
       await new Promise<void>((resolve, reject) => {
         updateItem.mutate(
           { id: item?.id ?? "", data: { imageObjectPath: dataUrl } },
-          { onSuccess: () => { invalidate(); resolve(); }, onError: reject },
+          { onSuccess: () => { invalidate(); notifyNewItemPhoto(); resolve(); }, onError: reject },
         );
       });
       handleReplaceClose();
@@ -354,7 +355,7 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
     // DB write in the background — no await, no spinner
     updateItem.mutate(
       { id: item?.id ?? "", data: { imageObjectPath: chosenUrl } },
-      { onSuccess: invalidate },
+      { onSuccess: () => { invalidate(); notifyNewItemPhoto(); } },
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cleanupResult, displayImageUrl, item?.id, item?.imageObjectPath, invalidate, handleCleanupClose]);
@@ -623,26 +624,6 @@ export function ItemDetailsSheet({ item, onClose, onDeleted, showAddToLookbook =
               </motion.button>
             )}
           </AnimatePresence>
-
-          {/* ── Wearing Today ─────────────────────────────────────────── */}
-          <button
-            onClick={() =>
-              updateItem.mutate(
-                { id: item.id, data: { timesWorn: (item.timesWorn ?? 0) + 1 } },
-                { onSuccess: invalidate },
-              )
-            }
-            disabled={updateItem.isPending}
-            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm
-                       font-bold uppercase border-2
-                       shadow-[2px_2px_0px_0px_rgba(79,94,60,1)]
-                       active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all
-                       text-white disabled:opacity-50"
-            style={{ background: "#6B7A52", borderColor: "#4F5E3C" }}
-          >
-            <span className="text-base leading-none">👕</span>
-            Wearing Today
-          </button>
 
           {!showDeleteConfirm ? (
             <button

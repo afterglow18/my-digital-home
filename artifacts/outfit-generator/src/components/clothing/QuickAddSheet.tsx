@@ -25,6 +25,7 @@ import {
   blobToDataUrl,
   dataUrlToBlob,
 } from "@/lib/backgroundRemoval";
+import { notifyNewItemPhoto } from "@/hooks/useVisionIndexer";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -207,6 +208,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
           {
             onSuccess: (createdItem) => {
               queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+              notifyNewItemPhoto();
               if (onCreated) onCreated(createdItem);
               resolve();
             },
@@ -242,6 +244,7 @@ export function QuickAddSheet({ open, onOpenChange, category, existingCount, onC
             {
               onSuccess: (createdItem) => {
                 queryClient.invalidateQueries({ queryKey: getListClothingQueryKey() });
+                notifyNewItemPhoto();
                 if (onCreated) onCreated(createdItem);
                 resolve();
               },
